@@ -1,18 +1,6 @@
-
 services:
-###> doctrine/doctrine-bundle ###
-  database:
+  web:
     ports:
-      - "5432"
-###< doctrine/doctrine-bundle ###
-
-###> symfony/mailer ###
-  mailer:
-    image: axllent/mailpit
-    ports:
-      - "1025"
-      - "8025"
-    environment:
-      MP_SMTP_AUTH_ACCEPT_ANY: 1
-      MP_SMTP_AUTH_ALLOW_INSECURE: 1
-###< symfony/mailer ###
+      - "127.0.0.1:32064:80"
+    volumes:
+      - ./var/data.db:/app/var/data.db:rw

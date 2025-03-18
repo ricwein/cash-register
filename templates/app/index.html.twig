@@ -1,0 +1,14 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Kasse{% endblock %}
+
+{% block body %}
+    <div {{ vue_component('cash-register', {
+        confirmEndpointUrl: path('send_cash_register', {eventId: event.id}),
+        startPrice: 0.00,
+        categories: categories,
+        gridWidthElements: event.productsPerRow,
+        gridHeightElements: 4,
+        useCategoryTabs: event.useCategoryTabs
+    }) }}></div>
+{% endblock %}

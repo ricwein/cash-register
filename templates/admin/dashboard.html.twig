@@ -1,0 +1,29 @@
+{% extends '@EasyAdmin/layout.html.twig' %}
+
+{% block page_title %}
+    Kasse | Verwaltung
+{% endblock %}
+
+{% block head_favicon %}
+    <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}">
+{% endblock %}
+
+{% block head_stylesheets %}
+    {{ parent() }}
+    {{ encore_entry_link_tags('admin') }}
+{% endblock %}
+
+{% block main %}
+    <div class="card mb-6">
+        <div class="card-header h5">Zur Kassenansicht wechseln:</div>
+        {% for event in events %}
+            <a class="card-body" href="{{ path('start_cash_register', {eventId: event.id}) }}">{{ event.name }}</a>
+        {% else %}
+            <div class="card-body">Noch keine Events angelegt</div>
+        {% endfor %}
+    </div>
+
+    <div class="card mb-6">
+        {{ render_chart(chart, {class: 'card-body'}) }}
+    </div>
+{% endblock main %}
