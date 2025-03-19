@@ -21,3 +21,8 @@ services:
     environment:
       - MYSQL_ROOT_PASSWORD=toor
       - MARIADB_DATABASE=app
+    volumes:
+      - db-mnt:/var/lib/mysql
+
+volumes:
+  db-mnt:
