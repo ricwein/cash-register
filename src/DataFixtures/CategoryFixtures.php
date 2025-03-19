@@ -9,11 +9,16 @@ use Doctrine\Persistence\ObjectManager;
 class CategoryFixtures extends Fixture
 {
     private const CATEGORIES = [
-        ['Pfand', '#FFF8E1'],
-        ['Getränke', '#FFD54F'],
+        ['Heißgetränke', '#B71C1C'],
+        ['AfG', '#B39DDB'],
+        ['Eisgetränke', '#283593'],
+        ['Bier / Wein / Sekt', '#FBC02D'],
+        ['Eis', '#4FC3F7'],
+        ['Speisen', '#8D6E63'],
+        ['Snacks', '#00E676'],
+        ['Kuchen', '#FF80AB'],
         ['Grill', '#795548'],
-        ['Snacks', '#FF8A65'],
-        ['Eis', '#80DEEA'],
+        ['Tabak etc.', '#304FFE'],
     ];
 
     public function load(ObjectManager $manager): void

@@ -1,9 +1,7 @@
 <template>
-  <div class="selection-view w-100 bg-dark">
-    <div class="d-flex flex-wrap align-items-baseline">
-      <div v-for="row in products" class="row w-100 justify-content-between">
-        <ProductButton v-for="[categoryName, product] in row" :product :categoryName :displayHeightPortrait :gridWidthElements :gridHeightElements @product-clicked="productClicked"></ProductButton>
-      </div>
+  <div class="selection-view w-100 bg-dark h-100">
+    <div v-for="row in rows" class="d-flex row w-100 justify-content-start" :class="`row-cols-${gridWidthElements}`">
+      <ProductButton v-for="[categoryName, product] in row" :product :categoryName :displayHeightPortrait :gridWidthElements :gridHeightElements @product-clicked="productClicked"></ProductButton>
     </div>
   </div>
 </template>
@@ -24,7 +22,7 @@ const props = defineProps({
   gridHeightElements: Number,
 })
 
-const products = computed((): Array<Array<[string, Product]>> => {
+const rows = computed((): Array<Array<[string, Product]>> => {
   let rows: Array<Array<[string, Product]>> = [];
 
   let products: Array<[string, Product]> = [];
@@ -53,7 +51,11 @@ function productClicked(product: Product) {
 
 <style scoped lang="scss">
 .selection-view {
-  border-top: 0.2rem solid var(--bs-dark);
   min-height: calc(100vh - (v-bind(displayHeightPortrait) + v-bind(historyHeightPortrait)));
+
+  .row {
+    margin-left: 0;
+    margin-right: 0;
+  }
 }
 </style>

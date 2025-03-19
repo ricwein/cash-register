@@ -4,6 +4,7 @@ Name: Name
 Icon: Bild
 Priority: Reihenfolge
 Is On: Aktiv
+Description: Beschreibung
 
 Category: Kategorie
 Event: Veranstaltung
@@ -18,10 +19,15 @@ Quantity: Anzahl
 Created At: Erstellt am
 Products Per Row: Produkte p. Zeile
 Use Category Tabs: Kategorien als Tabs
+Transaction Id: Beleg ID
 
 Dashboard: Dashboard
+Management: Verwaltung
+Register: Kasse
 Products: Produkte
 Events: Veranstaltungen
+Export Receipts: Belege exportieren
 Categories: Kategorien
+Setting: Einstellungen
 
 Clone: Kopieren

@@ -33,6 +33,8 @@ defineProps({
 .history {
   height: v-bind(historyHeightPortrait);
   border-top: 0.05em solid var(--bs-dark);
+  border-bottom: 0.2rem solid var(--bs-dark);
+
 
   .backspace-button {
     background-color: var(--bs-dark-bg-subtle);

@@ -32,6 +32,7 @@ defineProps({
 .history {
   height: calc(100vh - 5rem);
   border-top: 0.05em solid var(--bs-dark);
+  border-right: 0.2rem solid var(--bs-dark);
 
   .backspace-button {
     background-color: var(--bs-dark-bg-subtle);

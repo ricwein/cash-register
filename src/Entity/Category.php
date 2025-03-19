@@ -19,7 +19,7 @@ class Category implements Stringable
     #[ORM\Column(nullable: true)]
     private ?int $priority = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(length: 255, unique: true)]
     private ?string $name = null;
 
     #[ORM\Column(length: 7, options: ['fixed' => true])]

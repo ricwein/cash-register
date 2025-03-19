@@ -2,11 +2,12 @@ services:
   web:
     build:
       context: .
-      dockerfile: docker/php-fpm/Dockerfile
+      dockerfile: docker/Dockerfile
       args:
         PHP_VERSION: ${PHP_VERSION:-8.2}
-        APP_ENV: ${APP_ENV:-dev}
         PHP_TIMEZONE: ${PHP_TIMEZONE:-UTC}
+        APP_ENV: ${APP_ENV:-prod}
+        APP_SECRET: ${APP_SECRET:-}
     env_file:
       - .env
     restart: unless-stopped

@@ -6,6 +6,7 @@ use App\Repository\SaleRepository;
 use DateTimeImmutable;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Uid\Uuid;
 
 #[ORM\Entity(repositoryClass: SaleRepository::class)]
 class Sale
@@ -32,6 +33,9 @@ class Sale
 
     #[ORM\Column(type: Types::DATETIME_IMMUTABLE)]
     private DateTimeImmutable $createdAt;
+
+    #[ORM\Column(type: 'uuid')]
+    private ?Uuid $transactionId = null;
 
     public function __construct()
     {
@@ -105,5 +109,17 @@ class Sale
     public function getCreatedAt(): DateTimeImmutable
     {
         return $this->createdAt;
+    }
+
+    public function getTransactionId(): ?Uuid
+    {
+        return $this->transactionId;
+    }
+
+    public function setTransactionId(Uuid $transactionId): static
+    {
+        $this->transactionId = $transactionId;
+
+        return $this;
     }
 }

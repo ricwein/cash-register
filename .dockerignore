@@ -12,12 +12,14 @@
 **/docker-compose.*.yml
 **/docker-compose.yaml
 **/docker-compose.yml
-**/Dockerfile
+docker/Dockerfile
 **/Thumbs.db
 .editorconfig
 .env.*.local
 .env.local
 .env.local.php
+.env.test
+.env.dev
 .php_cs.cache
 .gitlab/
 bin/*

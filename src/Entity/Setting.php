@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use App\Repository\SettingRepository;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: SettingRepository::class)]
@@ -18,6 +19,17 @@ class Setting
 
     #[ORM\Column]
     private bool $isOn = true;
+
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    private ?string $description = null;
+
+    public static function create(string $name, bool $value, ?string $description = null): self
+    {
+        return (new self())
+            ->setName($name)
+            ->setIsOn($value)
+            ->setDescription($description);
+    }
 
     public function getId(): ?int
     {
@@ -44,6 +56,18 @@ class Setting
     public function setIsOn(bool $isOn): static
     {
         $this->isOn = $isOn;
+        return $this;
+    }
+
+    public function getDescription(): ?string
+    {
+        return $this->description;
+    }
+
+    public function setDescription(?string $description): static
+    {
+        $this->description = $description;
+
         return $this;
     }
 }

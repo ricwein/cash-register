@@ -47,7 +47,6 @@ const cart = ref<Product[]>([]);
 // for portrait-mode
 const displayHeightPortrait = props.useLandscapeMode ? '0' : '5rem'
 const historyHeightPortrait = props.useLandscapeMode ? '0' : '7rem'
-const receiptWidthLandscape = props.useLandscapeMode ? '30vw' : '0'
 
 function productClicked(product: Product): void {
   cart.value.push(product)

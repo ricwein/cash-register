@@ -9,11 +9,6 @@ fi
 if [ "$1" = 'php-fpm' ] || [ "$1" = 'php' ] || [ "$1" = 'bin/console' ] || [ "$1" = 'supervisord' ]; then
 
   rm -f .env.local.php
-  if [ "$APP_ENV" = 'prod' ]; then
-    ln -sf "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
-  else
-    ln -sf "$PHP_INI_DIR/php.ini-development" "$PHP_INI_DIR/php.ini"
-  fi
 
   ATTEMPTS_MAX_TO_REACH_DATABASE=300 # 5min
   ATTEMPTS_LEFT_TO_REACH_DATABASE=$ATTEMPTS_MAX_TO_REACH_DATABASE
@@ -44,8 +39,6 @@ if [ "$1" = 'php-fpm' ] || [ "$1" = 'php' ] || [ "$1" = 'bin/console' ] || [ "$1
     composer run-script post-install-cmd
   fi
 
-  composer symfony:dump-env "$APP_ENV"
-
   # run doctrine migrations if required
   if ls -A migrations/*.php >/dev/null 2>&1; then
     bin/console doctrine:migrations:migrate --allow-no-migration --no-interaction
@@ -54,6 +47,14 @@ if [ "$1" = 'php-fpm' ] || [ "$1" = 'php' ] || [ "$1" = 'bin/console' ] || [ "$1
   # warmup cache
   bin/console cache:clear --no-interaction --no-warmup
   bin/console cache:warmup --no-interaction
+
+  mkdir -p var/cache var/log
+  for writableDirPath in 'var/cache' 'var/log'; do
+    echo "[ENTRYPOINT] fix permissions on: ${writableDirPath}"
+    chmod -R 777 "${writableDirPath}"
+    setfacl -R -m u:www-data:rwX -m u:"$(whoami)":rwX "${writableDirPath}"
+    setfacl -dR -m u:www-data:rwX -m u:"$(whoami)":rwX "${writableDirPath}"
+  done
 fi
 
 exec docker-php-entrypoint "$@"

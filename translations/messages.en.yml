@@ -3,6 +3,8 @@ Color: Color
 Name: Name
 Icon: Icon
 Priority: Priority
+Is On: Active
+Description: Description
 
 Category: Category
 Event: Event
@@ -17,10 +19,15 @@ Quantity: Quantity
 Created At: Created At
 Products Per Row: Products Per Row
 Use Category Tabs: Use Category Tabs
+Transaction Id: Receipt ID
 
 Dashboard: Dashboard
+Management: Management
+Register: Register
 Products: Products
 Events: Events
+Export Receipts: Export Receipts
 Categories: Categories
+Setting: Settings
 
 Clone: Clone

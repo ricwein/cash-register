@@ -1,0 +1,25 @@
+{% extends '@EasyAdmin/layout.html.twig' %}
+
+{% block page_title %}
+    Kasse | Verwaltung
+{% endblock %}
+
+{% block head_favicon %}
+    <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}">
+{% endblock %}
+
+{% block head_stylesheets %}
+    {{ parent() }}
+    {{ encore_entry_link_tags('admin') }}
+{% endblock %}
+
+{% block main %}
+    <figure class="text-center bg-light p-5 rounded-3">
+        <blockquote class="blockquote">
+            Coole Übersicht + Export-als-PDF Formular hier
+        </blockquote>
+        <figcaption class="blockquote-footer">
+            TODO
+        </figcaption>
+    </figure>
+{% endblock %}

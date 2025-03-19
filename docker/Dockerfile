@@ -7,7 +7,7 @@ ARG APP_ENV=${APP_ENV:-prod}
 FROM php:${PHP_VERSION}-fpm-alpine AS php-base
 
 ADD --chmod=0755 https://github.com/mlocati/docker-php-extension-installer/releases/latest/download/install-php-extensions /usr/local/bin/
-RUN install-php-extensions bcmath ctype iconv intl @composer
+RUN install-php-extensions bcmath ctype iconv intl opcache @composer
 
 ARG PHP_TIMEZONE=${PHP_TIMEZONE:-UTC}
 RUN echo "date.timezone = ${PHP_TIMEZONE}" > $PHP_INI_DIR/conf.d/tzone.ini
@@ -15,7 +15,12 @@ RUN echo "date.timezone = ${PHP_TIMEZONE}" > $PHP_INI_DIR/conf.d/tzone.ini
 WORKDIR /app
 COPY composer.json composer.lock ./
 
-RUN if [ "$APP_ENV" = "prod" ] ; then composer install --prefer-dist --no-progress --no-interaction --optimize-autoloader --no-scripts --no-dev ; else composer install --prefer-dist --no-progress --no-interaction --optimize-autoloader --no-scripts ; fi
+RUN if [ "$APP_ENV" = "prod" ] ;  \
+    then ln -sf "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini" ; \
+    else ln -sf "$PHP_INI_DIR/php.ini-development" "$PHP_INI_DIR/php.ini" ; fi
+RUN if [ "$APP_ENV" = "prod" ] ;  \
+    then composer install --prefer-dist --no-progress --no-interaction --optimize-autoloader --no-scripts --no-dev ; \
+    else composer install --prefer-dist --no-progress --no-interaction --optimize-autoloader --no-scripts ; fi
 RUN if [ "$APP_ENV" = "prod" ] ; then composer dump-autoload --classmap-authoritative --no-dev ; fi
 
 
@@ -23,7 +28,9 @@ RUN if [ "$APP_ENV" = "prod" ] ; then composer dump-autoload --classmap-authorit
 ###        ASSETS         ###
 #############################
 FROM node AS yarn-encore
+
 ARG APP_ENV
+ENV APP_ENV=${APP_ENV}
 
 WORKDIR /app
 COPY ./assets ./assets
@@ -33,13 +40,15 @@ COPY package.json tsconfig.json webpack.config.js yarn.lock postcss.config.js co
 RUN yarn install --force --frozen-lockfile
 RUN yarn encore ${APP_ENV}
 
-ENV APP_ENV=${APP_ENV}
-
 
 #############################
 ###        PHP-FPM        ###
 #############################
 FROM php-base
+
+ARG APP_ENV
+ENV APP_ENV=${APP_ENV}
+ARG APP_SECRET
 
 RUN apk add --update --no-cache \
     supervisor nginx acl fcgi file gettext gnu-libiconv
@@ -62,7 +71,10 @@ COPY docker/php-fpm/supervisord.conf /etc/supervisord.conf
 
 COPY . .
 COPY --from=yarn-encore /app/public/build ./public/build
-RUN mkdir -p var/cache var/log & sync
+RUN rm -rf var/cache var/log && mkdir -p var/cache var/log && chmod -R 777 var/cache var/log && sync
+
+RUN sed -i -e "s/APP_ENV=.*/APP_ENV=${APP_ENV}/g" ./.env
+RUN sed -i -e "s/APP_SECRET=.*/APP_SECRET=${APP_SECRET}/g" ./.env
 
 ENTRYPOINT ["docker-entrypoint"]
 CMD ["supervisord", "-n", "-c", "/etc/supervisord.conf"]

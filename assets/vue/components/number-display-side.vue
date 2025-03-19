@@ -19,6 +19,7 @@ defineProps({
 <style scoped lang="scss">
 .display-container {
   text-align: right;
+  border-right: 0.2rem solid var(--bs-dark);
 
   .display {
     height: 5rem;

@@ -14,10 +14,13 @@ class SettingFixtures extends Fixture
 
     public function load(ObjectManager $manager): void
     {
-        foreach (self::SETTINGS as $settingName => $settingValue) {
-            $setting = (new Setting())->setName($settingName)->setIsOn($settingValue);
-            $manager->persist($setting);
-        }
+        $manager->persist(
+            Setting::create(
+                name: 'landscape_mode',
+                value: true,
+                description: 'Beleg links neben der Produktauswahl anzeigen, statt darüber.'
+            )
+        );
         $manager->flush();
     }
 }

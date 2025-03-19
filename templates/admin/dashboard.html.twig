@@ -14,7 +14,7 @@
 {% endblock %}
 
 {% block main %}
-    <div class="card mb-6">
+    <div class="card mb-5">
         <div class="card-header h5">Zur Kassenansicht wechseln:</div>
         {% for event in events %}
             <a class="card-body" href="{{ path('start_cash_register', {eventId: event.id}) }}">{{ event.name }}</a>
@@ -23,7 +23,7 @@
         {% endfor %}
     </div>
 
-    <div class="card mb-6">
+    <div class="card mt-5">
         {{ render_chart(chart, {class: 'card-body'}) }}
     </div>
 {% endblock main %}

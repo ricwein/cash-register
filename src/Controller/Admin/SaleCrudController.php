@@ -24,6 +24,7 @@ class SaleCrudController extends AbstractCrudController
     public function configureFields(string $pageName): iterable
     {
         return [
+            IdField::new('transactionId')->setMaxLength(36)->addCssClass('font-monospace small text-dark'),
             TextField::new('eventName'),
             TextField::new('productName'),
             MoneyField::new('pricePerItem')->setCurrency('EUR')->setStoredAsCents(false),

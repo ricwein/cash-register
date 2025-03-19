@@ -30,7 +30,7 @@ const categoryTextColor = computed(() => color.value.isLight() ? 'var(--bs-secon
 
 <style scoped lang="scss">
 .product {
-  outline: 0.05em solid var(--bs-dark);
+  outline: 0.1em solid var(--bs-dark);
   min-height: 9rem;
   border: 0.2em solid transparent;
   cursor: pointer;

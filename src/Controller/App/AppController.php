@@ -21,6 +21,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Uid\Uuid;
 
 #[Route('/app')]
 class AppController extends AbstractController
@@ -76,9 +77,12 @@ class AppController extends AbstractController
             $products[$product->getId()] = $product;
         }
 
+        $transactionId = Uuid::v4();
+
         foreach ($cartData as $productId => $quantity) {
             $product = $products[$productId];
             $sale = new Sale();
+            $sale->setTransactionId($transactionId);
             $sale->setEventName($event->getName());
             $sale->setQuantity($quantity);
             $sale->setPricePerItem($product->getPrice());
