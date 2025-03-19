@@ -5,10 +5,9 @@ namespace App\Controller\Admin;
 use App\Entity\Category;
 use App\Entity\Event;
 use App\Entity\Product;
-use App\Entity\Sale;
 use App\Entity\Setting;
+use App\Entity\PurchaseTransaction;
 use App\Repository\EventRepository;
-use App\Repository\SaleRepository;
 use App\Service\SaleChartService;
 use DateInterval;
 use DateInvalidOperationException;
@@ -27,7 +26,6 @@ class DashboardController extends AbstractDashboardController
     public function __construct(
         private readonly ClockInterface $clock,
         private readonly EventRepository $eventRepository,
-        private readonly SaleRepository $saleRepository,
         private readonly SaleChartService $saleChartService,
         private readonly ChartBuilderInterface $chartBuilder,
     ) {}
@@ -47,9 +45,8 @@ class DashboardController extends AbstractDashboardController
     {
         $now = $this->clock->now();
         $fromDate = $now->sub(new DateInterval('P7D'));
-        $sales = $this->saleRepository->findSales(since: $fromDate);
         $dataset = $this->saleChartService->buildData(
-            sales: $sales,
+            sales: [],
             startDate: $fromDate,
             endDate: $now,
         );
@@ -72,7 +69,7 @@ class DashboardController extends AbstractDashboardController
         yield MenuItem::linkToCrud('Products', 'fa-solid fa-list', Product::class);
         yield MenuItem::section('Register');
         yield MenuItem::linkToRoute('Export Receipts', 'fa-solid fa-receipt', 'receipt-export');
-        yield MenuItem::linkToCrud('Sales', 'fa-solid fa-receipt', Sale::class);
+        yield MenuItem::linkToCrud('Transactions', 'fa-solid fa-receipt', PurchaseTransaction::class);
         yield MenuItem::section('Setting');
         yield MenuItem::linkToCrud('Setting', 'fa-solid fa-gears', Setting::class);
     }

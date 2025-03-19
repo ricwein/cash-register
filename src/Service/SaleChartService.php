@@ -2,7 +2,6 @@
 
 namespace App\Service;
 
-use App\Entity\Sale;
 use DateInterval;
 use DateTimeImmutable;
 
@@ -12,9 +11,6 @@ readonly class SaleChartService
         private string $format = 'd.m.Y',
     ) {}
 
-    /**
-     * @param Sale[] $sales
-     */
     public function buildData(array $sales, DateTimeImmutable $startDate, DateTimeImmutable $endDate): array
     {
         $data = [];

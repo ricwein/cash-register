@@ -4,7 +4,7 @@
 
 {% block body %}
     <div {{ vue_component('cash-register', {
-        confirmEndpointUrl: path('send_cash_register', {eventId: event.id}),
+        confirmEndpointUrl: path('send_cash_register', {eventId: event.id, paymentType: '{{paymentType}}'}),
         startPrice: 0.00,
         categories: categories,
         gridWidthElements: event.productsPerRow,

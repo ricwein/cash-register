@@ -9,7 +9,8 @@ Description: Beschreibung
 Category: Kategorie
 Event: Veranstaltung
 Product: Produkt
-Sales: Verkäufe
+Transactions: Verkäufe
+PurchaseTransaction: Verkäufe
 
 Event Name: Veranstaltung
 Product Name: Produkt

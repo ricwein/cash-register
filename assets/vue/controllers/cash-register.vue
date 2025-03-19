@@ -1,7 +1,7 @@
 <template>
   <div v-if="useLandscapeMode" class="row w-100">
     <div class="receipt col-lg-4 col-md-5 col-sm-5">
-      <NumberDisplaySide :price @register-confirmed="registerConfirmed"></NumberDisplaySide>
+      <NumberDisplaySide :price @register-confirmed="showCheckout = true"></NumberDisplaySide>
       <ProductHistorySide :products="cart" @backspace-clicked="backspaceClicked"></ProductHistorySide>
     </div>
     <div class="products col">
@@ -11,17 +11,18 @@
   </div>
   <div v-else>
     <div class="sticky-top">
-      <NumberDisplay :price :displayHeightPortrait @register-confirmed="registerConfirmed"></NumberDisplay>
+      <NumberDisplay :price :displayHeightPortrait @register-confirmed="showCheckout = true"></NumberDisplay>
       <ProductHistory :products="cart" :historyHeightPortrait @backspace-clicked="backspaceClicked"></ProductHistory>
     </div>
     <ProductSelectionTabbed v-if="useCategoryTabs" :categories :displayHeightPortrait :historyHeightPortrait :gridWidthElements :gridHeightElements @product-clicked="productClicked"></ProductSelectionTabbed>
     <ProductSelection v-else :categories :displayHeightPortrait :historyHeightPortrait :gridWidthElements :gridHeightElements @product-clicked="productClicked"></ProductSelection>
   </div>
+
+  <Checkout v-model="showCheckout" :price :cart @checkoutCancelled="showCheckout = false" @createNewReceipt="resetCart"></Checkout>
 </template>
 
 <script setup lang="ts">
 import {type PropType, ref} from "vue";
-import {toast} from "vue3-toastify";
 import NumberDisplay from "../components/number-display.vue";
 import NumberDisplaySide from "../components/number-display-side.vue";
 import ProductHistory from "../components/product-history.vue";
@@ -30,6 +31,7 @@ import ProductSelection from "../components/product-selection.vue";
 import ProductSelectionTabbed from "../components/product-selection-tabbed.vue";
 import Category from "../../model/category";
 import Product from "../../model/product";
+import Checkout from "../components/checkout.vue";
 
 const props = defineProps({
   confirmEndpointUrl: String,
@@ -41,6 +43,7 @@ const props = defineProps({
   useLandscapeMode: Boolean,
 });
 
+const showCheckout = ref(false)
 const price = ref<number>(props.startPrice ?? 0.0)
 const cart = ref<Product[]>([]);
 
@@ -66,39 +69,9 @@ function _recalculateCart(): void {
   )
 }
 
-function registerConfirmed(): void {
-  let data: Record<number, number> = {};
-
-  /** @var {Product} product */
-  for (const product of cart.value) {
-    if (!data.hasOwnProperty(product.id)) {
-      data[product.id] = 0;
-    }
-    data[product.id]++;
-  }
-
-  fetch(props.confirmEndpointUrl ?? '', {
-    method: 'PUT',
-    body: JSON.stringify(data)
-  })
-      .then(response => response.json())
-      .then(response => {
-        if (response.hasOwnProperty('success') && response.success) {
-          cart.value = [];
-          _recalculateCart()
-
-          toast.success('verarbeitet', {
-            position: toast.POSITION.TOP_LEFT,
-            theme: toast.THEME.DARK,
-            autoClose: 1000,
-          })
-        } else if (response.hasOwnProperty('error')) {
-          toast.error(response.error, {
-            position: toast.POSITION.TOP_LEFT,
-            theme: toast.THEME.DARK,
-          })
-        }
-      })
+function resetCart(): void {
+  cart.value = []
+  _recalculateCart()
 }
 </script>
 

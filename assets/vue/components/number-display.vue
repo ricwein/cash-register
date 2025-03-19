@@ -1,7 +1,7 @@
 <template>
   <div class="w-100 bg-white display-container d-flex justify-content-end">
-    <span class="display">{{ NumberFormatter.format(price) }}</span>
-    <div class="confirm bg-primary d-flex align-items-center flex-column justify-content-around" :class="{disabled: price <= 0}" @click="price > 0.0 && $emit('register-confirmed')">
+    <span class="display">{{ NumberFormatter.format(price ?? 0.0) }}</span>
+    <div class="confirm bg-primary d-flex align-items-center flex-column justify-content-around" :class="{disabled: (price ?? 0.0) <= 0}" @click="(price ?? 0.0) > 0.0 && $emit('register-confirmed')">
       <span class="fa-solid fa-paper-plane fa-2xl mt-3"></span>
       <span>quittieren</span>
     </div>

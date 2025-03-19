@@ -7,7 +7,9 @@ namespace App\Controller\App;
 use App\Entity\Category;
 use App\Entity\Event;
 use App\Entity\Product;
-use App\Entity\Sale;
+use App\Entity\PurchasedArticle;
+use App\Entity\PurchaseTransaction;
+use App\Enum\PaymentType;
 use App\Repository\CategoryRepository;
 use App\Repository\EventRepository;
 use App\Repository\ProductRepository;
@@ -56,8 +58,8 @@ class AppController extends AbstractController
         ]);
     }
 
-    #[Route('/{eventId}/send', name: 'send_cash_register', requirements: ['eventId' => '\d+'])]
-    public function confirmTransaction(int $eventId, Request $request): Response
+    #[Route('/{eventId}/send/{paymentType}', name: 'send_cash_register', requirements: ['eventId' => '\d+'])]
+    public function confirmTransaction(int $eventId, PaymentType $paymentType, Request $request): Response
     {
         $event = $this->eventRepository->find($eventId);
         if ($event === null) {
@@ -77,21 +79,27 @@ class AppController extends AbstractController
             $products[$product->getId()] = $product;
         }
 
-        $transactionId = Uuid::v4();
+        $transaction = (new PurchaseTransaction())
+            ->setEventName($event->getName())
+            ->setPaymentType($paymentType)
+            ->setTransactionId(Uuid::v4());
 
+        $price = '0.00';
         foreach ($cartData as $productId => $quantity) {
             $product = $products[$productId];
-            $sale = new Sale();
-            $sale->setTransactionId($transactionId);
-            $sale->setEventName($event->getName());
-            $sale->setQuantity($quantity);
-            $sale->setPricePerItem($product->getPrice());
-            $sale->setPrice(bcmul($product->getPrice(), (string)$quantity, 2));
-            $sale->setProductName($product->getName());
 
-            $this->entityManager->persist($sale);
+            $price = bcadd($price, $product->getPrice(), 2);
+            $transaction->addSoldArticle(
+                (new PurchasedArticle())
+                    ->setPrice($product->getPrice())
+                    ->setQuantity($quantity)
+                    ->setProductName($product->getName())
+            );
         }
+        $transaction->setPrice($price);
+
         try {
+            $this->entityManager->persist($transaction);
             $this->entityManager->flush();
         } catch (Exception $exception) {
             return new JsonResponse(['success' => false, 'error' => $exception->getMessage()], 500);

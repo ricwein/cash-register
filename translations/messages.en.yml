@@ -9,7 +9,8 @@ Description: Description
 Category: Category
 Event: Event
 Product: Product
-Sales: Sales
+Transactions: Transactions
+PurchaseTransaction: Transactions
 
 Event Name: Event
 Product Name: Product
