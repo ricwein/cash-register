@@ -1,5 +1,5 @@
-ARG PHP_VERSION=${PHP_VERSION:-8.2}
-ARG APP_ENV=${APP_ENV:-prod}
+ARG PHP_VERSION
+ARG APP_ENV
 
 #############################
 ###        PHP-FPM        ###
@@ -7,7 +7,7 @@ ARG APP_ENV=${APP_ENV:-prod}
 FROM php:${PHP_VERSION}-fpm-alpine AS php-base
 
 ADD --chmod=0755 https://github.com/mlocati/docker-php-extension-installer/releases/latest/download/install-php-extensions /usr/local/bin/
-RUN install-php-extensions bcmath ctype iconv intl opcache @composer
+RUN install-php-extensions bcmath ctype iconv intl opcache pdo_mysql @composer
 
 ARG PHP_TIMEZONE=${PHP_TIMEZONE:-UTC}
 RUN echo "date.timezone = ${PHP_TIMEZONE}" > $PHP_INI_DIR/conf.d/tzone.ini
@@ -49,7 +49,9 @@ FROM php-base
 ARG APP_ENV
 ENV APP_ENV=${APP_ENV}
 ARG APP_SECRET
+ENV APP_SECRET=${APP_SECRET}
 
+USER root
 RUN apk add --update --no-cache \
     supervisor nginx acl fcgi file gettext gnu-libiconv
 
@@ -71,9 +73,8 @@ COPY docker/php-fpm/supervisord.conf /etc/supervisord.conf
 
 COPY . .
 COPY --from=yarn-encore /app/public/build ./public/build
-RUN rm -rf var/cache var/log && mkdir -p var/cache var/log && chmod -R 777 var/cache var/log && sync
+RUN mkdir -p var/cache var/log && chmod -R 777 var/cache var/log && sync
 
-RUN sed -i -e "s/APP_ENV=.*/APP_ENV=${APP_ENV}/g" ./.env
 RUN sed -i -e "s/APP_SECRET=.*/APP_SECRET=${APP_SECRET}/g" ./.env
 
 ENTRYPOINT ["docker-entrypoint"]

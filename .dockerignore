@@ -1,4 +1,4 @@
-**/*.log
+*.log
 **/*.php~
 **/._*
 **/.dockerignore
@@ -28,8 +28,6 @@ helm/
 public/bundles/
 public/build/
 var/
-!var/res/
 node_modules/
 vendor/
-!vendor/fwa/
 LICENSE

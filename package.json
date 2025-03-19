@@ -13,6 +13,7 @@
     "@symfony/ux-vue": "file:vendor/symfony/ux-vue/assets",
     "@symfony/webpack-encore": "^5.0.0",
     "@vue/tsconfig": "^0.7.0",
+    "@vueuse/core": "^13.0.0",
     "autoprefixer": "^10.4.21",
     "bootstrap": "^5.3.3",
     "bootstrap-icons": "^1.11.3",
