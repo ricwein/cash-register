@@ -1,10 +1,10 @@
 <template>
-  <div v-if="useLandscapeMode" class="row">
-    <div class="sticky-top receipt col">
+  <div v-if="useLandscapeMode" class="row w-100">
+    <div class="receipt col-lg-4 col-md-5 col-sm-5">
       <NumberDisplaySide :price @register-confirmed="registerConfirmed"></NumberDisplaySide>
       <ProductHistorySide :products="cart" @backspace-clicked="backspaceClicked"></ProductHistorySide>
     </div>
-    <div class="products col-8">
+    <div class="products col">
       <ProductSelectionTabbed v-if="useCategoryTabs" :categories :displayHeightPortrait :historyHeightPortrait :gridWidthElements :gridHeightElements @product-clicked="productClicked"></ProductSelectionTabbed>
       <ProductSelection v-else :categories :displayHeightPortrait :historyHeightPortrait :gridWidthElements :gridHeightElements @product-clicked="productClicked"></ProductSelection>
     </div>
@@ -113,5 +113,4 @@ body {
   padding-left: 0 !important;
   padding-right: 0 !important;
 }
-
 </style>
