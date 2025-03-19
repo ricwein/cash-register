@@ -24,21 +24,19 @@ import type Product from "../../model/product.ts";
 import type {PropType} from "vue";
 
 defineProps({
-  historyHeightPortrait: String,
   products: Object as PropType<Array<Product>>,
 })
 </script>
 
 <style scoped lang="scss">
 .history {
-  height: v-bind(historyHeightPortrait);
+  height: calc(100vh - 5rem);
   border-top: 0.05em solid var(--bs-dark);
 
   .backspace-button {
     background-color: var(--bs-dark-bg-subtle);
     height: 100% !important;
     width: 20vw;
-    min-width: v-bind(historyHeightPortrait);
     border-right: 0.05em solid var(--bs-dark);
     cursor: pointer;
 

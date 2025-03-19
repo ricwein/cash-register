@@ -3,6 +3,7 @@ Color: Farbe
 Name: Name
 Icon: Bild
 Priority: Reihenfolge
+Is On: Aktiv
 
 Category: Kategorie
 Event: Veranstaltung

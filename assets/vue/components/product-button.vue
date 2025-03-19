@@ -1,5 +1,5 @@
 <template>
-  <div class="product p-2 d-flex flex-column align-items-start" :style="{backgroundColor: product?.color}" @click="$emit('product-clicked', product)">
+  <div class="product col p-2 d-flex flex-column align-items-start" :style="{backgroundColor: product?.color}" @click="$emit('product-clicked', product)">
     <div class="product-category mb-1 small badge">{{ categoryName }}</div>
     <span class="product-icon mt-auto fa-2xl" v-if="product?.icon" :class="product?.icon"></span>
     <div class="product-price mt-auto font-monospace badge">{{ NumberFormatter.format(product?.price ?? 0.0) }}</div>
@@ -16,7 +16,8 @@ import Color from "../../components/color.ts";
 const props = defineProps({
   categoryName: String,
   product: Object as PropType<Product>,
-  displayHeight: String,
+  displayHeightPortrait: String,
+  receiptWidthLandscape: String,
   gridWidthElements: Number,
   gridHeightElements: Number,
 })
@@ -29,11 +30,9 @@ const categoryTextColor = computed(() => color.value.isLight() ? 'var(--bs-secon
 
 <style scoped lang="scss">
 .product {
-  margin: 0.05em;
-  width: calc((100vw - (0.05em * 2 * v-bind(gridWidthElements))) / v-bind(gridWidthElements));
-  height: calc(calc(100vh - v-bind(displayHeight)) / v-bind(gridHeightElements));
+  outline: 0.05em solid var(--bs-dark);
   min-height: 9rem;
-  border: 0.3em solid transparent;
+  border: 0.2em solid transparent;
   cursor: pointer;
 
   &:active, &:focus, &:hover {

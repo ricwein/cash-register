@@ -1,6 +1,0 @@
-services:
-  web:
-    ports:
-      - "127.0.0.1:32064:80"
-    volumes:
-      - ./var/data.db:/app/var/data.db:rw

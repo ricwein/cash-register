@@ -6,6 +6,7 @@ use App\Entity\Category;
 use App\Entity\Event;
 use App\Entity\Product;
 use App\Entity\Sale;
+use App\Entity\Setting;
 use App\Repository\EventRepository;
 use App\Repository\SaleRepository;
 use App\Service\SaleChartService;
@@ -66,10 +67,12 @@ class DashboardController extends AbstractDashboardController
     {
         yield MenuItem::linkToDashboard('Dashboard', 'fa fa-home');
         yield MenuItem::section('Verwaltung');
-        yield MenuItem::linkToCrud('Events', 'fas fa-list', Event::class);
-        yield MenuItem::linkToCrud('Categories', 'fas fa-list', Category::class);
-        yield MenuItem::linkToCrud('Products', 'fas fa-list', Product::class);
+        yield MenuItem::linkToCrud('Events', 'fa-solid fa-list', Event::class);
+        yield MenuItem::linkToCrud('Categories', 'fa-solid fa-list', Category::class);
+        yield MenuItem::linkToCrud('Products', 'fa-solid fa-list', Product::class);
         yield MenuItem::section('Kasse');
-        yield MenuItem::linkToCrud('Sales', 'fas fa-list', Sale::class);
+        yield MenuItem::linkToCrud('Sales', 'fa-solid fa-list', Sale::class);
+        yield MenuItem::section('Einstellungen');
+        yield MenuItem::linkToCrud('Einstellungen', 'fa-solid fa-gears', Setting::class);
     }
 }

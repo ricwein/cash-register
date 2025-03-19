@@ -1,18 +1,32 @@
 <template>
-  <div class="sticky-top">
-    <NumberDisplay :price :displayHeight @register-confirmed="registerConfirmed"></NumberDisplay>
-    <ProductHistory :products="cart" :historyHeight @backspace-clicked="backspaceClicked"></ProductHistory>
+  <div v-if="useLandscapeMode" class="row">
+    <div class="sticky-top receipt col">
+      <NumberDisplaySide :price @register-confirmed="registerConfirmed"></NumberDisplaySide>
+      <ProductHistorySide :products="cart" @backspace-clicked="backspaceClicked"></ProductHistorySide>
+    </div>
+    <div class="products col-8">
+      <ProductSelectionTabbed v-if="useCategoryTabs" :categories :displayHeightPortrait :historyHeightPortrait :gridWidthElements :gridHeightElements @product-clicked="productClicked"></ProductSelectionTabbed>
+      <ProductSelection v-else :categories :displayHeightPortrait :historyHeightPortrait :gridWidthElements :gridHeightElements @product-clicked="productClicked"></ProductSelection>
+    </div>
   </div>
-  <ProductSelectionTabbed v-if="useCategoryTabs" :categories :displayHeight :historyHeight :gridWidthElements :gridHeightElements @product-clicked="productClicked"></ProductSelectionTabbed>
-  <ProductSelection v-else :categories :displayHeight :historyHeight :gridWidthElements :gridHeightElements @product-clicked="productClicked"></ProductSelection>
+  <div v-else>
+    <div class="sticky-top">
+      <NumberDisplay :price :displayHeightPortrait @register-confirmed="registerConfirmed"></NumberDisplay>
+      <ProductHistory :products="cart" :historyHeightPortrait @backspace-clicked="backspaceClicked"></ProductHistory>
+    </div>
+    <ProductSelectionTabbed v-if="useCategoryTabs" :categories :displayHeightPortrait :historyHeightPortrait :gridWidthElements :gridHeightElements @product-clicked="productClicked"></ProductSelectionTabbed>
+    <ProductSelection v-else :categories :displayHeightPortrait :historyHeightPortrait :gridWidthElements :gridHeightElements @product-clicked="productClicked"></ProductSelection>
+  </div>
 </template>
 
 <script setup lang="ts">
 import {type PropType, ref} from "vue";
-import NumberDisplay from "../components/number-display.vue";
-import ProductSelection from "../components/product-selection.vue";
-import ProductHistory from "../components/product-history.vue";
 import {toast} from "vue3-toastify";
+import NumberDisplay from "../components/number-display.vue";
+import NumberDisplaySide from "../components/number-display-side.vue";
+import ProductHistory from "../components/product-history.vue";
+import ProductHistorySide from "../components/product-history-side.vue";
+import ProductSelection from "../components/product-selection.vue";
 import ProductSelectionTabbed from "../components/product-selection-tabbed.vue";
 import Category from "../../model/category";
 import Product from "../../model/product";
@@ -23,13 +37,17 @@ const props = defineProps({
   categories: Object as PropType<Array<Category>>,
   gridWidthElements: Number,
   gridHeightElements: Number,
-  useCategoryTabs: Boolean
+  useCategoryTabs: Boolean,
+  useLandscapeMode: Boolean,
 });
 
-const price = ref<Number>(props.startPrice)
+const price = ref<number>(props.startPrice ?? 0.0)
 const cart = ref<Product[]>([]);
-const displayHeight = '5rem'
-const historyHeight = '7rem'
+
+// for portrait-mode
+const displayHeightPortrait = props.useLandscapeMode ? '0' : '5rem'
+const historyHeightPortrait = props.useLandscapeMode ? '0' : '7rem'
+const receiptWidthLandscape = props.useLandscapeMode ? '30vw' : '0'
 
 function productClicked(product: Product): void {
   cart.value.push(product)
@@ -42,13 +60,15 @@ function backspaceClicked(): void {
 }
 
 function _recalculateCart(): void {
-  price.value = cart.value
-      .map((product: Product) => product.price)
-      .reduce((price: number, prev: number): number => price + prev, 0.0)
+  price.value = Number(
+      cart.value
+          .map((product: Product) => product.price)
+          .reduce((price: number, prev: number): number => price + prev, 0.0)
+  )
 }
 
 function registerConfirmed(): void {
-  let data: Array<number, number> = {};
+  let data: Record<number, number> = {};
 
   /** @var {Product} product */
   for (const product of cart.value) {
@@ -58,7 +78,7 @@ function registerConfirmed(): void {
     data[product.id]++;
   }
 
-  fetch(props.confirmEndpointUrl, {
+  fetch(props.confirmEndpointUrl ?? '', {
     method: 'PUT',
     body: JSON.stringify(data)
   })
@@ -87,4 +107,12 @@ function registerConfirmed(): void {
 body {
   user-select: none !important;
 }
+</style>
+
+<style scoped lang="scss">
+.row > * {
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}
+
 </style>

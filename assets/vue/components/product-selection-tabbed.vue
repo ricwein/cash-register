@@ -3,7 +3,7 @@
     <v-tabs-window v-model="tab">
       <v-tabs-window-item v-for="category in categories" :value="category.id">
         <div class="d-flex flex-wrap align-items-baseline">
-          <ProductButton v-for="product in category.products" :category-name="category.name" :product :displayHeight :gridWidthElements :gridHeightElements @product-clicked="productClicked"></ProductButton>
+          <ProductButton v-for="product in category.products" :category-name="category.name" :product :displayHeightPortrait :gridWidthElements :gridHeightElements @product-clicked="productClicked"></ProductButton>
         </div>
       </v-tabs-window-item>
     </v-tabs-window>
@@ -35,7 +35,7 @@
 <script setup lang="ts">
 import ProductButton from "./product-button.vue";
 import Category from "../../model/category.ts";
-import {computed, ref} from "vue";
+import {ref} from "vue";
 import type Product from "../../model/product.ts";
 import Color from "../../components/color.ts";
 
@@ -43,8 +43,8 @@ const emit = defineEmits(['product-clicked'])
 
 const props = defineProps({
   categories: Array<Category>,
-  displayHeight: String,
-  historyHeight: String,
+  displayHeightPortrait: String,
+  historyHeightPortrait: String,
   gridWidthElements: Number,
   gridHeightElements: Number,
 })
@@ -65,7 +65,7 @@ function productClicked(product: Product) {
 <style scoped lang="scss">
 .selection-view {
   border-top: 0.2rem solid var(--bs-dark);
-  min-height: calc(100vh - (v-bind(displayHeight) + v-bind(historyHeight) + v-bind(tabBarHeightSize)));
+  min-height: calc(100vh - (v-bind(displayHeightPortrait) + v-bind(historyHeightPortrait) + v-bind(tabBarHeightSize)));
 }
 
 .tab-bar {

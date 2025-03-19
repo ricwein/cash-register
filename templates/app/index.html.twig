@@ -9,6 +9,7 @@
         categories: categories,
         gridWidthElements: event.productsPerRow,
         gridHeightElements: 4,
-        useCategoryTabs: event.useCategoryTabs
+        useCategoryTabs: event.useCategoryTabs,
+        useLandscapeMode: (settings['landscape_mode'] ?? false) ? true : false,
     }) }}></div>
 {% endblock %}

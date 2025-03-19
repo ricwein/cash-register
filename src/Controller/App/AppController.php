@@ -11,6 +11,7 @@ use App\Entity\Sale;
 use App\Repository\CategoryRepository;
 use App\Repository\EventRepository;
 use App\Repository\ProductRepository;
+use App\Repository\SettingRepository;
 use App\Service\DTOMapperService;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
@@ -30,6 +31,7 @@ class AppController extends AbstractController
         private readonly EventRepository $eventRepository,
         private readonly CategoryRepository $categoryRepository,
         private readonly ProductRepository $productRepository,
+        private readonly SettingRepository $settingRepository,
     ) {}
 
     #[Route('/{eventId}', name: 'start_cash_register', requirements: ['eventId' => '\d+'])]
@@ -48,6 +50,7 @@ class AppController extends AbstractController
 
         return $this->render('app/index.html.twig', [
             'event' => $event,
+            'settings' => $this->settingRepository->getAllSettings(),
             'categories' => array_filter($categories),
         ]);
     }
