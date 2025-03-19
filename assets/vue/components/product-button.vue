@@ -16,8 +16,6 @@ import Color from "../../components/color.ts";
 const props = defineProps({
   categoryName: String,
   product: Object as PropType<Product>,
-  displayHeightPortrait: String,
-  receiptWidthLandscape: String,
   gridWidthElements: Number,
   gridHeightElements: Number,
 })

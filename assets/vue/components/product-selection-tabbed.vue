@@ -3,7 +3,7 @@
     <v-tabs-window v-model="tab">
       <v-tabs-window-item v-for="[categoryId, categoryName, rows] in categoryRows" :value="categoryId">
         <div v-for="row in rows" class="row w-100 justify-content-start" :class="`row-cols-${gridWidthElements}`">
-          <ProductButton v-for="product in row" :category-name="categoryName" :product :displayHeightPortrait :gridWidthElements :gridHeightElements @product-clicked="productClicked"></ProductButton>
+          <ProductButton v-for="product in row" :category-name="categoryName" :product :gridWidthElements :gridHeightElements @product-clicked="productClicked"></ProductButton>
         </div>
       </v-tabs-window-item>
     </v-tabs-window>
@@ -50,7 +50,6 @@ const props = defineProps({
 })
 
 const tabBarHeight = 60;
-const tabBarHeightSize = `${tabBarHeight}px`
 
 const categoryRows = computed((): Array<[number, string, Array<Array<Product>>]> => {
   let categories: Array<[number, string, Array<Array<Product>>]> = [];
