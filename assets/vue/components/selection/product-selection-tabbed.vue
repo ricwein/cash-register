@@ -1,5 +1,5 @@
 <template>
-  <div class="selection-view w-100 bg-dark d-flex flex-column h-100">
+  <div class="selection-view w-100 d-flex flex-column h-100">
     <v-tabs-window v-model="tab">
       <v-tabs-window-item v-for="[categoryId, categoryName, rows] in categoryRows" :value="categoryId">
         <div v-for="row in rows" class="row w-100 justify-content-start" :class="`row-cols-${gridWidthElements}`">
@@ -8,11 +8,9 @@
       </v-tabs-window-item>
     </v-tabs-window>
 
-    <v-card class="bg-dark sticky-bottom tab-bar w-100 mt-auto" variant="flat">
+    <v-card class="bg-dark tab-bar w-100 mt-auto" variant="flat">
       <v-tabs
           v-model="tab"
-          align-tabs="center"
-          fixed-tabs
           :height="tabBarHeight"
           slider-color="#fff"
       >
@@ -42,7 +40,7 @@ import Color from "../../../components/color.ts";
 const emit = defineEmits(['product-clicked'])
 
 const props = defineProps({
-  categories: Array<Category>,
+  categories: {type: Array<Category>, required: true},
   displayHeightPortrait: String,
   historyHeightPortrait: String,
   gridWidthElements: Number,
@@ -53,7 +51,7 @@ const tabBarHeight = 60;
 const categoryRows = computed((): Array<[number, string, Array<Array<Product>>]> => {
   let categories: Array<[number, string, Array<Array<Product>>]> = [];
 
-  for (const category of props.categories ?? []) {
+  for (const category of props.categories) {
     let rows: Array<Array<Product>> = [];
     let products: Array<Product> = [];
 
@@ -74,7 +72,7 @@ const categoryRows = computed((): Array<[number, string, Array<Array<Product>>]>
   return categories
 });
 
-const tab = ref(props.categories?.[0].id)
+const tab = ref<number>(props.categories[0].id)
 
 // bubble event to parent
 function productClicked(product: Product) {
@@ -84,7 +82,8 @@ function productClicked(product: Product) {
 
 <style scoped lang="scss">
 .selection-view {
-  min-height: calc(100vh - (v-bind(displayHeightPortrait) + v-bind(historyHeightPortrait)));
+  max-height: 100vh;
+  overflow-y: scroll;
 
   .row {
     margin-left: 0;
@@ -95,10 +94,28 @@ function productClicked(product: Product) {
 .tab-bar {
   border-top: 0.1rem solid var(--bs-dark);
   border-radius: 0;
-  position: relative;
+  position: sticky;
+  bottom: 0;
 
   .tab:not(:first-of-type) {
     border-left: 0.1em solid rgba(255, 255, 255, 0.3);
+  }
+
+  *:has(> .mdi-chevron-left),
+  *:has(> .mdi-chevron-right) {
+    background-color: var(--bs-dark-bg-subtle) !important;
+  }
+
+  :has(> .mdi-chevron-left) {
+    border-right: 1px solid var(--bs-dark);
+  }
+
+  :has(> .mdi-chevron-right) {
+    border-left: 1px solid var(--bs-dark);
+  }
+
+  *:has(> .tab) {
+    flex-wrap: wrap !important;
   }
 }
 </style>

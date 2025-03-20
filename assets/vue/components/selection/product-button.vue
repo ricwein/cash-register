@@ -3,7 +3,7 @@
     <div class="product-category mb-1 small badge">{{ categoryName }}</div>
     <span class="product-icon mt-auto fa-2xl" v-if="product.icon" :class="product.icon"></span>
     <div class="product-price mt-auto font-monospace badge">{{ NumberFormatter.format(product.price) }}</div>
-    <div class="product-name fw-medium h5 mb-0">{{ product.name }}</div>
+    <div class="product-name  fw-medium h5 mb-0">{{ product.name }}</div>
   </div>
 </template>
 
@@ -43,6 +43,12 @@ const categoryTextColor = computed(() => color.value.isLight() ? 'var(--bs-secon
 
   .product-category {
     color: v-bind(categoryTextColor);
+  }
+
+  .product-name {
+    font-size: calc(0.4rem + 0.8vw);
+    text-overflow: ellipsis;
+    overflow: hidden;
   }
 
   .product-price, .product-name, .product-icon {

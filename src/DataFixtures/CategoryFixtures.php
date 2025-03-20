@@ -13,12 +13,14 @@ class CategoryFixtures extends Fixture
         ['AfG', '#B39DDB'],
         ['Eisgetränke', '#283593'],
         ['Bier / Wein / Sekt', '#FBC02D'],
+        ['Pfand', '#FFF8E1'],
         ['Eis', '#4FC3F7'],
-        ['Speisen', '#8D6E63'],
+        ['Speisen', '#9E9D24'],
         ['Snacks', '#00E676'],
         ['Kuchen', '#FF80AB'],
         ['Grill', '#795548'],
         ['Tabak etc.', '#304FFE'],
+        ['Sonstiges', '#B0BEC5'],
     ];
 
     public function load(ObjectManager $manager): void

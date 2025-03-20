@@ -73,6 +73,7 @@ li {
 
   &:hover {
     outline: 1px solid black;
+    color: rgba(var(--bs-dark-rgb), 1.0);
     background-color: var(--bs-primary-bg-subtle);
   }
 

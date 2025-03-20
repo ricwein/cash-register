@@ -2,6 +2,7 @@
 
 namespace App\Controller\Admin;
 
+use App\Entity\IconField;
 use App\Entity\Product;
 use Doctrine\Bundle\DoctrineBundle\Registry;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
@@ -29,12 +30,12 @@ class ProductCrudController extends AbstractCrudController
     {
         return [
             IntegerField::new('priority'),
+            IconField::new('icon'),
             TextField::new('name'),
             AssociationField::new('event'),
             AssociationField::new('category'),
             MoneyField::new('price')->setCurrency('EUR')->setStoredAsCents(false),
             ColorField::new('color'),
-            TextField::new('icon'),
         ];
     }
 

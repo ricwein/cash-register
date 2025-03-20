@@ -1,7 +1,11 @@
 <template>
   <div class="history">
     <ul class="w-100 bg-light-subtle">
-      <receipt-row v-for="(product, index) in products.slice().reverse()" :product @removeArticle="$emit('removeArticle', index)"></receipt-row>
+      <receipt-row
+          v-for="(product, index) in products.slice().reverse()"
+          :product
+          @removeArticle="$emit('removeArticle', index)"
+      ></receipt-row>
     </ul>
   </div>
 </template>
@@ -18,6 +22,7 @@ defineProps({
 
 <style scoped lang="scss">
 .history {
+  background-color: var(--bs-white);
   height: calc(100vh - 10rem);
   border-top: 0.05em solid var(--bs-dark);
   overflow-y: scroll;

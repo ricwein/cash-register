@@ -5,7 +5,7 @@
       <receipt-side :products="cart" @removeArticle="removeArticleByIndex"></receipt-side>
       <div class="row action-button-row sticky-bottom">
         <backspace-button class="col" @backspaceClicked="cart.pop()"></backspace-button>
-        <confirm-button class="col" :price @registerConfirmed="showCheckout = true"></confirm-button>
+        <confirm-button class="col" :price @registerConfirmed="checkoutState.dispatch(CheckoutTransition.Start)"></confirm-button>
       </div>
     </div>
     <div class="products col">
@@ -15,18 +15,24 @@
   </div>
   <div v-else>
     <div class="sticky-top">
-      <number-display :price :displayHeightPortrait @registerConfirmed="showCheckout = true"></number-display>
+      <number-display :price :displayHeightPortrait @registerConfirmed="checkoutState.dispatch(CheckoutTransition.Start)"></number-display>
       <receipt :products="cart" :historyHeightPortrait @removeArticle="removeArticleByIndex" @backspaceClicked="cart.pop()"></receipt>
     </div>
     <product-selection-tabbed v-if="showCategoryTabs" :categories :displayHeightPortrait :historyHeightPortrait :gridWidthElements @product-clicked="product => cart.push(product)"></product-selection-tabbed>
     <product-selection v-else :categories :displayHeightPortrait :historyHeightPortrait :gridWidthElements @product-clicked="product => cart.push(product)"></product-selection>
   </div>
 
-  <checkout v-model="showCheckout" :price :cart :confirmEndpointUrl @checkoutCancelled="showCheckout = false" @createNewReceipt="cart = []"></checkout>
+  <checkout
+      v-model="checkoutState"
+      :price :cart :confirmEndpointUrl
+      @checkoutCancelled="checkoutState.dispatch(CheckoutTransition.Cancel)"
+      @createNewReceipt="cart = []"
+  ></checkout>
 </template>
 
 <script setup lang="ts">
-import {computed, type PropType, ref} from "vue";
+import {computed, type PropType, ref, shallowRef} from "vue";
+import {CheckoutStateMachine, CheckoutTransition} from "../../components/checkout-state-machine.ts";
 import Category from "../../model/category";
 import Product from "../../model/product";
 import NumberDisplay from "../components/receipt/display/number-display.vue";
@@ -48,7 +54,8 @@ const props = defineProps({
   useCategoryTabs: {type: Boolean, default: true},
 });
 
-const showCheckout = ref(false)
+const checkoutState = shallowRef<CheckoutStateMachine>(new CheckoutStateMachine())
+
 const cart = ref<Product[]>([]);
 const price = computed<number>(() => cart.value
     .map((product: Product) => product.price)

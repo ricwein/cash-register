@@ -6,3 +6,7 @@ body {
   left: 0.2em !important;
   top: 0.2em !important;
 }
+
+body, html {
+  background-color: var(--bs-dark);
+}

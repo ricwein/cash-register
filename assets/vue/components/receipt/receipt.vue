@@ -1,8 +1,12 @@
 <template>
   <div class="history d-flex justify-content-between">
-    <BackspaceButton @backspaceClicked="$emit('backspaceClicked')"></BackspaceButton>
+    <BackspaceButton class="sticky-top" @backspaceClicked="$emit('backspaceClicked')"></BackspaceButton>
     <ul class="w-100 bg-light-subtle">
-      <receipt-row v-for="(product, index) in products.slice().reverse()" :product @removeArticle="$emit('removeArticle', index)"></receipt-row>
+      <receipt-row
+          v-for="(product, index) in products.slice().reverse()"
+          :product
+          @removeArticle="$emit('removeArticle', index)"
+      ></receipt-row>
     </ul>
   </div>
 </template>
@@ -21,6 +25,7 @@ defineProps({
 
 <style scoped lang="scss">
 .history {
+  background-color: var(--bs-white);
   height: v-bind(historyHeightPortrait);
   border-top: 0.05em solid var(--bs-dark);
   border-bottom: 0.2rem solid var(--bs-dark);

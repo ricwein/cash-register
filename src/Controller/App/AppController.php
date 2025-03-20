@@ -94,6 +94,7 @@ class AppController extends AbstractController
                     ->setPrice($product->getPrice())
                     ->setQuantity($quantity)
                     ->setProductName($product->getName())
+                    ->setProductId($product->getId())
             );
         }
         $transaction->setPrice($price);
