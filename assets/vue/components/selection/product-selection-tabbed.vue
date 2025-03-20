@@ -3,7 +3,7 @@
     <v-tabs-window v-model="tab">
       <v-tabs-window-item v-for="[categoryId, categoryName, rows] in categoryRows" :value="categoryId">
         <div v-for="row in rows" class="row w-100 justify-content-start" :class="`row-cols-${gridWidthElements}`">
-          <ProductButton v-for="product in row" :category-name="categoryName" :product :gridWidthElements :gridHeightElements @product-clicked="productClicked"></ProductButton>
+          <ProductButton v-for="product in row" :category-name="categoryName" :product :gridWidthElements @product-clicked="productClicked"></ProductButton>
         </div>
       </v-tabs-window-item>
     </v-tabs-window>
@@ -34,10 +34,10 @@
 
 <script setup lang="ts">
 import ProductButton from "./product-button.vue";
-import Category from "../../model/category.ts";
+import Category from "../../../model/category.ts";
 import {computed, ref} from "vue";
-import type Product from "../../model/product.ts";
-import Color from "../../components/color.ts";
+import type Product from "../../../model/product.ts";
+import Color from "../../../components/color.ts";
 
 const emit = defineEmits(['product-clicked'])
 
@@ -46,7 +46,6 @@ const props = defineProps({
   displayHeightPortrait: String,
   historyHeightPortrait: String,
   gridWidthElements: Number,
-  gridHeightElements: Number,
 })
 
 const tabBarHeight = 60;
@@ -77,9 +76,7 @@ const categoryRows = computed((): Array<[number, string, Array<Array<Product>>]>
 
 const tab = ref(props.categories?.[0].id)
 
-/**
- * bubble event to parent
- */
+// bubble event to parent
 function productClicked(product: Product) {
   emit('product-clicked', product)
 }

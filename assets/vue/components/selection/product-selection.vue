@@ -1,16 +1,16 @@
 <template>
   <div class="selection-view w-100 bg-dark h-100">
     <div v-for="row in rows" class="d-flex row w-100 justify-content-start" :class="`row-cols-${gridWidthElements}`">
-      <ProductButton v-for="[categoryName, product] in row" :product :categoryName :gridWidthElements :gridHeightElements @product-clicked="productClicked"></ProductButton>
+      <product-button v-for="[categoryName, product] in row" :product :categoryName :gridWidthElements @product-clicked="productClicked"></product-button>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import ProductButton from "./product-button.vue";
-import Category from "../../model/category"
+import Category from "../../../model/category.ts"
 import {computed, type PropType} from "vue";
-import type Product from "../../model/product.ts";
+import type Product from "../../../model/product.ts";
 
 const emit = defineEmits(['product-clicked'])
 
@@ -19,7 +19,6 @@ const props = defineProps({
   displayHeightPortrait: String,
   historyHeightPortrait: String,
   gridWidthElements: Number,
-  gridHeightElements: Number,
 })
 
 const rows = computed((): Array<Array<[string, Product]>> => {

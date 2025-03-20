@@ -27,24 +27,25 @@
           </v-btn>
         </div>
       </template>
-      <h3 class="h3 text-center">{{ NumberFormatter.format(price ?? 0.0) }}</h3>
+      <h3 class="h3 text-center">{{ NumberFormatter.format(price) }}</h3>
     </v-card>
   </v-dialog>
 </template>
 
 <script setup lang="ts">
 import {ref} from "vue";
+import {toast} from "vue3-toastify";
 import Product from "../../model/product";
 import {NumberFormatter} from "../../components/number-formatter.ts";
-import {toast} from "vue3-toastify";
 
 const props = defineProps({
-  price: Number,
-  cart: Array<Product>,
-  showCheckout: Boolean,
+  price: {type: Number, required: true},
+  cart: {type: Array<Product>, required: true},
+  showCheckout: {type: Boolean, default: false},
+  confirmEndpointUrl: {type: String, required: true},
 })
 
-const createNewReceiptSignal = defineEmits(['create-new-receipt'])
+const emit = defineEmits(['create-new-receipt', 'checkout-cancelled'])
 
 const showPaymentSelection = ref<boolean>(false);
 const paymentType = ref<string>('');
@@ -57,7 +58,6 @@ function selectPaymentType(type: string): void {
 function processPayment(): void {
   let data: Record<number, number> = {};
 
-  /** @var {Product} product */
   for (const product of props.cart) {
     if (!data.hasOwnProperty(product.id)) {
       data[product.id] = 0;
@@ -65,8 +65,7 @@ function processPayment(): void {
     data[product.id]++;
   }
 
-  const endpointUrl = (props.confirmEndpointUrl ?? '')
-      .replaceAll("{{paymentType}}", paymentType.value)
+  const endpointUrl = props.confirmEndpointUrl.replace("{{paymentType}}", paymentType.value)
 
   fetch(endpointUrl, {
     method: 'PUT',
@@ -75,7 +74,7 @@ function processPayment(): void {
       .then(response => response.json())
       .then(response => {
         if (response.hasOwnProperty('success') && response.success) {
-          createNewReceiptSignal()
+          emit('create-new-receipt')
 
           toast.success('verarbeitet', {
             position: toast.POSITION.TOP_LEFT,
