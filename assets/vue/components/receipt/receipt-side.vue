@@ -2,7 +2,7 @@
   <div class="history">
     <ul class="w-100 bg-light-subtle">
       <receipt-row
-          v-for="(product, index) in products.slice().reverse()"
+          v-for="(product, index) in cart.slice().reverse()"
           :product
           @removeArticle="$emit('removeArticle', index)"
       ></receipt-row>
@@ -16,7 +16,7 @@ import type {PropType} from "vue";
 import ReceiptRow from "./receipt-row.vue";
 
 defineProps({
-  products: {type: Object as PropType<Array<Product>>, required: true},
+  cart: {type: Object as PropType<Array<Product>>, required: true},
 })
 </script>
 

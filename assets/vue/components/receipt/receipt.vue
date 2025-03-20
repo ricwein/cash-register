@@ -3,7 +3,7 @@
     <BackspaceButton class="sticky-top" @backspaceClicked="$emit('backspaceClicked')"></BackspaceButton>
     <ul class="w-100 bg-light-subtle">
       <receipt-row
-          v-for="(product, index) in products.slice().reverse()"
+          v-for="(product, index) in cart.slice().reverse()"
           :product
           @removeArticle="$emit('removeArticle', index)"
       ></receipt-row>
@@ -19,7 +19,7 @@ import ReceiptRow from "./receipt-row.vue";
 
 defineProps({
   historyHeightPortrait: String,
-  products: {type: Object as PropType<Array<Product>>, required: true},
+  cart: {type: Object as PropType<Array<Product>>, required: true},
 })
 </script>
 

@@ -1,8 +1,8 @@
 <template>
   <div
       class="confirm bg-primary d-flex align-items-center flex-column justify-content-around"
-      :class="{disabled: price <= 0}"
-      @click="price > 0.0 && $emit('registerConfirmed')"
+      :class="{disabled: cart.length <= 0}"
+      @click="cart.length > 0 && $emit('registerConfirmed')"
   >
     <span class="fa-solid fa-cash-register fa-2xl mt-3"></span>
     <span>quittieren</span>
@@ -10,8 +10,10 @@
 </template>
 
 <script setup lang="ts">
+import type Product from "../../../../model/product.ts";
+
 defineProps({
-  price: {type: Number, required: true},
+  cart: {type: Array<Product>, required: true},
 })
 </script>
 

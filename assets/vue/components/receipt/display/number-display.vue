@@ -1,16 +1,18 @@
 <template>
   <div class="w-100 bg-white display-container d-flex justify-content-end">
     <span class="display">{{ NumberFormatter.format(price) }}</span>
-    <confirm-button :price @registerConfirmed="$emit('registerConfirmed')"></confirm-button>
+    <confirm-button :cart @registerConfirmed="$emit('registerConfirmed')"></confirm-button>
   </div>
 </template>
 
 <script setup lang="ts">
 import {NumberFormatter} from "../../../../components/number-formatter.ts";
 import ConfirmButton from "../buttons/confirm-button.vue";
+import type Product from "../../../../model/product.ts";
 
 defineProps({
   price: {type: Number, required: true},
+  cart: {type: Array<Product>, required: true},
   displayHeightPortrait: String,
 })
 </script>

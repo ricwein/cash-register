@@ -7,6 +7,7 @@ use App\Entity\Product;
 use Doctrine\Bundle\DoctrineBundle\Registry;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
+use EasyCorp\Bundle\EasyAdminBundle\Config\Assets;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Context\AdminContext;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
@@ -68,5 +69,10 @@ class ProductCrudController extends AbstractCrudController
         $entityManager?->flush();
 
         return $this->redirectToRoute('admin_product_edit', ['entityId' => $clone->getId()]);
+    }
+
+    public function configureAssets(Assets $assets): Assets
+    {
+        return $assets->addWebpackEncoreEntry('admin');
     }
 }

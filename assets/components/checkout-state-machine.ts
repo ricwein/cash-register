@@ -5,6 +5,7 @@ export const enum CheckoutTransition {
     Cancel = 'cancel',
     Cash = 'cash',
     Card = 'card',
+    Skip = 'skip',
     Error = 'error',
     Success = 'success',
     Execute = 'execute',
@@ -37,6 +38,7 @@ export class CheckoutStateMachine {
         [CheckoutTransition.Cancel]: [],
         [CheckoutTransition.Cash]: [],
         [CheckoutTransition.Card]: [],
+        [CheckoutTransition.Skip]: [],
         [CheckoutTransition.Error]: [],
         [CheckoutTransition.Success]: [],
         [CheckoutTransition.Execute]: [],
@@ -52,6 +54,7 @@ export class CheckoutStateMachine {
             [CheckoutTransition.Cancel]: () => CheckoutState.Off,
             [CheckoutTransition.Cash]: () => CheckoutState.Calculator,
             [CheckoutTransition.Card]: () => CheckoutState.Confirm,
+            [CheckoutTransition.Skip]: () => CheckoutState.Sending,
         },
         [CheckoutState.Calculator]: {
             [CheckoutTransition.Execute]: () => CheckoutState.Sending,

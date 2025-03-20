@@ -11,21 +11,58 @@
         title="Zahlung bestätigen"
     >
       <div class="v-card-text">Beleg bestätigen und zur Zahlung fortfahren?</div>
-      <h3 class="h3 text-center">{{ NumberFormatter.format(price) }}</h3>
+      <price-badge :price></price-badge>
+
       <template v-slot:actions>
         <div class="d-flex w-100">
-          <v-btn @click="checkoutState.dispatch(CheckoutTransition.Cash)" class="me-3 h-auto btn btn-outline-success p-3">
-            <i class="fa-solid fa-xl fa-money-bill-wave"></i>
-            Bar
-          </v-btn>
-
-          <v-btn @click="checkoutState.dispatch(CheckoutTransition.Card)" class="h-auto btn btn-outline-success p-3">
-            <i class="fa-solid fa-xl fa-credit-card"></i>
-            Karte
-          </v-btn>
-
-          <v-btn @click="checkoutState.dispatch(CheckoutTransition.Cancel)" class="ms-auto h-auto btn btn-danger p-3">
+          <v-btn @click="checkoutState.dispatch(CheckoutTransition.Cancel)" class="me-auto h-auto btn btn-danger p-3">
             Abbrechen
+          </v-btn>
+
+          <div v-if="price > 0.00">
+            <v-btn @click="checkoutState.dispatch(CheckoutTransition.Cash)" class="me-3 h-auto btn btn-success p-3">
+              <i class="fa-solid fa-xl fa-money-bill-wave"></i>
+              Bar
+            </v-btn>
+
+            <v-btn @click="checkoutState.dispatch(CheckoutTransition.Card)" class="h-auto btn btn-success p-3">
+              <i class="fa-solid fa-xl fa-credit-card"></i>
+              Karte
+            </v-btn>
+          </div>
+          <div v-else>
+            <v-btn @click="checkoutState.dispatch(CheckoutTransition.Skip)" class="h-auto btn btn-success p-3">
+              <i class="fa-solid fa-xl fa-check"></i>
+              Bestätigen
+            </v-btn>
+          </div>
+        </div>
+      </template>
+    </v-card>
+  </v-dialog>
+
+  <!-- confirm payment-with-cash dialog -->
+  <v-dialog
+      v-model="showDialogCalculator"
+      width="auto"
+      min-width="50%"
+      persistent
+  >
+    <v-card
+        prepend-icon="mdi-cash-multiple"
+        title="Barzahlung bestätigen"
+    >
+      <price-badge :price></price-badge>
+
+      <template v-slot:actions>
+        <div class="d-flex w-100">
+          <v-btn @click="checkoutState.dispatch(CheckoutTransition.Cancel)" class="me-auto h-auto btn btn-danger p-3">
+            Abbrechen
+          </v-btn>
+
+          <v-btn @click="checkoutState.dispatch(CheckoutTransition.Execute)" class="me-3 h-auto btn btn-success p-3">
+            <i class="fa-solid fa-xl fa-credit-card"></i>
+            Fortfahren
           </v-btn>
         </div>
       </template>
@@ -43,15 +80,17 @@
         prepend-icon="mdi-check-all"
         title="Kartenzahlung bestätigen"
     >
+      <price-badge :price></price-badge>
+
       <template v-slot:actions>
         <div class="d-flex w-100">
-          <v-btn @click="checkoutState.dispatch(CheckoutTransition.Execute)" class="me-3 h-auto btn btn-success p-3">
-            <i class="fa-solid fa-xl fa-money-bill-wave"></i>
-            Fortfahren
+          <v-btn @click="checkoutState.dispatch(CheckoutTransition.Cancel)" class="me-auto h-auto btn btn-danger p-3">
+            Abbrechen
           </v-btn>
 
-          <v-btn @click="checkoutState.dispatch(CheckoutTransition.Cancel)" class="ms-auto h-auto btn btn-danger p-3">
-            Abbrechen
+          <v-btn @click="checkoutState.dispatch(CheckoutTransition.Execute)" class="me-3 h-auto btn btn-success p-3">
+            <i class="fa-solid fa-xl fa-credit-card"></i>
+            Fortfahren
           </v-btn>
         </div>
       </template>
@@ -62,11 +101,12 @@
 <script setup lang="ts">
 import {computed, ref} from "vue";
 import {toast} from "vue3-toastify";
-import {CheckoutState, CheckoutStateMachine, CheckoutTransition} from "../../components/checkout-state-machine.ts";
-import Product from "../../model/product";
-import {NumberFormatter} from "../../components/number-formatter.ts";
+import {CheckoutState, CheckoutStateMachine, CheckoutTransition, type StateChange} from "../../../components/checkout-state-machine.ts";
+import Product from "../../../model/product.ts";
+import {NumberFormatter} from "../../../components/number-formatter.ts";
+import PriceBadge from "./price-badge.vue";
 
-const paymentType = ref<string>('');
+const paymentType = ref<string>('none');
 
 const emit = defineEmits(['create-new-receipt', 'checkout-cancelled'])
 const checkoutState = defineModel<CheckoutStateMachine>({required: true})
@@ -78,12 +118,11 @@ checkoutState.value
         paymentType.value = 'card'
       } else if (change.transition === CheckoutTransition.Cash) {
         paymentType.value = 'cash'
+      } else if (change.transition === CheckoutTransition.Skip) {
+        paymentType.value = 'none'
       }
     })
-    .addCallback(CheckoutState.Sending, () => {
-      processPayment()
-    })
-;
+    .addCallback(CheckoutState.Sending, processPayment);
 
 // setup vue component
 const props = defineProps({
@@ -96,7 +135,7 @@ const showDialogCheck = computed<boolean>(() => checkoutState.value.currentState
 const showDialogCalculator = computed<boolean>(() => checkoutState.value.currentState() === CheckoutState.Calculator)
 const showDialogConfirmation = computed<boolean>(() => checkoutState.value.currentState() === CheckoutState.Confirm)
 
-function processPayment(): void {
+function processPayment(changes: StateChange): void {
   let data: Record<number, number> = {};
 
   for (const product of props.cart) {

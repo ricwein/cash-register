@@ -2,10 +2,10 @@
   <div v-if="useLandscapeMode" class="row w-100">
     <div class="receipt col-lg-4 col-md-5 col-sm-5">
       <number-display-side class="sticky-top" :price></number-display-side>
-      <receipt-side :products="cart" @removeArticle="removeArticleByIndex"></receipt-side>
+      <receipt-side :cart @removeArticle="removeArticleByIndex"></receipt-side>
       <div class="row action-button-row sticky-bottom">
         <backspace-button class="col" @backspaceClicked="cart.pop()"></backspace-button>
-        <confirm-button class="col" :price @registerConfirmed="checkoutState.dispatch(CheckoutTransition.Start)"></confirm-button>
+        <confirm-button class="col" :cart @registerConfirmed="checkoutState.dispatch(CheckoutTransition.Start)"></confirm-button>
       </div>
     </div>
     <div class="products col">
@@ -15,8 +15,8 @@
   </div>
   <div v-else>
     <div class="sticky-top">
-      <number-display :price :displayHeightPortrait @registerConfirmed="checkoutState.dispatch(CheckoutTransition.Start)"></number-display>
-      <receipt :products="cart" :historyHeightPortrait @removeArticle="removeArticleByIndex" @backspaceClicked="cart.pop()"></receipt>
+      <number-display :price :cart :displayHeightPortrait @registerConfirmed="checkoutState.dispatch(CheckoutTransition.Start)"></number-display>
+      <receipt :cart :historyHeightPortrait @removeArticle="removeArticleByIndex" @backspaceClicked="cart.pop()"></receipt>
     </div>
     <product-selection-tabbed v-if="showCategoryTabs" :categories :displayHeightPortrait :historyHeightPortrait :gridWidthElements @product-clicked="product => cart.push(product)"></product-selection-tabbed>
     <product-selection v-else :categories :displayHeightPortrait :historyHeightPortrait :gridWidthElements @product-clicked="product => cart.push(product)"></product-selection>
@@ -43,7 +43,7 @@ import ConfirmButton from "../components/receipt/buttons/confirm-button.vue";
 import BackspaceButton from "../components/receipt/buttons/backspace-button.vue";
 import ProductSelection from "../components/selection/product-selection.vue";
 import ProductSelectionTabbed from "../components/selection/product-selection-tabbed.vue";
-import Checkout from "../components/checkout.vue";
+import Checkout from "../components/checkout/checkout.vue";
 
 const props = defineProps({
   confirmEndpointUrl: {type: String, required: true},

@@ -13,7 +13,6 @@ import './scripts/setup-bootstrap';
 
 import './styles/app.scss';
 
-
 registerVueControllerComponents(require.context('./vue/controllers', true, /\.vue$/));
 document.addEventListener('vue:before-mount', (event) => {
     const {app} = event.detail;
