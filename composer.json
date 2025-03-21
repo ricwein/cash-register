@@ -9,6 +9,7 @@
     "ext-ctype": "*",
     "ext-iconv": "*",
     "ext-intl": "*",
+    "beberlei/doctrineextensions": "^1.5",
     "doctrine/dbal": "^4.2.3",
     "doctrine/doctrine-bundle": "^2.13.2",
     "doctrine/doctrine-migrations-bundle": "^3.4.1",

@@ -1,7 +1,7 @@
 <template>
   <div
-      class="confirm bg-primary d-flex align-items-center flex-column justify-content-around"
-      :class="{disabled: cart.length <= 0}"
+      class="checkout-button bg-primary d-flex align-items-center flex-column justify-content-around"
+      :class="{'disabled': cart.length <= 0}"
       @click="cart.length > 0 && $emit('registerConfirmed')"
   >
     <span class="fa-solid fa-cash-register fa-2xl mt-3"></span>
@@ -18,7 +18,7 @@ defineProps({
 </script>
 
 <style scoped lang="scss">
-.confirm {
+.checkout-button {
   border-left: 0.05em solid var(--bs-dark);
   width: 10vw;
 
@@ -26,7 +26,7 @@ defineProps({
     cursor: pointer;
 
     &:active, &:focus, &:hover {
-      background-color: var(--bs-danger) !important;
+      background-color: var(--bs-info) !important;
     }
   }
 

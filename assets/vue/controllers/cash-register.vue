@@ -4,8 +4,8 @@
       <number-display-side class="sticky-top" :price></number-display-side>
       <receipt-side :cart @removeArticle="removeArticleByIndex"></receipt-side>
       <div class="row action-button-row sticky-bottom">
-        <backspace-button class="col" @backspaceClicked="cart.pop()"></backspace-button>
-        <confirm-button class="col" :cart @registerConfirmed="checkoutState.dispatch(CheckoutTransition.Start)"></confirm-button>
+        <backspace-button class="col" @backspaceClicked="cart.pop()" @createNewReceipt="reset"></backspace-button>
+        <checkout-button class="col" :cart @registerConfirmed="checkoutState.dispatch(CheckoutTransition.Start)"></checkout-button>
       </div>
     </div>
     <div class="products col">
@@ -16,7 +16,7 @@
   <div v-else>
     <div class="sticky-top">
       <number-display :price :cart :displayHeightPortrait @registerConfirmed="checkoutState.dispatch(CheckoutTransition.Start)"></number-display>
-      <receipt :cart :historyHeightPortrait @removeArticle="removeArticleByIndex" @backspaceClicked="cart.pop()"></receipt>
+      <receipt :cart :historyHeightPortrait @removeArticle="removeArticleByIndex" @backspaceClicked="cart.pop()" @createNewReceipt="reset"></receipt>
     </div>
     <product-selection-tabbed v-if="showCategoryTabs" :categories :displayHeightPortrait :historyHeightPortrait :gridWidthElements @product-clicked="product => cart.push(product)"></product-selection-tabbed>
     <product-selection v-else :categories :displayHeightPortrait :historyHeightPortrait :gridWidthElements @product-clicked="product => cart.push(product)"></product-selection>
@@ -26,7 +26,7 @@
       v-model="checkoutState"
       :price :cart :confirmEndpointUrl
       @checkoutCancelled="checkoutState.dispatch(CheckoutTransition.Cancel)"
-      @createNewReceipt="cart = []"
+      @createNewReceipt="reset"
   ></checkout>
 </template>
 
@@ -39,7 +39,7 @@ import NumberDisplay from "../components/receipt/display/number-display.vue";
 import NumberDisplaySide from "../components/receipt/display/number-display-side.vue";
 import Receipt from "../components/receipt/receipt.vue";
 import ReceiptSide from "../components/receipt/receipt-side.vue";
-import ConfirmButton from "../components/receipt/buttons/confirm-button.vue";
+import CheckoutButton from "../components/receipt/buttons/checkout-button.vue";
 import BackspaceButton from "../components/receipt/buttons/backspace-button.vue";
 import ProductSelection from "../components/selection/product-selection.vue";
 import ProductSelectionTabbed from "../components/selection/product-selection-tabbed.vue";
@@ -71,6 +71,10 @@ const historyHeightPortrait = props.useLandscapeMode ? '0' : '7rem'
 function removeArticleByIndex(index: number): void {
   const normalizedIndex: number = (cart.value.length - 1) - index;
   cart.value.splice(normalizedIndex, 1)
+}
+
+function reset() {
+  cart.value = []
 }
 </script>
 

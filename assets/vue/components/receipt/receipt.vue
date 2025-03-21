@@ -1,6 +1,6 @@
 <template>
   <div class="history d-flex justify-content-between">
-    <BackspaceButton class="sticky-top" @backspaceClicked="$emit('backspaceClicked')"></BackspaceButton>
+    <backspace-button class="sticky-top" @backspaceClicked="$emit('backspaceClicked')" @createNewReceipt="$emit('create-new-receipt')"></backspace-button>
     <ul class="w-100 bg-light-subtle">
       <receipt-row
           v-for="(product, index) in cart.slice().reverse()"

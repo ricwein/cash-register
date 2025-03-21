@@ -6,6 +6,7 @@ export const enum CheckoutTransition {
     Cash = 'cash',
     Card = 'card',
     Skip = 'skip',
+    Back = 'back',
     Error = 'error',
     Success = 'success',
     Execute = 'execute',
@@ -39,6 +40,7 @@ export class CheckoutStateMachine {
         [CheckoutTransition.Cash]: [],
         [CheckoutTransition.Card]: [],
         [CheckoutTransition.Skip]: [],
+        [CheckoutTransition.Back]: [],
         [CheckoutTransition.Error]: [],
         [CheckoutTransition.Success]: [],
         [CheckoutTransition.Execute]: [],
@@ -58,10 +60,12 @@ export class CheckoutStateMachine {
         },
         [CheckoutState.Calculator]: {
             [CheckoutTransition.Execute]: () => CheckoutState.Sending,
+            [CheckoutTransition.Back]: () => CheckoutState.Check,
             [CheckoutTransition.Cancel]: () => CheckoutState.Off,
         },
         [CheckoutState.Confirm]: {
             [CheckoutTransition.Execute]: () => CheckoutState.Sending,
+            [CheckoutTransition.Back]: () => CheckoutState.Check,
             [CheckoutTransition.Cancel]: () => CheckoutState.Off,
         },
         [CheckoutState.Sending]: {
@@ -114,7 +118,5 @@ export class CheckoutStateMachine {
         this.callbacks[this.state.value].forEach(callback => callback(change))
         this.callbacks[transition].forEach(callback => callback(change))
         this.anywayCallbacks.forEach(callback => callback(change))
-
-        console.debug('[CheckoutState] transitioned', change)
     }
 }

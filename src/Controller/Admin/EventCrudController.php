@@ -37,10 +37,8 @@ class EventCrudController extends AbstractCrudController
     public function configureActions(Actions $actions): Actions
     {
         return $actions
-            ->add(
-                Crud::PAGE_INDEX,
-                Action::new('clone')->linkToCrudAction('cloneAction')
-            );
+            /** {@see self::cloneAction()} */
+            ->add(Crud::PAGE_INDEX, Action::new('clone')->linkToCrudAction('cloneAction'));
     }
 
     /**
