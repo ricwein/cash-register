@@ -26,17 +26,17 @@ class WebManifestController extends AbstractController
             'short_name' => $this->translator->trans('Cash Register'),
             'name' => $this->translator->trans('Cash Register'),
             'description' => $this->translator->trans('Cash Register') . ' | GeyserHaus',
-            "icons" => [[
-                "src" => "/favicon.svg",
-                "type" => "image/svg+xml",
-                "sizes" => "256x256"
+            'icons' => [[
+                "src" => '/favicon.svg',
+                "type" => 'image/svg+xml',
+                "sizes" => '256x256'
             ]],
             'id' => $this->generateUrl('redirect_to_admin'),
-            'start_url' => "/",
-            'background_color' => "#ffffff",
-            'display' => "fullscreen",
-            'scope' => "/",
-            'theme_color' => "#000000",
+            'start_url' => '/',
+            'background_color' => '#ffffff',
+            'display' => 'standalone',
+            'scope' => '/',
+            'theme_color' => '#000000',
             'shortcuts' => array_map(fn(Event $event) => [
                 'name' => $event->getName(),
                 'short_name' => $this->translator->trans('Cash Register') . ' ' . $event->getId(),
