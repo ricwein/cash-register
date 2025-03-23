@@ -22,6 +22,7 @@ Encore
      */
     .addEntry('app', './assets/app.js')
     .addEntry('admin', './assets/admin.js')
+    .addEntry('pdf', './assets/pdf.js')
 
     // When enabled, Webpack "splits" your files into smaller pieces for greater optimization.
     .splitEntryChunks()
@@ -65,7 +66,11 @@ Encore
     })
 
     // enables Sass/SCSS support
-    .enableSassLoader()
+    .enableSassLoader((options) => {
+        options.sassOptions = {
+            quietDeps: true, // disable warning msg
+        }
+    })
 
     // uncomment if you use TypeScript
     .enableTypeScriptLoader()

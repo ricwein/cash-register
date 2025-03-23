@@ -29,7 +29,7 @@ class Event implements Stringable
     /**
      * @var Collection<int, Product>
      */
-    #[ORM\OneToMany(targetEntity: Product::class, mappedBy: 'event', cascade: ['persist'], orphanRemoval: true)]
+    #[ORM\ManyToMany(targetEntity: Product::class, mappedBy: 'events', cascade: ['persist'], orphanRemoval: true)]
     private Collection $products;
 
     #[ORM\Column]
@@ -91,7 +91,7 @@ class Event implements Stringable
     {
         if (!$this->products->contains($product)) {
             $this->products->add($product);
-            $product->setEvent($this);
+            $product->addEvent($this);
         }
 
         return $this;
@@ -100,10 +100,7 @@ class Event implements Stringable
     public function removeProduct(Product $product): static
     {
         if ($this->products->removeElement($product)) {
-            // set the owning side to null (unless already changed)
-            if ($product->getEvent() === $this) {
-                $product->setEvent(null);
-            }
+            $product->removeEvent($this);
         }
 
         return $this;
@@ -125,5 +122,4 @@ class Event implements Stringable
 
         return $this;
     }
-
 }

@@ -1,0 +1,83 @@
+@page {
+  margin: 0;
+}
+
+body {
+  margin: 1.5cm;
+
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  font-size: 1em;
+
+  .page {
+    page-break-after: always;
+
+    &:last-of-type {
+      page-break-after: avoid;
+    }
+  }
+
+  .mt-3 {
+    margin-top: 0.5em;
+  }
+
+  .card {
+    border: 1px solid lightgrey;
+    border-radius: 0.2em;
+
+    &, * {
+      margin: 0;
+    }
+
+    .card-header {
+      background-color: lightgrey;
+
+      .card-title {
+        padding: 0.5em;
+      }
+    }
+
+    .card-body {
+      padding: 0.5em;
+    }
+  }
+
+  table.table {
+    border-collapse: collapse;
+    width: 100%;
+
+    thead {
+      tr {
+        td, th {
+          padding: 0.5em;
+          background-color: darkgrey;
+          border-bottom: 2px solid black;
+          text-align: left;
+        }
+      }
+    }
+
+    tbody {
+      tr {
+        td, th {
+          padding: 0.2em;
+          text-align: left;
+          border-bottom: 1px solid rgba(0, 0, 0, 0.2);
+        }
+      }
+
+      tr:last-of-type {
+        td, th {
+          border-bottom: none !important;
+        }
+      }
+    }
+
+    tfoot {
+      tr:first-of-type {
+        td, th {
+          border-top: 1px solid black;
+        }
+      }
+    }
+  }
+}

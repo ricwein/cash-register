@@ -24,24 +24,24 @@
           </v-btn>
 
           <div v-if="price > 0.00">
-            <v-btn @click="checkoutState.dispatch(CheckoutTransition.Cash)" class="me-3 h-auto btn btn-success p-3">
+            <v-btn @click="checkoutState.dispatch(CheckoutTransition.Cash, 'cash')" class="me-3 h-auto btn btn-success p-3">
               <i class="fa-solid fa-xl fa-money-bill-wave"></i>
               Bar
             </v-btn>
 
-            <v-btn @click="checkoutState.dispatch(CheckoutTransition.Card)" class="h-auto btn btn-success p-3">
+            <v-btn @click="checkoutState.dispatch(CheckoutTransition.Card, 'card')" class="h-auto btn btn-success p-3">
               <i class="fa-solid fa-xl fa-credit-card"></i>
               Karte
             </v-btn>
           </div>
           <div v-else-if="price < 0.00">
-            <v-btn @click="checkoutState.dispatch(CheckoutTransition.Skip)" class="h-auto btn btn-success p-3">
+            <v-btn @click="checkoutState.dispatch(CheckoutTransition.Skip, 'cash')" class="h-auto btn btn-success p-3">
               <i class="fa-xl mdi mdi-hand-coin"></i>
               Betrag Auszahlen
             </v-btn>
           </div>
           <div v-else>
-            <v-btn @click="checkoutState.dispatch(CheckoutTransition.Skip)" class="h-auto btn btn-success p-3">
+            <v-btn @click="checkoutState.dispatch(CheckoutTransition.Skip, 'none')" class="h-auto btn btn-success p-3">
               <i class="fa-solid fa-xl fa-check"></i>
               Bestätigen
             </v-btn>
@@ -160,22 +160,12 @@ import Product from "../../../model/product.ts";
 import {NumberFormatter} from "../../../components/number-formatter.ts";
 import PriceBadge from "./price-badge.vue";
 
-const paymentType = ref<string>('none');
-
 const emit = defineEmits(['create-new-receipt', 'checkout-cancelled'])
 const checkoutState = defineModel<CheckoutStateMachine>({required: true})
 
 // setup state-machine callbacks
 checkoutState.value
-    .addCallback(null, change => {
-      if (change.transition === CheckoutTransition.Card) {
-        paymentType.value = 'card'
-      } else if (change.transition === CheckoutTransition.Cash) {
-        paymentType.value = 'cash'
-      } else if (change.transition === CheckoutTransition.Skip) {
-        paymentType.value = 'none'
-      }
-    })
+    .addCallback(null, () => changeField.value = '0,00')
     .addCallback(CheckoutTransition.Cash, () => setTimeout(() => document.getElementById('calculatorInput')?.focus(), 200))
     .addCallback(CheckoutState.Sending, processPayment);
 
@@ -205,6 +195,7 @@ function updateChangeMoney(event: Event): void {
 }
 
 function processPayment(changes: StateChange): void {
+  const paymentType: string = changes.storage ?? 'none'
   let data: Record<number, number> = {};
 
   for (const product of props.cart) {
@@ -214,7 +205,7 @@ function processPayment(changes: StateChange): void {
     data[product.id]++;
   }
 
-  const endpointUrl = decodeURI(props.confirmEndpointUrl ?? '').replace("{{paymentType}}", paymentType.value)
+  const endpointUrl = decodeURI(props.confirmEndpointUrl ?? '').replace("{{paymentType}}", paymentType)
 
   fetch(endpointUrl, {
     method: 'PUT',

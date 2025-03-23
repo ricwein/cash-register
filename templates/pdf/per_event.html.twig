@@ -1,0 +1,47 @@
+{# @var \App\Model\ReceiptArticle[] articles #}
+{% extends 'pdf/base.html.twig' %}
+
+{% block size %}{{ size.size }} {{ size.orientation }}{% endblock %}
+
+{% block body %}
+    {% for eventName, eventArticle in articles %}
+        <div class="page">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="card-title">{{ eventName }}</h4>
+                </div>
+                <div class="card-body">
+                    {% if filter.toDate is not null %}
+                        Verkäufe vom <strong>{{ filter.fromDate|date('d.m.Y') }}</strong> bis zum <strong>{{ filter.toDate|date('d.m.Y') }}</strong>.
+                    {% else %}
+                        Verkäufe am <strong>{{ filter.fromDate|date('d.m.Y') }}</strong>.
+                    {% endif %}
+                </div>
+            </div>
+            <table class="table mt-3">
+                <thead>
+                <tr>
+                    <th>{{ 'Product Name'|trans }}</th>
+                    <th>{{ 'Quantity'|trans }}</th>
+                    <th>{{ 'Price Sum'|trans }}</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for article in eventArticle %}
+                    <tr>
+                        <th>{{ article.name }}</th>
+                        <td>{{ article.quantity }}</td>
+                        <td>{{ article.price | number_format(2,',','.') }} €</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+                <tfoot>
+                <tr>
+                    <td colspan="2"></td>
+                    <th>{{ eventArticle | reduce((carry, article) => carry + article.price, 0.0) | number_format(2,',','.') }} €</th>
+                </tr>
+                </tfoot>
+            </table>
+        </div>
+    {% endfor %}
+{% endblock %}

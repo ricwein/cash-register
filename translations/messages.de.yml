@@ -7,25 +7,28 @@ Is On: Aktiv
 Description: Beschreibung
 
 Category: Kategorie
-Event: Veranstaltung
-Product: Produkt
+Event: Veranstaltung/Kasse
+Product: Artikel
 Transactions: Verkäufe
 PurchaseTransaction: Verkäufe
+Receipt: Beleg
 
 Event Name: Veranstaltung
-Product Name: Produkt
+Product Name: Artikel
 Price Per Item: Preis
-Price Sum: Preis gesamt
+Payment Type: Zahlart
+Price Sum: Einnahme gesamt
 Quantity: Anzahl
 Created At: Erstellt am
-Products Per Row: Produkte p. Zeile
+Products Per Row: Artikel p. Zeile
 Use Category Tabs: Kategorien als Tabs
 Transaction Id: Beleg ID
+Open Register: Kasse öffnen
 
 Dashboard: Dashboard
 Management: Verwaltung
 Register: Kasse
-Products: Produkte
+Products: Artikel
 Events: Veranstaltungen
 Export Receipts: Belege exportieren
 Categories: Kategorien
@@ -36,3 +39,11 @@ Clone: Kopieren
 CARD: KARTE
 CASH: BAR
 NONE: –
+PER_EVENT: pro Veranstaltung/Kasse
+ACCUMULATED: Zusammengefasst
+
+From date: Datum
+To date: bis Datum
+Export type: Export-Art
+generate receipt PDF: Beleg-PDF exportieren
+Sold articles: Verkaufte Artikel

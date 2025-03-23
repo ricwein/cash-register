@@ -12,7 +12,7 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Uid\Uuid;
 
 #[ORM\Entity(repositoryClass: PurchaseTransactionRepository::class)]
-#[ORM\Index(columns: ['created_at'])]
+#[ORM\Index(columns: ['created_at', 'event_name'])]
 class PurchaseTransaction
 {
     #[ORM\Id]
@@ -79,6 +79,12 @@ class PurchaseTransaction
     public function getCreatedAt(): DateTimeImmutable
     {
         return $this->createdAt;
+    }
+
+    public function setCreatedAt(DateTimeImmutable $createdAt): static
+    {
+        $this->createdAt = $createdAt;
+        return $this;
     }
 
     public function getPrice(): string

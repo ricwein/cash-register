@@ -1,3 +1,15 @@
+@use '@mdi/font';
+@use "@fortawesome/fontawesome-free/scss/fontawesome";
+@use "@fortawesome/fontawesome-free/scss/regular";
+@use "@fortawesome/fontawesome-free/scss/solid";
+@use "@fortawesome/fontawesome-free/scss/brands";
+@use 'bootstrap';
+
+* {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
 body, html {
   background-color: var(--bs-dark);
 }

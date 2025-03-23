@@ -28,8 +28,8 @@ class CategoryRepository extends ServiceEntityRepository
             ->addSelect('product');
 
         $queryBuilder
-            ->where('product.event = :eventId')
-            ->setParameter('eventId', $event->getId());
+            ->where(':event MEMBER OF product.events')
+            ->setParameter('event', $event);
 
         $queryBuilder
             ->orderBy('category.priority', 'ASC')

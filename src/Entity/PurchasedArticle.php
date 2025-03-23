@@ -7,6 +7,7 @@ use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: PurchasedArticleRepository::class)]
+#[ORM\Index(columns: ['product_id'])]
 class PurchasedArticle
 {
     #[ORM\Id]

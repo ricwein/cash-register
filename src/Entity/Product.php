@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\ProductRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -32,9 +34,16 @@ class Product
     #[ORM\ManyToOne(inversedBy: 'products')]
     private ?Category $category = null;
 
-    #[ORM\ManyToOne(inversedBy: 'products')]
-    #[ORM\JoinColumn(nullable: false)]
-    private ?Event $event = null;
+    /**
+     * @var Collection<int, Event>
+     */
+    #[ORM\ManyToMany(targetEntity: Event::class, inversedBy: 'products')]
+    private Collection $events;
+
+    public function __construct()
+    {
+        $this->events = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -112,14 +121,26 @@ class Product
         return $this;
     }
 
-    public function getEvent(): ?Event
+    /**
+     * @return Collection<int, Event>
+     */
+    public function getEvents(): Collection
     {
-        return $this->event;
+        return $this->events;
     }
 
-    public function setEvent(?Event $event): static
+    public function addEvent(Event $event): static
     {
-        $this->event = $event;
+        if (!$this->events->contains($event)) {
+            $this->events->add($event);
+        }
+
+        return $this;
+    }
+
+    public function removeEvent(Event $event): static
+    {
+        $this->events->removeElement($event);
 
         return $this;
     }

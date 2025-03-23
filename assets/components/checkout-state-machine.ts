@@ -21,13 +21,14 @@ export const enum CheckoutState {
     Failed = 'failed',
 }
 
-export type StateChange = { fromState: CheckoutState, transition: CheckoutTransition, toState: CheckoutState }
+export type StateChange = { fromState: CheckoutState, transition: CheckoutTransition, toState: CheckoutState, storage: any | null }
 type TransitionAction = (() => CheckoutState)
 type StateChangeCallback = (change: StateChange) => void
 type StateChangeTrigger = CheckoutTransition | CheckoutState
 
 export class CheckoutStateMachine {
     private state = ref<CheckoutState>(CheckoutState.Off)
+    private anywayCallbacks: StateChangeCallback[] = [];
     private callbacks: Record<StateChangeTrigger, StateChangeCallback[]> = {
         [CheckoutState.Off]: [],
         [CheckoutState.Check]: [],
@@ -45,7 +46,7 @@ export class CheckoutStateMachine {
         [CheckoutTransition.Success]: [],
         [CheckoutTransition.Execute]: [],
     };
-    private anywayCallbacks: StateChangeCallback[] = [];
+    private storage: any | null = null
 
     private transitions: Record<CheckoutState, Partial<Record<CheckoutTransition, TransitionAction>>> = {
         [CheckoutState.Off]: {
@@ -101,7 +102,7 @@ export class CheckoutStateMachine {
         return this.current().value
     }
 
-    public dispatch(transition: CheckoutTransition): void {
+    public dispatch(transition: CheckoutTransition, storage: any | null | undefined = undefined): void {
         const action: TransitionAction | undefined = this.transitions[this.state.value][transition]
 
         if (!action) {
@@ -112,8 +113,11 @@ export class CheckoutStateMachine {
 
         // execute actual transition
         this.state.value = action()
+        if (storage !== undefined) {
+            this.storage = storage
+        }
 
-        const change: StateChange = {fromState: from.value, transition: transition, toState: this.state.value}
+        const change: StateChange = {fromState: from.value, transition: transition, toState: this.state.value, storage: this.storage}
 
         this.callbacks[this.state.value].forEach(callback => callback(change))
         this.callbacks[transition].forEach(callback => callback(change))

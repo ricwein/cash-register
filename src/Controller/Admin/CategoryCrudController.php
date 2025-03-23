@@ -26,9 +26,9 @@ class CategoryCrudController extends AbstractCrudController
     public function configureFields(string $pageName): iterable
     {
         return [
-            IntegerField::new('priority'),
             TextField::new('name'),
             ColorField::new('color'),
+            IntegerField::new('priority'),
         ];
     }
 

@@ -15,6 +15,7 @@ use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
 use Symfony\Component\HttpFoundation\Response;
+use function Sodium\add;
 
 class EventCrudController extends AbstractCrudController
 {
@@ -26,10 +27,10 @@ class EventCrudController extends AbstractCrudController
     public function configureFields(string $pageName): iterable
     {
         return [
-            IntegerField::new('priority'),
+            TextField::new('name'),
             IntegerField::new('productsPerRow'),
             BooleanField::new('useCategoryTabs'),
-            TextField::new('name'),
+            IntegerField::new('priority'),
         ];
     }
 
@@ -38,7 +39,13 @@ class EventCrudController extends AbstractCrudController
     {
         return $actions
             /** {@see self::cloneAction()} */
-            ->add(Crud::PAGE_INDEX, Action::new('clone')->linkToCrudAction('cloneAction'));
+            ->add(Crud::PAGE_INDEX, Action::new('clone')->linkToCrudAction('cloneAction'))
+            ->add(
+                Crud::PAGE_INDEX,
+                Action::new('open', label: 'Open Register')->linkToRoute('start_cash_register', fn(Event $event) => [
+                    'eventId' => $event->getId(),
+                ])
+            );
     }
 
     /**

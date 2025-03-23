@@ -16,7 +16,7 @@
       >
         <v-tab
             v-for="category in categories"
-            class="tab"
+            class="tab flex-fill"
             :style="{
               backgroundColor: category.color,
               color: (new Color(category.color)).getContrastColor()

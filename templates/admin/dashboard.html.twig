@@ -15,9 +15,14 @@
 
 {% block main %}
     <div class="card mb-5">
-        <div class="card-header h5">Zur Kassenansicht wechseln:</div>
+        <div class="card-header bg-dark text-white">
+            <h4 class="card-title">Zur Kassenansicht wechseln</h4>
+        </div>
         {% for event in events %}
-            <a class="card-body" href="{{ path('start_cash_register', {eventId: event.id}) }}">{{ event.name }}</a>
+            <a class="card-body" href="{{ path('start_cash_register', {eventId: event.id}) }}">
+                <span class="fa-solid fa-cash-register me-4"></span>
+                <span>{{ event.name }}</span>
+            </a>
         {% else %}
             <div class="card-body">Noch keine Events angelegt</div>
         {% endfor %}

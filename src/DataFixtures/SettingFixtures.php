@@ -18,7 +18,7 @@ class SettingFixtures extends Fixture
             Setting::create(
                 name: 'landscape_mode',
                 value: true,
-                description: 'Beleg links neben der Produktauswahl anzeigen, statt darüber.'
+                description: 'Beleg links neben der Artikelauswahl anzeigen, statt darüber.'
             )
         );
         $manager->flush();
