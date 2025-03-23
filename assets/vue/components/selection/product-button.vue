@@ -1,7 +1,8 @@
 <template>
   <div class="product col p-2 d-flex flex-column align-items-start" :style="{backgroundColor: product.color}" @click="$emit('product-clicked', product)">
-    <div class="product-category mb-1 small badge">{{ categoryName }}</div>
-    <span class="product-icon mt-auto fa-2xl" v-if="product.icon" :class="product.icon"></span>
+    <div v-if="showCategory" class="product-category mb-1 small badge">{{ categoryName }}</div>
+    <span v-if="showCategory && product.icon !== null" class="product-icon mt-auto fa-2xl" :class="product.icon"></span>
+    <span v-else-if="product.icon" class="product-icon mt-4 fa-2xl" v-if="product.icon" :class="product.icon"></span>
     <div class="product-price mt-auto font-monospace badge">{{ NumberFormatter.format(product.price) }}</div>
     <div class="product-name  fw-medium h5 mb-0">{{ product.name }}</div>
   </div>
@@ -17,6 +18,7 @@ const props = defineProps({
   categoryName: String,
   product: {type: Object as PropType<Product>, required: true},
   gridWidthElements: Number,
+  showCategory: Boolean,
 })
 
 const color = computed(() => new Color(props.product.color))

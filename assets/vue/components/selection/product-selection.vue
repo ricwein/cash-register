@@ -1,7 +1,7 @@
 <template>
   <div class="selection-view w-100 bg-dark">
     <div v-for="row in rows" class="d-flex row w-100 justify-content-start" :class="`row-cols-${gridWidthElements}`">
-      <product-button v-for="[categoryName, product] in row" :product :categoryName :gridWidthElements @product-clicked="productClicked"></product-button>
+      <product-button v-for="[categoryName, product] in row" :show-category="true" :product :categoryName :gridWidthElements @product-clicked="productClicked"></product-button>
     </div>
   </div>
 </template>

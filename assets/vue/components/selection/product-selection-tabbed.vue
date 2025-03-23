@@ -3,7 +3,7 @@
     <v-tabs-window v-model="tab">
       <v-tabs-window-item v-for="[categoryId, categoryName, rows] in categoryRows" :value="categoryId">
         <div v-for="row in rows" class="row w-100 justify-content-start" :class="`row-cols-${gridWidthElements}`">
-          <ProductButton v-for="product in row" :category-name="categoryName" :product :gridWidthElements @product-clicked="productClicked"></ProductButton>
+          <product-button v-for="product in row" :show-category="false" :category-name="categoryName" :product :gridWidthElements @product-clicked="productClicked"></product-button>
         </div>
       </v-tabs-window-item>
     </v-tabs-window>
