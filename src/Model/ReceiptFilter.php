@@ -2,6 +2,7 @@
 
 namespace App\Model;
 
+use App\Enum\ExportFileFormat;
 use App\Enum\ReceiptExportType;
 use DateTimeImmutable;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -20,6 +21,7 @@ final class ReceiptFilter
         private ?DateTimeImmutable $toDate = null,
         private ?array $events = null,
         private ReceiptExportType $exportType = ReceiptExportType::ACCUMULATED,
+        private ExportFileFormat $fileFormat = ExportFileFormat::CSV,
     ) {}
 
     public function getFromDate(): DateTimeImmutable
@@ -63,6 +65,17 @@ final class ReceiptFilter
     public function setExportType(ReceiptExportType $exportType): self
     {
         $this->exportType = $exportType;
+        return $this;
+    }
+
+    public function getFileFormat(): ExportFileFormat
+    {
+        return $this->fileFormat;
+    }
+
+    public function setFileFormat(ExportFileFormat $fileFormat): self
+    {
+        $this->fileFormat = $fileFormat;
         return $this;
     }
 }

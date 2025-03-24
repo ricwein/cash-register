@@ -2,18 +2,15 @@
 
 namespace App\Service;
 
+use App\Enum\ExportFileFormat;
 use App\Enum\PaperSize;
-use App\Enum\ReceiptExportType;
 use App\Model\ReceiptFilter;
-use App\Repository\PurchaseTransactionRepository;
-use Dompdf\Dompdf;
+use App\Service\Receipt\CsvGenerator;
+use App\Service\Receipt\PdfGenerator;
 use RuntimeException;
 use SplFileInfo;
 use Symfony\Component\Clock\ClockInterface;
-use Symfony\Component\DependencyInjection\Attribute\Autowire;
-use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\Response;
-use Twig\Environment as TwigEnvironment;
 use Twig\Error\LoaderError;
 use Twig\Error\RuntimeError;
 use Twig\Error\SyntaxError;
@@ -21,10 +18,9 @@ use Twig\Error\SyntaxError;
 final readonly class ReceiptGenerator
 {
     public function __construct(
-        private PurchaseTransactionRepository $purchaseTransactionRepository,
-        private TwigEnvironment $twig,
         private ClockInterface $clock,
-        #[Autowire('%kernel.project_dir%/public')] private string $publicDir,
+        private PdfGenerator $pdfGenerator,
+        private CsvGenerator $csvGenerator,
     ) {}
 
     /**
@@ -45,89 +41,31 @@ final readonly class ReceiptGenerator
                 || ($filter->getToDate() !== null && $filter->getToDate() < $today)
             )
         ) {
-            return $this->buildResponse($file);
+            return match ($filter->getFileFormat()) {
+                ExportFileFormat::CSV => $this->pdfGenerator->buildFileResponse($file),
+                ExportFileFormat::PDF => $this->csvGenerator->buildFileResponse($file),
+            };
         }
 
-        $pdf = match ($filter->getExportType()) {
-            ReceiptExportType::PER_EVENT => $this->buildEventPdf($size, $filter, $file),
-            ReceiptExportType::ACCUMULATED => $this->buildOverallPdf($size, $filter, $file),
+        return match ($filter->getFileFormat()) {
+            ExportFileFormat::PDF => $this->pdfGenerator->generate($file, $size, $filter),
+            ExportFileFormat::CSV => $this->csvGenerator->generate($file, $size, $filter),
         };
-
-        if (false === file_put_contents($file->getPathname(), $pdf->output())) {
-            throw new RuntimeException('Failed to write PDF to file.');
-        }
-
-        return $this->buildResponse($file);
-    }
-
-    private function buildResponse(SplFileInfo $file): BinaryFileResponse
-    {
-        return new BinaryFileResponse(
-            file: $file,
-            headers: [
-                'Content-Transfer-Encoding', 'binary',
-                'Content-Type' => 'application/pdf',
-                'Content-Disposition' => "attachment; filename=\"{$file->getFilename()}\"",
-            ]
-        );
     }
 
     private function buildFilename(PaperSize $size, ReceiptFilter $filter): SplFileInfo
     {
         return new SplFileInfo(
             sprintf(
-                "%s/Beleg_%s_%s%s_%s.%s.pdf",
+                "%s/Beleg_%s_%s%s_%s.%s.%s",
                 sys_get_temp_dir(),
                 strtolower($filter->getExportType()->value),
                 $filter->getFromDate()->format('Y-m-d'),
                 $filter->getToDate() === null ? '' : ('_' . $filter->getToDate()->format('Y-m-d')),
                 empty($filter->getEvents()) ? 'Alle' : implode('+', $filter->getEvents()),
                 $size->value,
+                $filter->getFileFormat()->value,
             )
         );
-    }
-
-    /**
-     * @throws RuntimeError
-     * @throws SyntaxError
-     * @throws LoaderError
-     */
-    private function buildEventPdf(PaperSize $size, ReceiptFilter $filter, SplFileInfo $file): Dompdf
-    {
-        $articles = $this->purchaseTransactionRepository->aggregateArticlesByEvent($filter);
-        $dompdf = new Dompdf(['chroot' => $this->publicDir]);
-        $content = $this->twig->render('pdf/per_event.html.twig', [
-            'size' => $size,
-            'articles' => $articles,
-            'filter' => $filter,
-            'file' => $file,
-        ]);
-        $dompdf->loadHtml($content, 'UTF-8');
-        $dompdf->setPaper($size->size(), $size->orientation());
-        $dompdf->render();
-
-        return $dompdf;
-    }
-
-    /**
-     * @throws RuntimeError
-     * @throws SyntaxError
-     * @throws LoaderError
-     */
-    private function buildOverallPdf(PaperSize $size, ReceiptFilter $filter, SplFileInfo $file): Dompdf
-    {
-        $articles = $this->purchaseTransactionRepository->aggregateArticlesOverall($filter);
-
-        $dompdf = new Dompdf(['chroot' => $this->publicDir]);
-        $content = $this->twig->render('pdf/overall.html.twig', [
-            'size' => $size,
-            'articles' => $articles,
-            'filter' => $filter,
-            'file' => $file,
-        ]);
-        $dompdf->loadHtml($content, 'UTF-8');
-        $dompdf->setPaper($size->size(), $size->orientation());
-        $dompdf->render();
-        return $dompdf;
     }
 }

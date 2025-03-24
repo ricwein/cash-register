@@ -2,6 +2,7 @@
 
 namespace App\Form;
 
+use App\Enum\ExportFileFormat;
 use App\Enum\ReceiptExportType;
 use App\Model\ReceiptFilter;
 use Symfony\Component\Form\AbstractType;
@@ -22,6 +23,9 @@ class ReceiptFilterType extends AbstractType
                 'multiple' => true,
                 'required' => false,
                 'choices' => $options['events'],
+            ])
+            ->add('fileFormat', EnumType::class, [
+                'class' => ExportFileFormat::class,
             ])
             ->add('exportType', EnumType::class, [
                 'class' => ReceiptExportType::class,

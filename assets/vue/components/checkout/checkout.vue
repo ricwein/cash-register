@@ -6,6 +6,7 @@
       min-width="50%"
       min-height="50%"
       persistent
+      fullscreen
   >
     <v-card
         class="checkout-dialog"
@@ -58,6 +59,7 @@
       min-width="50%"
       min-height="50%"
       persistent
+      fullscreen
   >
     <v-card
         class="checkout-dialog"
@@ -108,8 +110,8 @@
           </v-btn>
 
           <v-btn @click="checkoutState.dispatch(CheckoutTransition.Execute)" class="me-3 h-auto btn btn-success p-3">
-            <i class="fa-solid fa-xl fa-credit-card"></i>
-            Fortfahren
+            <i class="fa-solid fa-xl fa-check-double"></i>
+            Zahlung Bestätigen
           </v-btn>
         </div>
       </template>
@@ -123,6 +125,7 @@
       min-width="50%"
       min-height="50%"
       persistent
+      fullscreen
   >
     <v-card
         class="checkout-dialog"
@@ -143,8 +146,8 @@
           </v-btn>
 
           <v-btn @click="checkoutState.dispatch(CheckoutTransition.Execute)" class="me-3 h-auto btn btn-success p-3">
-            <i class="fa-solid fa-xl fa-credit-card"></i>
-            Fortfahren
+            <i class="fa-solid fa-xl fa-check-double"></i>
+            Zahlung Bestätigen
           </v-btn>
         </div>
       </template>

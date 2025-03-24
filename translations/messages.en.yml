@@ -47,5 +47,6 @@ ACCUMULATED: accumulated
 From date: Date
 To date: until Date
 Export type: Export Type
+File format: Format
 generate receipt PDF: Generate Receipt-PDF
 Sold articles: Sold Articles
