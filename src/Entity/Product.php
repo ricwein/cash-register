@@ -40,6 +40,9 @@ class Product
     #[ORM\ManyToMany(targetEntity: Event::class, inversedBy: 'products')]
     private Collection $events;
 
+    #[ORM\Column(type: 'string', length: 255, nullable: true)]
+    private ?string $image = null;
+
     public function __construct()
     {
         $this->events = new ArrayCollection();
@@ -142,6 +145,17 @@ class Product
     {
         $this->events->removeElement($event);
 
+        return $this;
+    }
+
+    public function getImage(): ?string
+    {
+        return $this->image;
+    }
+
+    public function setImage(?string $image): static
+    {
+        $this->image = $image;
         return $this;
     }
 }

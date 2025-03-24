@@ -14,6 +14,7 @@ use EasyCorp\Bundle\EasyAdminBundle\Context\AdminContext;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
 use EasyCorp\Bundle\EasyAdminBundle\Field\AssociationField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\ColorField;
+use EasyCorp\Bundle\EasyAdminBundle\Field\ImageField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\IntegerField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\MoneyField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
@@ -42,6 +43,7 @@ class ProductCrudController extends AbstractCrudController
             AssociationField::new('category'),
             ColorField::new('color'),
             IntegerField::new('priority'),
+            ImageField::new('image')->setBasePath('uploads')->setUploadDir('public/uploads'),
             MoneyField::new('price')->addCssClass('fw-bold')->setCurrency('EUR')->setStoredAsCents(false),
         ];
     }
