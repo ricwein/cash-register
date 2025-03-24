@@ -44,6 +44,8 @@
                 {{ form_widget(form.exportType) }}
             </div>
 
+            {{ form(form) }}
+
             <div class="d-flex justify-content-end">
                 {{ form_widget(form.submit, {label: 'generate receipt PDF'}) }}
             </div>

@@ -9,13 +9,13 @@ Is On: Aktiv
 Description: Beschreibung
 
 Category: Kategorie
-Event: Veranstaltung/Kasse
+Event: Kasse
 Product: Artikel
 Transactions: Verkäufe
 PurchaseTransaction: Verkäufe
 Receipt: Beleg
 
-Event Name: Veranstaltung
+Event Name: Kasse
 Product Name: Artikel
 Price Per Item: Preis
 Payment Type: Zahlart
@@ -31,7 +31,7 @@ Dashboard: Dashboard
 Management: Verwaltung
 Register: Kasse
 Products: Artikel
-Events: Veranstaltungen
+Events: Kassen
 Export Receipts: Belege exportieren
 Categories: Kategorien
 Setting: Einstellungen
@@ -41,7 +41,7 @@ Clone: Kopieren
 CARD: KARTE
 CASH: BAR
 NONE: –
-PER_EVENT: pro Veranstaltung/Kasse
+PER_EVENT: pro Kasse
 ACCUMULATED: Zusammengefasst
 
 From date: Datum
