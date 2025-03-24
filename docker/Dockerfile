@@ -73,7 +73,7 @@ COPY docker/php-fpm/supervisord.conf /etc/supervisord.conf
 
 COPY . .
 COPY --from=yarn-encore /app/public/build ./public/build
-RUN mkdir -p var/cache var/log && chmod -R 777 var/cache var/log && sync
+RUN mkdir -p var/cache var/log public/uploads && chmod -R 777 var/cache var/log public/uploads && sync
 
 RUN sed -i -e "s/APP_SECRET=.*/APP_SECRET=${APP_SECRET}/g" ./.env
 

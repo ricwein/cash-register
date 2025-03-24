@@ -48,8 +48,8 @@ if [ "$1" = 'php-fpm' ] || [ "$1" = 'php' ] || [ "$1" = 'bin/console' ] || [ "$1
   bin/console cache:clear --no-interaction --no-warmup
   bin/console cache:warmup --no-interaction
 
-  mkdir -p var/cache var/log
-  for writableDirPath in 'var/cache' 'var/log'; do
+  mkdir -p var/cache var/log public/uploads
+  for writableDirPath in 'var/cache' 'var/log' 'public/uploads'; do
     echo "[ENTRYPOINT] fix permissions on: ${writableDirPath}"
     chmod -R 777 "${writableDirPath}"
     setfacl -R -m u:www-data:rwX -m u:"$(whoami)":rwX "${writableDirPath}"

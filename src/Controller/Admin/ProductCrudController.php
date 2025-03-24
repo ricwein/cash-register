@@ -50,6 +50,11 @@ class ProductCrudController extends AbstractCrudController
 
     public function configureFilters(Filters $filters): Filters
     {
+        $events = $this->eventRepository->findAllEventNames();
+        if (empty($events)) {
+            return $filters;
+        }
+
         return $filters->add(
             ChoiceFilter::new('events')
                 ->setChoices($this->eventRepository->findAllEventNames())
