@@ -3501,6 +3501,11 @@ vue-final-modal@^4.5.5:
     "@vueuse/integrations" "^10.5.0"
     focus-trap "^7.5.4"
 
+vue-haptic@^1.2.0:
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/vue-haptic/-/vue-haptic-1.2.0.tgz#cd06532d0ed486deb9b2ccd290d32b7dbbc09c32"
+  integrity sha512-sqqBiAQnyf2ZRp0yUysrrpevoGAEiXJscu/uO5p5lhqE3tJS3Luef6Pm7Q8frEaJqwe1oV41POwfPZWoPbBN3w==
+
 vue-loader@^17.4.2:
   version "17.4.2"
   resolved "https://registry.yarnpkg.com/vue-loader/-/vue-loader-17.4.2.tgz#f87f0d8adfcbbe8623de9eba1979d41ba223c6da"

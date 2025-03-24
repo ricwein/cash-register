@@ -15,7 +15,7 @@
     >
       <div class="v-card-text">
         <p>Beleg bestätigen und zur Zahlung fortfahren?</p>
-        <price-badge :price class="text-center"></price-badge>
+        <receipt :price :cart></receipt>
       </div>
 
       <template v-slot:actions>
@@ -132,7 +132,9 @@
         prepend-icon="mdi-check-all"
         title="Kartenzahlung bestätigen"
     >
-      <price-badge :price class="text-center"></price-badge>
+      <div class="v-card-text">
+        <receipt :price :cart></receipt>
+      </div>
 
       <template v-slot:actions>
         <div class="d-flex w-100 action-row">
@@ -162,6 +164,7 @@ import {CheckoutState, CheckoutStateMachine, CheckoutTransition, type StateChang
 import Product from "../../../model/product.ts";
 import {NumberFormatter} from "../../../components/number-formatter.ts";
 import PriceBadge from "./price-badge.vue";
+import Receipt from "./receipt.vue";
 
 const emit = defineEmits(['create-new-receipt', 'checkout-cancelled'])
 const checkoutState = defineModel<CheckoutStateMachine>({required: true})
