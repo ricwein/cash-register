@@ -1,6 +1,5 @@
 import {registerVueControllerComponents} from '@symfony/ux-vue';
 import vuetify from "./vue/plugins/vuetify";
-import VueHaptic from 'vue-haptic';
 
 import './bootstrap.js';
 
@@ -15,5 +14,4 @@ registerVueControllerComponents(require.context('./vue/controllers', true, /\.vu
 document.addEventListener('vue:before-mount', (event) => {
     const {app} = event.detail;
     app.use(vuetify)
-    app.use(VueHaptic)
 });

@@ -29,7 +29,6 @@
     "typescript": "^5.8.2",
     "vue": "^3.0",
     "vue-final-modal": "^4.5.5",
-    "vue-haptic": "^1.2.0",
     "vue-loader": "^17.4.2",
     "vue3-toastify": "^0.2.8",
     "vuetify": "^3.7.16",

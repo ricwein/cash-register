@@ -1,5 +1,12 @@
 <template>
-  <div v-haptic class="product col p-2 d-flex flex-column align-items-start" :style="{backgroundColor: product.color}" @click="$emit('product-clicked', product)">
+  <div
+      class="product col p-2 d-flex flex-column align-items-start"
+      :style="{backgroundColor: product.color}"
+      @click="() => {
+        useVibrate({pattern: 100})
+        $emit('product-clicked', product)
+      }"
+  >
     <div v-if="showCategory" class="product-category mb-1 small badge">{{ categoryName }}</div>
     <span v-if="showCategory && product.icon !== null" class="product-icon mt-auto fa-2xl" :class="product.icon"></span>
     <span v-else-if="product.icon" class="product-icon mt-4 fa-2xl" v-if="product.icon" :class="product.icon"></span>
@@ -10,6 +17,7 @@
 
 <script setup lang="ts">
 import {computed, type PropType} from "vue";
+import {useVibrate} from '@vueuse/core';
 import {NumberFormatter} from "../../../components/number-formatter.ts";
 import Product from "../../../model/product.ts";
 import Color from "../../../components/color.ts";
