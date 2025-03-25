@@ -4,6 +4,8 @@ namespace App\Service\Receipt;
 
 use App\Enum\PaperSize;
 use App\Enum\ReceiptExportType;
+use App\Helper\ReceiptArticleGroupHelper;
+use App\Model\ReceiptArticle;
 use App\Model\ReceiptFilter;
 use App\Repository\PurchaseTransactionRepository;
 use SplFileInfo;
@@ -16,6 +18,7 @@ readonly class CsvGenerator implements FileGeneratorInterface
 {
     public function __construct(
         private PurchaseTransactionRepository $purchaseTransactionRepository,
+        private ReceiptArticleGroupHelper $groupHelper,
         private TranslatorInterface $translator,
     ) {}
 
@@ -45,33 +48,19 @@ readonly class CsvGenerator implements FileGeneratorInterface
     {
         $articles = $this->purchaseTransactionRepository->aggregateArticlesByEvent($filter);
 
+        [$groupedArticles, $paymentPrices] = $this->groupHelper->groupByEvents($articles);
+
         $csv = new SplFileObject($file->getPathname(), 'wb+');
         $csv->fwrite(chr(0xEF) . chr(0xBB) . chr(0xBF));
         $csv->setCsvControl(';', escape: '');
 
-        $firstEvent = array_key_first($articles);
-        foreach ($articles as $eventName => $eventArticles) {
+        $firstEvent = array_key_first($groupedArticles);
+        foreach ($groupedArticles as $eventName => $eventArticles) {
             if ($eventName !== $firstEvent) {
                 $csv->fputcsv([]);
             }
             $csv->fputcsv([$eventName]);
-            $csv->fputcsv([
-                $this->translator->trans('Product Name'),
-                $this->translator->trans('Quantity'),
-                $this->translator->trans('Price Sum'),
-            ]);
-
-            $priceSum = 0.00;
-            foreach ($eventArticles as $article) {
-                $price = (float)$article->price;
-                $priceSum += $price;
-                $csv->fputcsv([
-                    $article->name,
-                    $article->quantity,
-                    number_format($price, 2, ',', '.'),
-                ]);
-            }
-            $csv->fputcsv(['', '', number_format($priceSum, 2, ',', '.')]);
+            $this->writeArticles($csv, $eventArticles, $paymentPrices[$eventName]);
         }
 
         return $csv;
@@ -81,9 +70,22 @@ readonly class CsvGenerator implements FileGeneratorInterface
     {
         $articles = $this->purchaseTransactionRepository->aggregateArticlesOverall($filter);
 
+        [$groupedArticles, $paymentPrices] = $this->groupHelper->group($articles);
+
         $csv = new SplFileObject($file->getPathname(), 'wb+');
         $csv->fwrite(chr(0xEF) . chr(0xBB) . chr(0xBF));
         $csv->setCsvControl(';', escape: '');
+        $this->writeArticles($csv, $groupedArticles, $paymentPrices);
+
+        return $csv;
+    }
+
+    /**
+     * @param ReceiptArticle[] $articles
+     * @param array<string, string> $paymentPrices
+     */
+    private function writeArticles(SplFileObject $csv, array $articles, array $paymentPrices): void
+    {
         $csv->fputcsv([
             $this->translator->trans('Product Name'),
             $this->translator->trans('Quantity'),
@@ -100,8 +102,11 @@ readonly class CsvGenerator implements FileGeneratorInterface
                 number_format($price, 2, ',', '.'),
             ]);
         }
-        $csv->fputcsv(['', '', number_format($priceSum, 2, ',', '.')]);
 
-        return $csv;
+        foreach ($paymentPrices as $type => $price) {
+            $csv->fputcsv(['', ucfirst(strtolower($this->translator->trans($type))), number_format((float)$price, 2, ',', '.')]);
+        }
+
+        $csv->fputcsv(['', '', number_format($priceSum, 2, ',', '.')]);
     }
 }

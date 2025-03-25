@@ -4,6 +4,7 @@ namespace App\Service\Receipt;
 
 use App\Enum\PaperSize;
 use App\Enum\ReceiptExportType;
+use App\Helper\ReceiptArticleGroupHelper;
 use App\Model\ReceiptFilter;
 use App\Repository\PurchaseTransactionRepository;
 use Dompdf\Dompdf;
@@ -21,6 +22,7 @@ readonly class PdfGenerator implements FileGeneratorInterface
 {
     public function __construct(
         private PurchaseTransactionRepository $purchaseTransactionRepository,
+        private ReceiptArticleGroupHelper $groupHelper,
         private TwigEnvironment $twig,
         #[Autowire('%kernel.project_dir%/public')] private string $publicDir,
     ) {}
@@ -65,12 +67,16 @@ readonly class PdfGenerator implements FileGeneratorInterface
     private function buildEventPdf(PaperSize $size, ReceiptFilter $filter, SplFileInfo $file): Dompdf
     {
         $articles = $this->purchaseTransactionRepository->aggregateArticlesByEvent($filter);
+
+        [$groupedArticles, $paymentPrices] = $this->groupHelper->groupByEvents($articles);
+
         $dompdf = new Dompdf(['chroot' => $this->publicDir]);
         $content = $this->twig->render('pdf/per_event.html.twig', [
             'size' => $size,
-            'articles' => $articles,
+            'articles' => $groupedArticles,
             'filter' => $filter,
             'file' => $file,
+            'paymentPrices' => $paymentPrices,
         ]);
         $dompdf->loadHtml($content, 'UTF-8');
         $dompdf->setPaper($size->size(), $size->orientation());
@@ -88,12 +94,15 @@ readonly class PdfGenerator implements FileGeneratorInterface
     {
         $articles = $this->purchaseTransactionRepository->aggregateArticlesOverall($filter);
 
+        [$groupedArticles, $paymentPrices] = $this->groupHelper->group($articles);
+
         $dompdf = new Dompdf(['chroot' => $this->publicDir]);
         $content = $this->twig->render('pdf/overall.html.twig', [
             'size' => $size,
-            'articles' => $articles,
+            'articles' => $groupedArticles,
             'filter' => $filter,
             'file' => $file,
+            'paymentPrices' => $paymentPrices,
         ]);
         $dompdf->loadHtml($content, 'UTF-8');
         $dompdf->setPaper($size->size(), $size->orientation());

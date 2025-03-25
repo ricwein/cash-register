@@ -86,6 +86,7 @@ class PurchaseTransactionRepository extends ServiceEntityRepository
 
         $queryBuilder
             ->select('transaction.eventName')
+            ->addSelect('transaction.paymentType')
             ->addSelect('article.productName')
             ->addSelect('article.productId')
             ->addSelect('SUM(article.quantity) AS quantity')
@@ -93,6 +94,8 @@ class PurchaseTransactionRepository extends ServiceEntityRepository
 
         $queryBuilder
             ->groupBy('transaction.eventName')
+            ->addGroupBy('transaction.paymentType')
+            ->addGroupBy('article.productName')
             ->addGroupBy('article.productId');
 
         $queryBuilder
@@ -111,6 +114,7 @@ class PurchaseTransactionRepository extends ServiceEntityRepository
                 id: $articleData['productId'],
                 quantity: $articleData['quantity'],
                 price: $articleData['price'],
+                paymentType: $articleData['paymentType'],
             );
         }
 
@@ -125,13 +129,15 @@ class PurchaseTransactionRepository extends ServiceEntityRepository
         $queryBuilder = $this->createFilterQueryBuilder($filter);
 
         $queryBuilder
-            ->select('article.productName')
+            ->select('transaction.paymentType')
+            ->addSelect('article.productName')
             ->addSelect('article.productId')
             ->addSelect('SUM(article.quantity) AS quantity')
             ->addSelect('SUM(article.price * article.quantity) AS price');
 
         $queryBuilder
-            ->groupBy('article.productId');
+            ->groupBy('article.productId')
+            ->addGroupBy('transaction.paymentType');
 
         $queryBuilder
             ->orderBy('article.productName', 'ASC')
@@ -144,6 +150,7 @@ class PurchaseTransactionRepository extends ServiceEntityRepository
                 id: $articleData['productId'],
                 quantity: $articleData['quantity'],
                 price: $articleData['price'],
+                paymentType: $articleData['paymentType'],
             );
         }
 

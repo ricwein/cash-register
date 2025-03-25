@@ -73,6 +73,13 @@ body {
     }
 
     tfoot {
+      tr {
+        td, th {
+          padding: 0.2em;
+          text-align: left;
+        }
+      }
+
       tr:first-of-type {
         td, th {
           border-top: 1px solid black;

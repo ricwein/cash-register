@@ -21,12 +21,15 @@ use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
 use EasyCorp\Bundle\EasyAdminBundle\Filter\ChoiceFilter;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpFoundation\Response;
 
 class ProductCrudController extends AbstractCrudController
 {
     public function __construct(
         private readonly EventRepository $eventRepository,
+        #[Autowire('%app.upload_dir_name%')] private readonly string $uploadDirName,
+        #[Autowire('%app.upload_dir_path%')] private readonly string $uploadDirPath,
     ) {}
 
     public static function getEntityFqcn(): string
@@ -43,7 +46,7 @@ class ProductCrudController extends AbstractCrudController
             AssociationField::new('category'),
             ColorField::new('color'),
             IntegerField::new('priority'),
-            ImageField::new('image')->setBasePath('uploads')->setUploadDir('public/uploads'),
+            ImageField::new('image')->setBasePath($this->uploadDirName)->setUploadDir($this->uploadDirPath),
             MoneyField::new('price')->addCssClass('fw-bold')->setCurrency('EUR')->setStoredAsCents(false),
         ];
     }

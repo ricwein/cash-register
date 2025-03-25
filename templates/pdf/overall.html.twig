@@ -42,6 +42,15 @@
             {% endfor %}
             </tbody>
             <tfoot>
+            {% for type, price in paymentPrices %}
+                <tr>
+                    <td></td>
+                    <td>{{ type | trans | capitalize }}:</td>
+                    <td>{{ price | number_format(2,',','.') }} €</td>
+                </tr>
+            {% endfor %}
+            </tfoot>
+            <tfoot>
             <tr>
                 <td colspan="2"></td>
                 <th>{{ articles | reduce((carry, article) => carry + article.price, 0.0) | number_format(2,',','.') }} €</th>
