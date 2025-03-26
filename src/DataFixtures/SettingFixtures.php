@@ -21,6 +21,13 @@ class SettingFixtures extends Fixture
                 description: 'Beleg links neben der Artikelauswahl anzeigen, statt darüber.'
             )
         );
+        $manager->persist(
+            Setting::create(
+                name: 'button_sound',
+                value: true,
+                description: 'Akustisches Feedback (Ton) für Kassen-Schaltflächen.'
+            )
+        );
         $manager->flush();
     }
 }

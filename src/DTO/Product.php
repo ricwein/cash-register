@@ -12,6 +12,7 @@ final readonly class Product implements JsonSerializable
         private string $price,
         private string $color,
         private ?string $icon,
+        private ?string $imageUrl,
     ) {}
 
     public function jsonSerialize(): array
@@ -22,6 +23,7 @@ final readonly class Product implements JsonSerializable
             'price' => (float)$this->price,
             'color' => $this->color,
             'icon' => $this->icon,
+            'imageUrl' => $this->imageUrl,
         ];
     }
 }

@@ -49,12 +49,15 @@ if [ "$1" = 'php-fpm' ] || [ "$1" = 'php' ] || [ "$1" = 'bin/console' ] || [ "$1
   bin/console cache:warmup --no-interaction
 
   mkdir -p var/cache var/log public/uploads
-  for writableDirPath in 'var/cache' 'var/log' 'public/uploads'; do
+  for writableDirPath in 'var/cache' 'var/log'; do
     echo "[ENTRYPOINT] fix permissions on: ${writableDirPath}"
     chmod -R 777 "${writableDirPath}"
     setfacl -R -m u:www-data:rwX -m u:"$(whoami)":rwX "${writableDirPath}"
     setfacl -dR -m u:www-data:rwX -m u:"$(whoami)":rwX "${writableDirPath}"
   done
+
+  echo "[ENTRYPOINT] fix permissions on: public/uploads"
+  chmod -R 777 public/uploads
 fi
 
 exec docker-php-entrypoint "$@"

@@ -14,7 +14,7 @@ final class Version00000000000000 extends AbstractMigration
 {
     public function getDescription(): string
     {
-        return '';
+        return 'Init';
     }
 
     public function up(Schema $schema): void
@@ -32,6 +32,17 @@ final class Version00000000000000 extends AbstractMigration
         $this->addSql('ALTER TABLE product_event ADD CONSTRAINT FK_9AF271FB4584665A FOREIGN KEY (product_id) REFERENCES product (id) ON DELETE CASCADE');
         $this->addSql('ALTER TABLE product_event ADD CONSTRAINT FK_9AF271FB71F7E88B FOREIGN KEY (event_id) REFERENCES event (id) ON DELETE CASCADE');
         $this->addSql('ALTER TABLE purchased_article ADD CONSTRAINT FK_F3D4A2462BFB24F FOREIGN KEY (receipt_transaction_id) REFERENCES purchase_transaction (id)');
+
+        $this->addSql(
+            <<<QUERY
+                INSERT INTO `setting` (`name`, `description`, `is_on`)
+                VALUES (
+                    'landscape_mode',
+                    'Beleg links neben der Artikelauswahl anzeigen, statt darüber.',
+                    1
+                );
+            QUERY
+        );
     }
 
     public function down(Schema $schema): void

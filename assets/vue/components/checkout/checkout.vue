@@ -160,11 +160,20 @@
 <script setup lang="ts">
 import {computed, ref} from "vue";
 import {toast} from "vue3-toastify";
+import {useSound} from "@vueuse/sound";
+import Receipt from "./receipt.vue";
 import {CheckoutState, CheckoutStateMachine, CheckoutTransition, type StateChange} from "../../../components/checkout-state-machine.ts";
 import Product from "../../../model/product.ts";
 import {NumberFormatter} from "../../../components/number-formatter.ts";
-import PriceBadge from "./price-badge.vue";
-import Receipt from "./receipt.vue";
+import deleteSound from '../../../sounds/delete.mp3'
+import successSound from '../../../sounds/success.wav'
+import warningSound from '../../../sounds/warning.wav'
+import buttonSound from '../../../sounds/checkout.mp3'
+
+const {play: playButton} = useSound(buttonSound)
+const {play: playSuccess} = useSound(successSound)
+const {play: playWarning} = useSound(warningSound)
+const {play: playDelete} = useSound(deleteSound)
 
 const emit = defineEmits(['create-new-receipt', 'checkout-cancelled'])
 const checkoutState = defineModel<CheckoutStateMachine>({required: true})
@@ -172,6 +181,21 @@ const checkoutState = defineModel<CheckoutStateMachine>({required: true})
 // setup state-machine callbacks
 checkoutState.value
     .addCallback(null, () => changeField.value = '0,00')
+    .addCallback(null, change => {
+      if (!props.buttonSound) {
+        return;
+      }
+
+      if (change.transition === CheckoutTransition.Error) {
+        playWarning()
+      } else if (change.transition === CheckoutTransition.Success) {
+        playSuccess()
+      } else if ([CheckoutTransition.Cancel].includes(change.transition)) {
+        playDelete()
+      } else {
+        playButton()
+      }
+    })
     .addCallback(CheckoutTransition.Cash, () => setTimeout(() => document.getElementById('calculatorInput')?.focus(), 200))
     .addCallback(CheckoutState.Sending, processPayment);
 
@@ -180,6 +204,7 @@ const props = defineProps({
   price: {type: Number, required: true},
   cart: {type: Array<Product>, required: true},
   confirmEndpointUrl: {type: String, required: true},
+  buttonSound: {type: Boolean, required: true},
 })
 
 const changeField = ref<string>('0,00');

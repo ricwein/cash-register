@@ -1,7 +1,7 @@
 <template>
   <div class="selection-view w-100 bg-dark">
     <div v-for="row in rows" class="d-flex row w-100 justify-content-start" :class="`row-cols-${gridWidthElements}`">
-      <product-button v-for="[categoryName, product] in row" :show-category="true" :product :categoryName :gridWidthElements @product-clicked="productClicked"></product-button>
+      <product-button v-for="[categoryName, product] in row" :buttonSound :show-category="true" :product :categoryName :gridWidthElements @product-clicked="productClicked"></product-button>
     </div>
   </div>
 </template>
@@ -19,6 +19,7 @@ const props = defineProps({
   displayHeightPortrait: String,
   historyHeightPortrait: String,
   gridWidthElements: Number,
+  buttonSound: {type: Boolean, required: true},
 })
 
 const rows = computed((): Array<Array<[string, Product]>> => {

@@ -1,7 +1,7 @@
 <template>
   <div
       class="backspace-button d-flex align-items-center justify-content-around"
-      @click="$emit('backspaceClicked')"
+      @click="backspaceClicked"
       :class="{'mousedown': isMouseDown}"
       ref="button"
   >
@@ -12,13 +12,29 @@
 <script setup lang="ts">
 import {ref, useTemplateRef} from "vue";
 import {onLongPress, useMousePressed} from '@vueuse/core'
+import {useSound} from "@vueuse/sound";
+import buttonSound from '../../../../sounds/delete.mp3'
+import warningSound from '../../../../sounds/warning.wav'
 
+const {play} = useSound(buttonSound)
+const {play: playWarning} = useSound(warningSound)
+
+const props = defineProps({
+  buttonSound: {type: Boolean, required: true},
+})
 const emit = defineEmits(['create-new-receipt', 'backspaceClicked'])
 
 const backspaceButton = useTemplateRef<HTMLLIElement>('button')
 const isMouseDown = ref<boolean>(false);
 const longPressDelay: number = 1000; // 1.5s
 const longPressDelayWithUnit: string = `${longPressDelay}ms`
+
+function backspaceClicked() {
+  if (props.buttonSound) {
+    play()
+  }
+  emit('backspaceClicked')
+}
 
 useMousePressed({
   target: backspaceButton,
@@ -32,6 +48,9 @@ onLongPress(backspaceButton, onLongPressCallbackHook, {
 
 function onLongPressCallbackHook(): void {
   isMouseDown.value = false
+  if (props.buttonSound) {
+    playWarning()
+  }
   emit('create-new-receipt')
 }
 </script>

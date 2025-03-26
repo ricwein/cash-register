@@ -4,27 +4,27 @@
       <number-display-side class="sticky-top" :price></number-display-side>
       <receipt-side :cart @removeArticle="removeArticleByIndex"></receipt-side>
       <div class="row action-button-row sticky-bottom">
-        <backspace-button class="col" @backspaceClicked="cart.pop()" @createNewReceipt="reset"></backspace-button>
-        <checkout-button class="col" :cart @registerConfirmed="checkoutState.dispatch(CheckoutTransition.Start)"></checkout-button>
+        <backspace-button class="col" :buttonSound @backspaceClicked="cart.pop()" @createNewReceipt="reset"></backspace-button>
+        <checkout-button class="col" :buttonSound :cart @registerConfirmed="checkoutState.dispatch(CheckoutTransition.Start)"></checkout-button>
       </div>
     </div>
     <div class="products col">
-      <product-selection-tabbed v-if="showCategoryTabs" :categories :displayHeightPortrait :historyHeightPortrait :gridWidthElements @product-clicked="product => cart.push(product)"></product-selection-tabbed>
-      <product-selection v-else :categories :displayHeightPortrait :historyHeightPortrait :gridWidthElements @product-clicked="product => cart.push(product)"></product-selection>
+      <product-selection-tabbed v-if="showCategoryTabs" :buttonSound :categories :displayHeightPortrait :historyHeightPortrait :gridWidthElements @product-clicked="product => cart.push(product)"></product-selection-tabbed>
+      <product-selection v-else :buttonSound :categories :displayHeightPortrait :historyHeightPortrait :gridWidthElements @product-clicked="product => cart.push(product)"></product-selection>
     </div>
   </div>
   <div v-else>
     <div class="sticky-top">
-      <number-display :price :cart :displayHeightPortrait @registerConfirmed="checkoutState.dispatch(CheckoutTransition.Start)"></number-display>
-      <receipt :cart :historyHeightPortrait @removeArticle="removeArticleByIndex" @backspaceClicked="cart.pop()" @createNewReceipt="reset"></receipt>
+      <number-display :buttonSound :price :cart :displayHeightPortrait @registerConfirmed="checkoutState.dispatch(CheckoutTransition.Start)"></number-display>
+      <receipt :buttonSound :cart :historyHeightPortrait @removeArticle="removeArticleByIndex" @backspaceClicked="cart.pop()" @createNewReceipt="reset"></receipt>
     </div>
-    <product-selection-tabbed v-if="showCategoryTabs" :categories :displayHeightPortrait :historyHeightPortrait :gridWidthElements @product-clicked="product => cart.push(product)"></product-selection-tabbed>
-    <product-selection v-else :categories :displayHeightPortrait :historyHeightPortrait :gridWidthElements @product-clicked="product => cart.push(product)"></product-selection>
+    <product-selection-tabbed v-if="showCategoryTabs" :buttonSound :categories :displayHeightPortrait :historyHeightPortrait :gridWidthElements @product-clicked="product => cart.push(product)"></product-selection-tabbed>
+    <product-selection v-else :buttonSound :categories :displayHeightPortrait :historyHeightPortrait :gridWidthElements @product-clicked="product => cart.push(product)"></product-selection>
   </div>
 
   <checkout
       v-model="checkoutState"
-      :price :cart :confirmEndpointUrl
+      :buttonSound :price :cart :confirmEndpointUrl
       @checkoutCancelled="checkoutState.dispatch(CheckoutTransition.Cancel)"
       @createNewReceipt="reset"
   ></checkout>
@@ -48,7 +48,8 @@ import Checkout from "../components/checkout/checkout.vue";
 const props = defineProps({
   confirmEndpointUrl: {type: String, required: true},
   categories: {type: Object as PropType<Array<Category>>, required: true},
-  useLandscapeMode: {type: Boolean, required: true},
+  useLandscapeMode: {type: Boolean, default: true},
+  buttonSound: {type: Boolean, default: true},
   startPrice: {type: Number, default: 0.0},
   gridWidthElements: {type: Number, default: 5},
   useCategoryTabs: {type: Boolean, default: true},

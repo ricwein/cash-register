@@ -27,6 +27,7 @@ Encore
     // When enabled, Webpack "splits" your files into smaller pieces for greater optimization.
     .splitEntryChunks()
 
+    .addLoader({test: /\.(mp3|wav)$/, loader: 'file-loader'})
     .enableVueLoader()
     .configureDefinePlugin(options => {
         options.__VUE_OPTIONS_API__ = true;

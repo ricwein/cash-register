@@ -1,7 +1,7 @@
 <template>
   <div class="w-100 bg-white display-container d-flex justify-content-end">
     <span class="display">{{ NumberFormatter.format(price) }}</span>
-    <checkout-button :cart @registerConfirmed="$emit('registerConfirmed')"></checkout-button>
+    <checkout-button :buttonSound :cart @registerConfirmed="$emit('registerConfirmed')"></checkout-button>
   </div>
 </template>
 
@@ -13,6 +13,7 @@ import type Product from "../../../../model/product.ts";
 defineProps({
   price: {type: Number, required: true},
   cart: {type: Array<Product>, required: true},
+  buttonSound: {type: Boolean, required: true},
   displayHeightPortrait: String,
 })
 </script>

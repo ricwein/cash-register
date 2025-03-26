@@ -1,6 +1,6 @@
 <template>
   <div class="history d-flex justify-content-between">
-    <backspace-button class="sticky-top" @backspaceClicked="$emit('backspaceClicked')" @createNewReceipt="$emit('create-new-receipt')"></backspace-button>
+    <backspace-button class="sticky-top" :buttonSound @backspaceClicked="$emit('backspaceClicked')" @createNewReceipt="$emit('create-new-receipt')"></backspace-button>
     <ul class="w-100 bg-light-subtle">
       <receipt-row
           v-for="(product, index) in cart.slice().reverse()"
@@ -20,6 +20,7 @@ import ReceiptRow from "./receipt-row.vue";
 defineProps({
   historyHeightPortrait: String,
   cart: {type: Object as PropType<Array<Product>>, required: true},
+  buttonSound: {type: Boolean, required: true},
 })
 </script>
 

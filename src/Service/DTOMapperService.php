@@ -6,9 +6,14 @@ use App\DTO\Category as CategoryDTO;
 use App\DTO\Product as ProductDTO;
 use App\Entity\Category as CategoryEntity;
 use App\Entity\Product as ProductEntity;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
-class DTOMapperService
+readonly class DTOMapperService
 {
+    public function __construct(
+        #[Autowire('%app.upload_dir_name%')] private string $uploadDirName,
+    ) {}
+
     public function mapCategory(CategoryEntity $category): ?CategoryDTO
     {
         if (null === $id = $category->getId()) {
@@ -52,6 +57,9 @@ class DTOMapperService
             price: $price,
             color: $product->getColor() ?? $category?->getColor() ?? 'transparent',
             icon: $icon,
+            imageUrl: (null !== $imageFile = $product->getImage())
+                ? "/{$this->uploadDirName}/{$imageFile}"
+                : null,
         );
     }
 }
