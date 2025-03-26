@@ -166,6 +166,7 @@ import {CheckoutState, CheckoutStateMachine, CheckoutTransition, type StateChang
 import Product from "../../../model/product.ts";
 import {NumberFormatter} from "../../../components/number-formatter.ts";
 import deleteSound from '../../../sounds/delete.mp3'
+import cancelSound from '../../../sounds/cancel.mp3'
 import successSound from '../../../sounds/success.wav'
 import warningSound from '../../../sounds/warning.wav'
 import buttonSound from '../../../sounds/checkout.mp3'
@@ -174,6 +175,7 @@ const {play: playButton} = useSound(buttonSound)
 const {play: playSuccess} = useSound(successSound)
 const {play: playWarning} = useSound(warningSound)
 const {play: playDelete} = useSound(deleteSound)
+const {play: playCancel} = useSound(cancelSound)
 
 const emit = defineEmits(['create-new-receipt', 'checkout-cancelled'])
 const checkoutState = defineModel<CheckoutStateMachine>({required: true})
@@ -190,8 +192,10 @@ checkoutState.value
         playWarning()
       } else if (change.transition === CheckoutTransition.Success) {
         playSuccess()
-      } else if ([CheckoutTransition.Cancel].includes(change.transition)) {
+      } else if (change.transition === CheckoutTransition.Cancel) {
         playDelete()
+      } else if (change.transition === CheckoutTransition.Back) {
+        playCancel()
       } else {
         playButton()
       }

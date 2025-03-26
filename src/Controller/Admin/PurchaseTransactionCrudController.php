@@ -35,6 +35,12 @@ class PurchaseTransactionCrudController extends AbstractCrudController
         ];
     }
 
+    public function configureCrud(Crud $crud): Crud
+    {
+        return $crud
+            ->setDefaultSort(['createdAt' => 'DESC']);
+    }
+
     public function configureActions(Actions $actions): Actions
     {
         return $actions
