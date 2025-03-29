@@ -10,6 +10,7 @@ Description: Beschreibung
 Image: Artikelbild
 
 Category: Kategorie
+Additional Categories: weitere Anzeigekategorien
 Event: Kasse
 Product: Artikel
 Transactions: Verkäufe
@@ -46,7 +47,7 @@ PER_EVENT: pro Kasse
 ACCUMULATED: Zusammengefasst
 
 From date: Datum
-To date: bis Datum
+To date: bis Datum (optional)
 Export type: Export-Art
 File format: Format
 generate receipt PDF: Beleg-PDF exportieren

@@ -7,6 +7,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: ProductRepository::class)]
 class Product
@@ -20,18 +21,22 @@ class Product
     private ?int $priority = null;
 
     #[ORM\Column(length: 255)]
+    #[Assert\NotBlank]
     private ?string $name = null;
 
     #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 2)]
+    #[Assert\NotNull]
     private ?string $price = null;
 
     #[ORM\Column(length: 7, nullable: true, options: ['fixed' => true])]
     private ?string $color = null;
 
     #[ORM\Column(length: 255)]
+    #[Assert\NotBlank]
     private ?string $icon = null;
 
     #[ORM\ManyToOne(inversedBy: 'products')]
+    #[Assert\NotBlank]
     private ?Category $category = null;
 
     /**
@@ -43,9 +48,20 @@ class Product
     #[ORM\Column(type: 'string', length: 255, nullable: true)]
     private ?string $image = null;
 
+    /**
+     * @var Collection<int, Category>
+     */
+    #[ORM\ManyToMany(targetEntity: Category::class)]
+    #[Assert\Expression(
+        '!value.contains(this.getCategory())',
+        message: 'Category already set as primary category',
+    )]
+    private Collection $additionalCategories;
+
     public function __construct()
     {
         $this->events = new ArrayCollection();
+        $this->additionalCategories = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -156,6 +172,30 @@ class Product
     public function setImage(?string $image): static
     {
         $this->image = $image;
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Category>
+     */
+    public function getAdditionalCategories(): Collection
+    {
+        return $this->additionalCategories;
+    }
+
+    public function addAdditionalCategory(Category $additionalCategory): static
+    {
+        if (!$this->additionalCategories->contains($additionalCategory)) {
+            $this->additionalCategories->add($additionalCategory);
+        }
+
+        return $this;
+    }
+
+    public function removeAdditionalCategory(Category $additionalCategory): static
+    {
+        $this->additionalCategories->removeElement($additionalCategory);
+
         return $this;
     }
 }

@@ -46,9 +46,10 @@ class AppController extends AbstractController
             throw $this->createNotFoundException();
         }
 
-        $categories = array_map(
-            fn(Category $category) => $this->dtoMapperService->mapCategory($category),
-            $this->categoryRepository->findAllForEvent($event),
+        $useCategoryTabs = $event->isUseCategoryTabs();
+        $categories = $this->dtoMapperService->mapCategories(
+            $this->categoryRepository->findAllForEvent($event, loadAdditionalCategories: $useCategoryTabs),
+            duplicateCategoryProducts: $useCategoryTabs,
         );
 
         return $this->render('app/index.html.twig', [

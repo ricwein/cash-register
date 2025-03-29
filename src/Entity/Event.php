@@ -11,7 +11,7 @@ use Stringable;
 #[ORM\Entity(repositoryClass: EventRepository::class)]
 class Event implements Stringable
 {
-    private const DEFAULT_PRODUCTS_PER_ROW = 5;
+    private const int DEFAULT_PRODUCTS_PER_ROW = 5;
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]

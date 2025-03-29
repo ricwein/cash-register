@@ -14,6 +14,69 @@ readonly class DTOMapperService
         #[Autowire('%app.upload_dir_name%')] private string $uploadDirName,
     ) {}
 
+    /**
+     * @param array<CategoryEntity> $categories
+     * @return array<CategoryDTO>
+     */
+    public function mapCategories(array $categories, bool $duplicateCategoryProducts): array
+    {
+        /** @var array<int, CategoryDTO> $categoryDTOs */
+        $categoryDTOs = [];
+        /** @var array<int, array{category: CategoryEntity, products: ProductEntity[]}> $additionalCategoryProducts */
+        $additionalCategoryProducts = [];
+        foreach ($categories as $category) {
+            $categoryDTO = $this->mapCategory($category);
+            if ($categoryDTO === null) {
+                continue;
+            }
+            $categoryDTOs[$category->getId()] = $categoryDTO;
+
+            if (!$duplicateCategoryProducts) {
+                continue;
+            }
+
+            foreach ($category->getProducts() as $product) {
+                foreach ($product->getAdditionalCategories() as $additionalCategory) {
+                    if (!isset($additionalCategoryProducts[$additionalCategory->getId()])) {
+                        $additionalCategoryProducts[$additionalCategory->getId()] = [
+                            'category' => $additionalCategory,
+                            'products' => [],
+                        ];
+                    }
+                    $additionalCategoryProducts[$additionalCategory->getId()]['products'][] = $product;
+                }
+            }
+        }
+
+        foreach ($additionalCategoryProducts as $categoryId => $additionalData) {
+            /**
+             * @var CategoryEntity $additionalCategory
+             * @var ProductEntity[] $products
+             */
+            ['category' => $additionalCategory, 'products' => $products] = $additionalData;
+            $productDTOs = array_filter(
+                array_map(
+                    fn(ProductEntity $product) => $this->mapProduct($product, $product->getCategory()),
+                    $products,
+                )
+            );
+
+            if (!isset($categoryDTOs[$categoryId])) {
+                $categoryDTOs[$categoryId] = new CategoryDTO(
+                    id: $categoryId,
+                    name: $additionalCategory->getName(),
+                    color: $additionalCategory->getColor(),
+                    products: $productDTOs,
+                );
+            } else {
+                $categoryDTOs[$categoryId] = $categoryDTOs[$categoryId]->withProducts($productDTOs);
+            }
+
+        }
+
+        return array_values($categoryDTOs);
+    }
+
     public function mapCategory(CategoryEntity $category): ?CategoryDTO
     {
         if (null === $id = $category->getId()) {

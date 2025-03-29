@@ -8,7 +8,7 @@ use Doctrine\Persistence\ObjectManager;
 
 class CategoryFixtures extends Fixture
 {
-    private const CATEGORIES = [
+    private const array CATEGORIES = [
         ['Heißgetränke', '#B71C1C'],
         ['AfG', '#B39DDB'],
         ['Eisgetränke', '#283593'],

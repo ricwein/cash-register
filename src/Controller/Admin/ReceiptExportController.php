@@ -26,7 +26,7 @@ use Twig\Error\SyntaxError;
 
 class ReceiptExportController extends AbstractController
 {
-    public const DEFAULT_CHART_RANGE = 'P6M';
+    public const string DEFAULT_CHART_RANGE = 'P6M';
 
     public function __construct(
         private readonly ClockInterface $clock,

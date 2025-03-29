@@ -11,7 +11,7 @@ use Doctrine\Persistence\ObjectManager;
 
 class ProductFixtures extends Fixture implements DependentFixtureInterface
 {
-    private const PRODUCTS = [
+    private const array PRODUCTS = [
         [['Tagesbetrieb'], 'Heißgetränke', 'Filterkaffee klein', 2.50, 'fa-solid fa-mug-hot'],
         [['Tagesbetrieb'], 'Heißgetränke', 'Filterkaffee groß', 3.50, 'fa-solid fa-mug-hot'],
         [['Tagesbetrieb'], 'Heißgetränke', 'Kaffee crème klein', 3.50, 'fa-solid fa-mug-hot'],

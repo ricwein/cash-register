@@ -14,6 +14,16 @@ final readonly class Category implements JsonSerializable
         private array $products,
     ) {}
 
+    public function withProducts(array $products): self
+    {
+        return new self(
+            id: $this->id,
+            name: $this->name,
+            color: $this->color,
+            products: [...$this->products, ...$products],
+        );
+    }
+
     public function jsonSerialize(): array
     {
         return [

@@ -84,7 +84,10 @@ function productClicked(product: Product) {
 <style scoped lang="scss">
 .selection-view {
   max-height: 100vh;
-  overflow-y: scroll;
+
+  > * {
+    overflow-y: scroll !important;
+  }
 
   .row {
     margin-left: 0;
@@ -94,9 +97,9 @@ function productClicked(product: Product) {
 
 .tab-bar {
   border-top: 0.1rem solid var(--bs-dark);
-  border-radius: 0;
-  position: sticky;
-  bottom: 0;
+  //border-radius: 0;
+  //position: sticky;
+  //bottom: 0;
 
   .tab:not(:first-of-type) {
     border-left: 0.1em solid rgba(255, 255, 255, 0.3);

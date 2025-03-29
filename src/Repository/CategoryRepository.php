@@ -20,12 +20,18 @@ class CategoryRepository extends ServiceEntityRepository
     /**
      * @return Category[]
      */
-    public function findAllForEvent(Event $event): array
+    public function findAllForEvent(Event $event, bool $loadAdditionalCategories): array
     {
         $queryBuilder = $this->createQueryBuilder('category');
         $queryBuilder
             ->leftJoin('category.products', 'product')
             ->addSelect('product');
+
+        if ($loadAdditionalCategories) {
+            $queryBuilder
+                ->leftJoin('product.additionalCategories', 'additionalCategory')
+                ->addSelect('additionalCategory');
+        }
 
         $queryBuilder
             ->where(':event MEMBER OF product.events')

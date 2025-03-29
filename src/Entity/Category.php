@@ -6,6 +6,7 @@ use App\Repository\CategoryRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 use Stringable;
 
 #[ORM\Entity(repositoryClass: CategoryRepository::class)]
@@ -20,9 +21,11 @@ class Category implements Stringable
     private ?int $priority = null;
 
     #[ORM\Column(length: 255, unique: true)]
+    #[Assert\NotBlank]
     private ?string $name = null;
 
     #[ORM\Column(length: 7, options: ['fixed' => true])]
+    #[Assert\NotBlank]
     private ?string $color = null;
 
     /**

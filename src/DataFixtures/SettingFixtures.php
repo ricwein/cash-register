@@ -8,10 +8,6 @@ use Doctrine\Persistence\ObjectManager;
 
 class SettingFixtures extends Fixture
 {
-    private const SETTINGS = [
-        'landscape_mode' => true,
-    ];
-
     public function load(ObjectManager $manager): void
     {
         $manager->persist(

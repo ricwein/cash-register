@@ -23,6 +23,7 @@ use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Validator\Constraints\Image;
 
 class ProductCrudController extends AbstractCrudController
 {
@@ -44,9 +45,15 @@ class ProductCrudController extends AbstractCrudController
             TextField::new('name'),
             AssociationField::new('events'),
             AssociationField::new('category'),
+            AssociationField::new('additionalCategories'),
             ColorField::new('color'),
             IntegerField::new('priority'),
-            ImageField::new('image')->setBasePath($this->uploadDirName)->setUploadDir($this->uploadDirPath),
+            ImageField::new('image')
+                ->setBasePath($this->uploadDirName)
+                ->setUploadDir($this->uploadDirPath)
+                ->setFileConstraints(new Image(maxSize: '2M', maxWidth: 2048, maxHeight: 2048, detectCorrupted: true))
+                ->setUploadedFileNamePattern('[slug]-[contenthash].[extension]')
+            ,
             MoneyField::new('price')->addCssClass('fw-bold')->setCurrency('EUR')->setStoredAsCents(false),
         ];
     }

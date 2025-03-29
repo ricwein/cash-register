@@ -26,7 +26,7 @@ final class Version20250326181431 extends AbstractMigration
                     'button_sound',
                     'Akustisches Feedback (Ton) für Kassen-Schaltflächen.',
                     1
-                );
+                ) ON DUPLICATE KEY UPDATE description = VALUES(description);
             QUERY
         );
     }

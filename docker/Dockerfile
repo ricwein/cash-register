@@ -53,7 +53,7 @@ ENV APP_SECRET=${APP_SECRET}
 
 USER root
 RUN apk add --update --no-cache \
-    supervisor nginx acl fcgi file gettext gnu-libiconv
+    supervisor nginx acl fcgi file gd gettext gnu-libiconv
 
 COPY docker/php-fpm/docker-entrypoint.sh /usr/local/bin/docker-entrypoint
 RUN chmod +x /usr/local/bin/docker-entrypoint && sync
