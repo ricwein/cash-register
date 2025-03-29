@@ -99,7 +99,10 @@ class ReceiptExportController extends AbstractController
         ]);
         $chart->setOptions([
             'maintainAspectRatio' => false,
-            'plugins' => ['legend' => ['display' => false]],
+            'plugins' => [
+                'legend' => ['display' => false],
+                'tooltip' => ['padding' => 20, 'backgroundColor' => '#222', 'cornerRadius' => 1, 'boxPadding' => 0, 'usePointStyle' => true],
+            ],
             'scales' => [
                 'x' => [
                     'grid' => ['display' => false],

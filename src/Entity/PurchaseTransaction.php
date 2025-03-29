@@ -10,6 +10,7 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Uid\Uuid;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: PurchaseTransactionRepository::class)]
 #[ORM\Index(columns: ['created_at', 'event_name'])]
@@ -33,6 +34,7 @@ class PurchaseTransaction
     private string $price = '0.00';
 
     #[ORM\Column(length: 255)]
+    #[Assert\NotBlank]
     private ?string $eventName = null;
 
     /**

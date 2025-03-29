@@ -40,6 +40,7 @@ readonly class CsvGenerator implements FileGeneratorInterface
             ReceiptExportType::PER_EVENT => $this->buildEventCsv($filter, $file),
             ReceiptExportType::ACCUMULATED => $this->buildOverallCsv($filter, $file),
         };
+        $csv->fflush();
 
         return $this->buildFileResponse($csv);
     }
@@ -59,7 +60,7 @@ readonly class CsvGenerator implements FileGeneratorInterface
             if ($eventName !== $firstEvent) {
                 $csv->fputcsv([]);
             }
-            $csv->fputcsv([$eventName]);
+            $csv->fputcsv([$eventName . ' ' . rtrim($filter->getFromDate()->format('d.m.Y') . ' - ' . $filter->getToDate()?->format('d.m.Y'), '- ')]);
             $this->writeArticles($csv, $eventArticles, $paymentPrices[$eventName]);
         }
 
@@ -75,6 +76,7 @@ readonly class CsvGenerator implements FileGeneratorInterface
         $csv = new SplFileObject($file->getPathname(), 'wb+');
         $csv->fwrite(chr(0xEF) . chr(0xBB) . chr(0xBF));
         $csv->setCsvControl(';', escape: '');
+        $csv->fputcsv([rtrim($filter->getFromDate()->format('d.m.Y') . ' - ' . $filter->getToDate()?->format('d.m.Y'), '- ')]);
         $this->writeArticles($csv, $groupedArticles, $paymentPrices);
 
         return $csv;
@@ -107,6 +109,6 @@ readonly class CsvGenerator implements FileGeneratorInterface
             $csv->fputcsv(['', ucfirst(strtolower($this->translator->trans($type))), number_format((float)$price, 2, ',', '.')]);
         }
 
-        $csv->fputcsv(['', '', number_format($priceSum, 2, ',', '.')]);
+        $csv->fputcsv(['', '∑', number_format($priceSum, 2, ',', '.')]);
     }
 }

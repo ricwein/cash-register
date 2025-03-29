@@ -7,6 +7,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Stringable;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: EventRepository::class)]
 class Event implements Stringable
@@ -21,9 +22,11 @@ class Event implements Stringable
     private ?int $priority = null;
 
     #[ORM\Column(length: 255)]
+    #[Assert\NotBlank]
     private ?string $name = null;
 
     #[ORM\Column]
+    #[Assert\Positive]
     private int $productsPerRow = self::DEFAULT_PRODUCTS_PER_ROW;
 
     /**
