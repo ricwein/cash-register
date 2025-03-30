@@ -32,8 +32,6 @@ readonly class PdfGenerator implements FileGeneratorInterface
         return new BinaryFileResponse(
             file: $file,
             headers: [
-                'Content-Transfer-Encoding', 'binary',
-                'Content-Type' => 'application/pdf',
                 'Content-Disposition' => "attachment; filename=\"{$file->getFilename()}\"",
             ]
         );

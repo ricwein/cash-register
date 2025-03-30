@@ -27,8 +27,6 @@ readonly class CsvGenerator implements FileGeneratorInterface
         return new BinaryFileResponse(
             file: $file,
             headers: [
-                'Content-Transfer-Encoding', 'binary',
-                'Content-Type' => 'text/csv',
                 'Content-Disposition' => "attachment; filename=\"{$file->getFilename()}\"",
             ]
         );
