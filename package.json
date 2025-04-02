@@ -13,6 +13,7 @@
     "@symfony/ux-turbo": "file:vendor/symfony/ux-turbo/assets",
     "@symfony/ux-vue": "file:vendor/symfony/ux-vue/assets",
     "@symfony/webpack-encore": "^5.0.0",
+    "@types/serviceworker": "^0.0.127",
     "@vue/tsconfig": "^0.7.0",
     "@vueuse/core": "^13.0.0",
     "@vueuse/sound": "^2.1.3",

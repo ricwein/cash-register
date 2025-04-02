@@ -1089,6 +1089,11 @@
   dependencies:
     undici-types "~6.20.0"
 
+"@types/serviceworker@^0.0.127":
+  version "0.0.127"
+  resolved "https://registry.yarnpkg.com/@types/serviceworker/-/serviceworker-0.0.127.tgz#6b57f0fe4830b46586755603c7f03c62eff22791"
+  integrity sha512-jj6drAuP9/KzIeuLKQyIFnmWF4cZMr3phuej3zfsilo7bwaAmDOq2L7Ns/3IjoLVRWpW5q0UBdpiyZAP8CQPzw==
+
 "@types/web-bluetooth@^0.0.20":
   version "0.0.20"
   resolved "https://registry.yarnpkg.com/@types/web-bluetooth/-/web-bluetooth-0.0.20.tgz#f066abfcd1cbe66267cdbbf0de010d8a41b41597"

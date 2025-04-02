@@ -184,21 +184,13 @@ const checkoutState = defineModel<CheckoutStateMachine>({required: true})
 checkoutState.value
     .addCallback(null, () => changeField.value = '0,00')
     .addCallback(null, change => {
-      if (!props.buttonSound) {
-        return;
-      }
+      if (!props.buttonSound) return;
 
-      if (change.transition === CheckoutTransition.Error) {
-        playWarning()
-      } else if (change.transition === CheckoutTransition.Success) {
-        playSuccess()
-      } else if (change.transition === CheckoutTransition.Cancel) {
-        playDelete()
-      } else if (change.transition === CheckoutTransition.Back) {
-        playCancel()
-      } else {
-        playButton()
-      }
+      if (change.transition === CheckoutTransition.Error) playWarning()
+      else if (change.transition === CheckoutTransition.Success) playSuccess()
+      else if (change.transition === CheckoutTransition.Cancel) playDelete()
+      else if (change.transition === CheckoutTransition.Back) playCancel()
+      else playButton()
     })
     .addCallback(CheckoutTransition.Cash, () => setTimeout(() => document.getElementById('calculatorInput')?.focus(), 200))
     .addCallback(CheckoutState.Sending, processPayment);
@@ -244,28 +236,34 @@ function processPayment(changes: StateChange): void {
 
   fetch(endpointUrl, {
     method: 'PUT',
-    body: JSON.stringify(data)
+    body: JSON.stringify(data),
+    signal: AbortSignal.timeout(3000)
   })
       .then(response => response.json())
       .then(response => {
-        if (response.hasOwnProperty('success') && response.success) {
-          emit('create-new-receipt')
+        const message = response.hasOwnProperty('message') ? response.message : '[unknown]'
+        const state = response.hasOwnProperty('state') ? response.state : 'error'
 
-          checkoutState.value.dispatch(CheckoutTransition.Success)
+        switch (state) {
+          case 'success':
+            emit('create-new-receipt')
+            checkoutState.value.dispatch(CheckoutTransition.Success)
+            toast.success(message, {autoClose: 1000})
+            break
 
-          toast.success('verarbeitet', {
-            position: toast.POSITION.TOP_LEFT,
-            theme: toast.THEME.DARK,
-            autoClose: 1000,
-          })
-        } else if (response.hasOwnProperty('error')) {
-          checkoutState.value.dispatch(CheckoutTransition.Error)
+          case 'error':
+            checkoutState.value.dispatch(CheckoutTransition.Error)
+            toast.error(message)
+            break
 
-          toast.error(response.error, {
-            position: toast.POSITION.TOP_LEFT,
-            theme: toast.THEME.DARK,
-          })
+          case 'offline':
+            checkoutState.value.dispatch(CheckoutTransition.Success)
+            toast.warning(message, {autoClose: 1000})
         }
+      })
+      .catch(error => {
+        checkoutState.value.dispatch(CheckoutTransition.Error)
+        toast.error(error)
       })
 }
 </script>
