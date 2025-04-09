@@ -1,8 +1,12 @@
 services:
   web:
+    image: ricwein/cash-register:latest
     build:
       context: .
       dockerfile: docker/Dockerfile
+      platforms:
+        - "linux/amd64"
+        - "linux/arm64"
       args:
         PHP_VERSION: ${PHP_VERSION:-8.4}
         PHP_TIMEZONE: ${PHP_TIMEZONE:-UTC}
