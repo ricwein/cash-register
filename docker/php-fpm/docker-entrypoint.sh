@@ -6,7 +6,7 @@ if [ "${1#-}" != "$1" ]; then
   set -- php-fpm "$@"
 fi
 
-if [ "$1" = 'php-fpm' ] || [ "$1" = 'php' ] || [ "$1" = 'bin/console' ] || [ "$1" = 'supervisord' ]; then
+if [ "$1" = 'php-fpm' ] || [ "$1" = 'php' ] || [ "$1" = 'bin/console' ]; then
 
   rm -f .env.local.php
 

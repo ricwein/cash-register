@@ -1,19 +1,20 @@
 ARG PHP_VERSION=8.4
 ARG APP_ENV
 
-#############################
-###        PHP-FPM        ###
-#############################
+##############################
+###        PHP BASE        ###
+##############################
 FROM php:${PHP_VERSION}-fpm-alpine AS php-base
 
 ADD --chmod=0755 https://github.com/mlocati/docker-php-extension-installer/releases/latest/download/install-php-extensions /usr/local/bin/
-RUN install-php-extensions bcmath ctype iconv intl opcache pdo_mysql @composer
+RUN install-php-extensions bcmath ctype iconv intl opcache pdo_mysql gd @composer
 
 ARG PHP_TIMEZONE=${PHP_TIMEZONE:-UTC}
 RUN echo "date.timezone = ${PHP_TIMEZONE}" > $PHP_INI_DIR/conf.d/tzone.ini
 
 WORKDIR /app
 COPY composer.json composer.lock ./
+ENV COMPOSER_ALLOW_SUPERUSER=1
 
 RUN if [ "$APP_ENV" = "prod" ] ;  \
     then ln -sf "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini" ; \
@@ -41,10 +42,21 @@ RUN yarn install --force --frozen-lockfile
 RUN yarn encore ${APP_ENV}
 
 
+############################
+###        NGINX         ###
+############################
+
+FROM nginx AS cash-register_nginx
+
+WORKDIR /app
+COPY --from=yarn-encore /app/public/build ./public/build
+COPY docker/nginx/nginx.conf /etc/nginx/conf.d/default.conf
+
+
 #############################
 ###        PHP-FPM        ###
 #############################
-FROM php-base
+FROM php-base AS cash-register_php-fpm
 
 ARG APP_ENV
 ENV APP_ENV=${APP_ENV}
@@ -53,7 +65,7 @@ ENV APP_SECRET=${APP_SECRET}
 
 USER root
 RUN apk add --update --no-cache \
-    supervisor nginx acl fcgi file gd gettext gnu-libiconv
+    acl fcgi file gd gettext gnu-libiconv
 
 COPY docker/php-fpm/docker-entrypoint.sh /usr/local/bin/docker-entrypoint
 RUN chmod +x /usr/local/bin/docker-entrypoint && sync
@@ -62,20 +74,19 @@ COPY docker/php-fpm/docker-healthcheck.sh /usr/local/bin/docker-healthcheck
 RUN chmod +x /usr/local/bin/docker-healthcheck
 HEALTHCHECK --interval=10s --timeout=3s --retries=3 CMD ["docker-healthcheck"]
 
-ENV COMPOSER_ALLOW_SUPERUSER=1
-ENV PATH="${PATH}:/root/.composer/vendor/bin"
-
-# Setup php/php-fpm + nginx config
 COPY docker/php-fpm/php.ini $PHP_INI_DIR/conf.d/symfony.ini
 COPY docker/php-fpm/php-fpm.conf /usr/local/etc/php-fpm.d/zz-docker.conf
-COPY docker/nginx/ /etc/nginx/http.d/
-COPY docker/php-fpm/supervisord.conf /etc/supervisord.conf
+COPY docker/php-fpm/opcache.ini /php/production/
+COPY migrations ./migrations
+COPY templates ./templates
+COPY translations ./translations
+COPY public ./public
+COPY src ./src
+COPY .env ./.env
 
-COPY . .
-COPY --from=yarn-encore /app/public/build ./public/build
 RUN mkdir -p var/cache var/log public/uploads && chmod -R 777 var/cache var/log public/uploads && sync
 
 RUN sed -i -e "s/APP_SECRET=.*/APP_SECRET=${APP_SECRET}/g" ./.env
 
 ENTRYPOINT ["docker-entrypoint"]
-CMD ["supervisord", "-n", "-c", "/etc/supervisord.conf"]
+CMD [ "php-fpm" ]
