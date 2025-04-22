@@ -7,6 +7,8 @@ use App\Model\ReceiptArticle;
 
 class ReceiptArticleGroupHelper
 {
+    public const int PRECISION = 2;
+
     /**
      * @param array<string, ReceiptArticle[]> $articles
      * @return array{
@@ -35,7 +37,7 @@ class ReceiptArticleGroupHelper
                     $paymentPrices[$eventName][$paymentType] = bcadd(
                         $paymentPrices[$eventName][$paymentType],
                         $eventArticle->price,
-                        2,
+                        self::PRECISION,
                     );
                 }
 
@@ -73,7 +75,7 @@ class ReceiptArticleGroupHelper
                 $paymentPrices[$paymentType] = bcadd(
                     $paymentPrices[$paymentType],
                     $article->price,
-                    2,
+                    self::PRECISION,
                 );
             }
 

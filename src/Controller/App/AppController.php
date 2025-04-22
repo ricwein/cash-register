@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace App\Controller\App;
 
-use App\Entity\Category;
 use App\Entity\Event;
 use App\Entity\Product;
 use App\Entity\PurchasedArticle;
 use App\Entity\PurchaseTransaction;
 use App\Enum\PaymentType;
+use App\Helper\ReceiptArticleGroupHelper;
 use App\Repository\CategoryRepository;
 use App\Repository\EventRepository;
 use App\Repository\ProductRepository;
@@ -28,6 +28,8 @@ use Symfony\Component\Uid\Uuid;
 #[Route('/app')]
 class AppController extends AbstractController
 {
+    private const int PRECISION = ReceiptArticleGroupHelper::PRECISION;
+
     public function __construct(
         private readonly EntityManagerInterface $entityManager,
         private readonly DTOMapperService $dtoMapperService,
@@ -80,7 +82,7 @@ class AppController extends AbstractController
             $products[$product->getId()] = $product;
         }
 
-        $transaction = (new PurchaseTransaction())
+        $transaction = new PurchaseTransaction()
             ->setEventName($event->getName())
             ->setPaymentType($paymentType)
             ->setTransactionId(Uuid::v4());
@@ -89,9 +91,9 @@ class AppController extends AbstractController
         foreach ($cartData as $productId => $quantity) {
             $product = $products[$productId];
 
-            $price = bcadd($price, $product->getPrice(), 2);
+            $price = bcadd($price, bcmul($product->getPrice(), (string)$quantity, self::PRECISION), self::PRECISION);
             $transaction->addSoldArticle(
-                (new PurchasedArticle())
+                new PurchasedArticle()
                     ->setPrice($product->getPrice())
                     ->setQuantity($quantity)
                     ->setProductName($product->getName())

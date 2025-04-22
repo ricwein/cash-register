@@ -72,8 +72,8 @@ class ReceiptExportController extends AbstractController
         $transactions = $this->purchaseTransactionRepository->findTransactionCountByDate(from: $fromDate, to: $now);
         $sales = $prices = [];
         foreach ($transactions as $date => $transaction) {
-            $sales[$date][] = $transaction[0];
-            $prices[$date][] = $transaction[1];
+            $sales[$date] = $transaction[0];
+            $prices[$date] = $transaction[1];
         }
 
         $chart = $this->chartBuilder->createChart(Chart::TYPE_BAR);

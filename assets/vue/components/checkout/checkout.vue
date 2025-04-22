@@ -84,6 +84,7 @@
                 min="0.0"
                 step="0.01"
                 @input="updateChangeMoney"
+                @keyup.enter="checkoutState.dispatch(CheckoutTransition.Execute)"
                 :placeholder="NumberFormatter.format(price).slice(0, -1).trimEnd()"
             />
             <span class="input-group-text border-0 bg-white">€</span>

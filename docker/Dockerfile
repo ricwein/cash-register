@@ -16,6 +16,10 @@ WORKDIR /app
 COPY composer.json composer.lock ./
 ENV COMPOSER_ALLOW_SUPERUSER=1
 
+COPY docker/php-fpm/php-fpm.conf /usr/local/etc/php-fpm.d/zz-docker.conf
+COPY docker/php-fpm/php.ini $PHP_INI_DIR/conf.d/symfony.ini
+COPY docker/php-fpm/opcache.ini $PHP_INI_DIR/conf.d/
+
 RUN if [ "$APP_ENV" = "prod" ] ;  \
     then ln -sf "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini" ; \
     else ln -sf "$PHP_INI_DIR/php.ini-development" "$PHP_INI_DIR/php.ini" ; fi
@@ -74,9 +78,6 @@ COPY docker/php-fpm/docker-healthcheck.sh /usr/local/bin/docker-healthcheck
 RUN chmod +x /usr/local/bin/docker-healthcheck
 HEALTHCHECK --interval=10s --timeout=3s --retries=3 CMD ["docker-healthcheck"]
 
-COPY docker/php-fpm/php.ini $PHP_INI_DIR/conf.d/symfony.ini
-COPY docker/php-fpm/php-fpm.conf /usr/local/etc/php-fpm.d/zz-docker.conf
-COPY docker/php-fpm/opcache.ini /php/production/
 COPY migrations ./migrations
 COPY templates ./templates
 COPY translations ./translations
@@ -90,3 +91,10 @@ RUN sed -i -e "s/APP_SECRET=.*/APP_SECRET=${APP_SECRET}/g" ./.env
 
 ENTRYPOINT ["docker-entrypoint"]
 CMD [ "php-fpm" ]
+
+###################################
+###        PHP-FPM-DEBUG        ###
+###################################
+FROM cash-register_php-fpm AS cash-register_php-fpm-debug
+RUN install-php-extensions xdebug
+COPY docker/php-fpm/xdebug.ini $PHP_INI_DIR/conf.d/
