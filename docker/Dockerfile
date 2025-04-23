@@ -13,7 +13,18 @@ ARG PHP_TIMEZONE=${PHP_TIMEZONE:-UTC}
 RUN echo "date.timezone = ${PHP_TIMEZONE}" > $PHP_INI_DIR/conf.d/tzone.ini
 
 WORKDIR /app
+
 COPY composer.json composer.lock ./
+COPY .env ./.env
+COPY bin ./bin
+COPY config ./config
+COPY migrations ./migrations
+COPY public ./public
+COPY src ./src
+COPY templates ./templates
+COPY tests ./tests
+COPY translations ./translations
+
 ENV COMPOSER_ALLOW_SUPERUSER=1
 
 COPY docker/php-fpm/php-fpm.conf /usr/local/etc/php-fpm.d/zz-docker.conf
@@ -24,8 +35,8 @@ RUN if [ "$APP_ENV" = "prod" ] ;  \
     then ln -sf "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini" ; \
     else ln -sf "$PHP_INI_DIR/php.ini-development" "$PHP_INI_DIR/php.ini" ; fi
 RUN if [ "$APP_ENV" = "prod" ] ;  \
-    then composer install --prefer-dist --no-progress --no-interaction --optimize-autoloader --no-scripts --no-dev ; \
-    else composer install --prefer-dist --no-progress --no-interaction --optimize-autoloader --no-scripts ; fi
+    then composer install --prefer-dist --no-progress --no-interaction --optimize-autoloader --no-dev ; \
+    else composer install --prefer-dist --no-progress --no-interaction --optimize-autoloader ; fi
 RUN if [ "$APP_ENV" = "prod" ] ; then composer dump-autoload --classmap-authoritative --no-dev ; fi
 
 
@@ -49,11 +60,12 @@ RUN yarn encore ${APP_ENV}
 ############################
 ###        NGINX         ###
 ############################
-
 FROM nginx AS cash-register_nginx
 
 WORKDIR /app
+COPY public ./public
 COPY --from=yarn-encore /app/public/build ./public/build
+COPY --from=php-base /app/public/bundles ./public/bundles
 COPY docker/nginx/nginx.conf /etc/nginx/conf.d/default.conf
 
 
@@ -78,12 +90,7 @@ COPY docker/php-fpm/docker-healthcheck.sh /usr/local/bin/docker-healthcheck
 RUN chmod +x /usr/local/bin/docker-healthcheck
 HEALTHCHECK --interval=10s --timeout=3s --retries=3 CMD ["docker-healthcheck"]
 
-COPY migrations ./migrations
-COPY templates ./templates
-COPY translations ./translations
-COPY public ./public
-COPY src ./src
-COPY .env ./.env
+COPY --from=yarn-encore /app/public/build ./public/build
 
 RUN mkdir -p var/cache var/log public/uploads && chmod -R 777 var/cache var/log public/uploads && sync
 
@@ -92,9 +99,11 @@ RUN sed -i -e "s/APP_SECRET=.*/APP_SECRET=${APP_SECRET}/g" ./.env
 ENTRYPOINT ["docker-entrypoint"]
 CMD [ "php-fpm" ]
 
+
 ###################################
 ###        PHP-FPM-DEBUG        ###
 ###################################
 FROM cash-register_php-fpm AS cash-register_php-fpm-debug
+
 RUN install-php-extensions xdebug
 COPY docker/php-fpm/xdebug.ini $PHP_INI_DIR/conf.d/
