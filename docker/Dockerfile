@@ -83,6 +83,7 @@ COPY templates ./templates
 COPY translations ./translations
 COPY public ./public
 COPY src ./src
+COPY bin ./bin
 COPY .env ./.env
 
 RUN mkdir -p var/cache var/log public/uploads && chmod -R 777 var/cache var/log public/uploads && sync
