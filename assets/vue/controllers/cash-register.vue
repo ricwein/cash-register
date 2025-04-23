@@ -24,7 +24,7 @@
 
   <checkout
       v-model="checkoutState"
-      :buttonSound :price :cart :confirmEndpointUrl
+      :buttonSound :price :cart :transactor
       @checkoutCancelled="checkoutState.dispatch(CheckoutTransition.Cancel)"
       @createNewReceipt="reset"
   ></checkout>
@@ -32,6 +32,7 @@
 
 <script setup lang="ts">
 import {computed, type PropType, ref, shallowRef} from "vue";
+import {toast} from "vue3-toastify";
 import {CheckoutStateMachine, CheckoutTransition} from "../../components/checkout-state-machine.ts";
 import Category from "../../model/category";
 import Product from "../../model/product";
@@ -44,6 +45,7 @@ import BackspaceButton from "../components/receipt/buttons/backspace-button.vue"
 import ProductSelection from "../components/selection/product-selection.vue";
 import ProductSelectionTabbed from "../components/selection/product-selection-tabbed.vue";
 import Checkout from "../components/checkout/checkout.vue";
+import Transactor from "../../components/transactor.ts";
 
 const props = defineProps({
   confirmEndpointUrl: {type: String, required: true},
@@ -56,6 +58,24 @@ const props = defineProps({
 });
 
 const checkoutState = shallowRef<CheckoutStateMachine>(new CheckoutStateMachine())
+const transactor = new Transactor(decodeURI(props.confirmEndpointUrl))
+
+transactor.queue.length().then((queueCount: number) => {
+  if (queueCount > 0) {
+    const loadingToast = toast.loading(`0 / ${queueCount}`, {
+      toastClassName: 'w-50',
+    })
+    transactor.sendAll((current, max) => {
+      toast.update(loadingToast, {render: `${current} / ${max} ...`})
+    }).then(() => {
+      toast.update(loadingToast, {
+        type: toast.TYPE.SUCCESS,
+        isLoading: false,
+        autoClose: 1000,
+      })
+    })
+  }
+})
 
 const cart = ref<Product[]>([]);
 const price = computed<number>(() => cart.value

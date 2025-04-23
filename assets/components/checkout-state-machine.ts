@@ -8,6 +8,7 @@ export const enum CheckoutTransition {
     Skip = 'skip',
     Back = 'back',
     Error = 'error',
+    RetryableError = 'retryable',
     Success = 'success',
     Execute = 'execute',
 }
@@ -43,6 +44,7 @@ export class CheckoutStateMachine {
         [CheckoutTransition.Skip]: [],
         [CheckoutTransition.Back]: [],
         [CheckoutTransition.Error]: [],
+        [CheckoutTransition.RetryableError]: [],
         [CheckoutTransition.Success]: [],
         [CheckoutTransition.Execute]: [],
     };
@@ -71,6 +73,7 @@ export class CheckoutStateMachine {
         },
         [CheckoutState.Sending]: {
             [CheckoutTransition.Success]: () => CheckoutState.Off,
+            [CheckoutTransition.RetryableError]: () => CheckoutState.Off,
             [CheckoutTransition.Error]: () => CheckoutState.Failed,
         },
         [CheckoutState.Failed]: {

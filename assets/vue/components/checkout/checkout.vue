@@ -20,29 +20,29 @@
 
       <template v-slot:actions>
         <div class="d-flex w-100 action-row">
-          <v-btn @click="checkoutState.dispatch(CheckoutTransition.Cancel)" class="me-auto h-auto btn btn-danger p-3">
+          <v-btn @click="checkoutStateMachine.dispatch(CheckoutTransition.Cancel)" class="me-auto h-auto btn btn-danger p-3">
             Abbrechen
           </v-btn>
 
           <div v-if="price > 0.00">
-            <v-btn @click="checkoutState.dispatch(CheckoutTransition.Cash, 'cash')" class="me-3 h-auto btn btn-success p-3">
-              <i class="fa-solid fa-xl fa-money-bill-wave"></i>
-              Bar
-            </v-btn>
-
-            <v-btn @click="checkoutState.dispatch(CheckoutTransition.Card, 'card')" class="h-auto btn btn-success p-3">
+            <v-btn @click="checkoutStateMachine.dispatch(CheckoutTransition.Card, 'card')" class="me-3 h-auto btn btn-primary py-3 px-5">
               <i class="fa-solid fa-xl fa-credit-card"></i>
               Karte
             </v-btn>
+
+            <v-btn @click="checkoutStateMachine.dispatch(CheckoutTransition.Cash, 'cash')" class="h-auto btn btn-success py-3 px-5">
+              <i class="fa-solid fa-xl fa-money-bill-wave"></i>
+              Bar
+            </v-btn>
           </div>
           <div v-else-if="price < 0.00">
-            <v-btn @click="checkoutState.dispatch(CheckoutTransition.Skip, 'cash')" class="h-auto btn btn-success p-3">
+            <v-btn @click="checkoutStateMachine.dispatch(CheckoutTransition.Skip, 'cash')" class="h-auto btn btn-success p-3">
               <i class="fa-xl mdi mdi-hand-coin"></i>
               Betrag Auszahlen
             </v-btn>
           </div>
           <div v-else>
-            <v-btn @click="checkoutState.dispatch(CheckoutTransition.Skip, 'none')" class="h-auto btn btn-success p-3">
+            <v-btn @click="checkoutStateMachine.dispatch(CheckoutTransition.Skip, 'none')" class="h-auto btn btn-success p-3">
               <i class="fa-solid fa-xl fa-check"></i>
               Bestätigen
             </v-btn>
@@ -84,7 +84,7 @@
                 min="0.0"
                 step="0.01"
                 @input="updateChangeMoney"
-                @keyup.enter="checkoutState.dispatch(CheckoutTransition.Execute)"
+                @keyup.enter="checkoutStateMachine.dispatch(CheckoutTransition.Execute)"
                 :placeholder="NumberFormatter.format(price).slice(0, -1).trimEnd()"
             />
             <span class="input-group-text border-0 bg-white">€</span>
@@ -101,16 +101,16 @@
 
       <template v-slot:actions>
         <div class="d-flex w-100 action-row">
-          <v-btn @click="checkoutState.dispatch(CheckoutTransition.Cancel)" class="me-3 h-auto btn btn-danger p-3">
+          <v-btn @click="checkoutStateMachine.dispatch(CheckoutTransition.Cancel)" class="me-3 h-auto btn btn-danger p-3">
             Abbrechen
           </v-btn>
 
-          <v-btn @click="checkoutState.dispatch(CheckoutTransition.Back)" class="me-auto h-auto btn btn-outline-primary p-3">
+          <v-btn @click="checkoutStateMachine.dispatch(CheckoutTransition.Back)" class="me-auto h-auto btn btn-outline-primary p-3">
             <i class="fa-solid fa-xl fa-arrow-left"></i>
             Zurück
           </v-btn>
 
-          <v-btn @click="checkoutState.dispatch(CheckoutTransition.Execute)" class="me-3 h-auto btn btn-success p-3">
+          <v-btn @click="checkoutStateMachine.dispatch(CheckoutTransition.Execute)" class="me-3 h-auto btn btn-success p-3">
             <i class="fa-solid fa-xl fa-check-double"></i>
             Zahlung Bestätigen
           </v-btn>
@@ -139,16 +139,16 @@
 
       <template v-slot:actions>
         <div class="d-flex w-100 action-row">
-          <v-btn @click="checkoutState.dispatch(CheckoutTransition.Cancel)" class="me-3 h-auto btn btn-danger p-3">
+          <v-btn @click="checkoutStateMachine.dispatch(CheckoutTransition.Cancel)" class="me-3 h-auto btn btn-danger p-3">
             Abbrechen
           </v-btn>
 
-          <v-btn @click="checkoutState.dispatch(CheckoutTransition.Back)" class="me-auto h-auto btn btn-outline-primary p-3">
+          <v-btn @click="checkoutStateMachine.dispatch(CheckoutTransition.Back)" class="me-auto h-auto btn btn-outline-primary p-3">
             <i class="fa-solid fa-xl fa-arrow-left"></i>
             Zurück
           </v-btn>
 
-          <v-btn @click="checkoutState.dispatch(CheckoutTransition.Execute)" class="me-3 h-auto btn btn-success p-3">
+          <v-btn @click="checkoutStateMachine.dispatch(CheckoutTransition.Execute)" class="me-3 h-auto btn btn-success p-3">
             <i class="fa-solid fa-xl fa-check-double"></i>
             Zahlung Bestätigen
           </v-btn>
@@ -159,20 +159,20 @@
 </template>
 
 <script setup lang="ts">
-import {computed, ref} from "vue";
+import {computed, type PropType, ref} from "vue";
 import {toast} from "vue3-toastify";
 import {useSound} from "@vueuse/sound";
 import Receipt from "./receipt.vue";
 import {CheckoutState, CheckoutStateMachine, CheckoutTransition, type StateChange} from "../../../components/checkout-state-machine.ts";
 import Product from "../../../model/product.ts";
 import {NumberFormatter} from "../../../components/number-formatter.ts";
+import Transactor from "../../../components/transactor.ts";
+import {Transaction} from "../../../model/transaction.ts";
 import deleteSound from '../../../sounds/delete.mp3'
 import cancelSound from '../../../sounds/cancel.mp3'
 import successSound from '../../../sounds/success.wav'
 import warningSound from '../../../sounds/warning.wav'
 import buttonSound from '../../../sounds/checkout.mp3'
-import Transactor from "../../../components/transactor.ts";
-import {Transaction} from "../../../model/transaction.ts";
 
 const {play: playButton} = useSound(buttonSound)
 const {play: playSuccess} = useSound(successSound)
@@ -181,25 +181,23 @@ const {play: playDelete} = useSound(deleteSound)
 const {play: playCancel} = useSound(cancelSound)
 
 const emit = defineEmits(['create-new-receipt', 'checkout-cancelled'])
-const checkoutState = defineModel<CheckoutStateMachine>({required: true})
+const checkoutStateMachine = defineModel<CheckoutStateMachine>({required: true})
 
 // setup vue component
 const props = defineProps({
   price: {type: Number, required: true},
   cart: {type: Array<Product>, required: true},
-  confirmEndpointUrl: {type: String, required: true},
+  transactor: {type: Object as PropType<Transactor>, required: true},
   buttonSound: {type: Boolean, required: true},
 })
 
-const transactor = new Transactor(decodeURI(props.confirmEndpointUrl ?? ''))
-
-// setup state-machine callbacks
-checkoutState.value
+// set up state-machine callbacks
+checkoutStateMachine.value
     .addCallback(null, () => changeField.value = '0,00')
     .addCallback(null, change => {
       if (!props.buttonSound) return;
 
-      if (change.transition === CheckoutTransition.Error) playWarning()
+      if (change.transition === CheckoutTransition.Error || change.transition === CheckoutTransition.RetryableError) playWarning()
       else if (change.transition === CheckoutTransition.Success) playSuccess()
       else if (change.transition === CheckoutTransition.Cancel) playDelete()
       else if (change.transition === CheckoutTransition.Back) playCancel()
@@ -210,9 +208,9 @@ checkoutState.value
 
 const changeField = ref<string>('0,00');
 
-const showDialogCheck = computed<boolean>(() => checkoutState.value.currentState() === CheckoutState.Check)
-const showDialogCalculator = computed<boolean>(() => checkoutState.value.currentState() === CheckoutState.Calculator)
-const showDialogConfirmation = computed<boolean>(() => checkoutState.value.currentState() === CheckoutState.Confirm)
+const showDialogCheck = computed<boolean>(() => checkoutStateMachine.value.currentState() === CheckoutState.Check)
+const showDialogCalculator = computed<boolean>(() => checkoutStateMachine.value.currentState() === CheckoutState.Calculator)
+const showDialogConfirmation = computed<boolean>(() => checkoutStateMachine.value.currentState() === CheckoutState.Confirm)
 
 function updateChangeMoney(event: Event): void {
   const input: HTMLInputElement = event.target as HTMLInputElement;
@@ -237,16 +235,20 @@ function processPayment(changes: StateChange): void {
     cart[product.id]++;
   }
 
-  transactor
+  props.transactor
       .send(new Transaction(paymentType, cart))
       .then(response => {
         if (response.state === CheckoutTransition.Success) {
           emit('create-new-receipt')
-          toast.success(response.message, {autoClose: 1000})
+          toast.success(response.message, {autoClose: 750})
+        } else if (response.state === CheckoutTransition.RetryableError) {
+          emit('create-new-receipt')
+          toast.warn(response.message, {autoClose: 1000})
         } else {
           toast.error(response.message)
         }
-        checkoutState.value.dispatch(response.state)
+
+        checkoutStateMachine.value.dispatch(response.state)
       })
 }
 </script>

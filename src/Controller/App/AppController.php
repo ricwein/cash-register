@@ -15,6 +15,7 @@ use App\Repository\CategoryRepository;
 use App\Repository\EventRepository;
 use App\Repository\ProductRepository;
 use App\Repository\SettingRepository;
+use App\Resolver\PaymentTransactionRequestResolver;
 use App\Service\DTOMapperService;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
@@ -65,7 +66,7 @@ class AppController extends AbstractController
     #[Route('/{eventId}/send', name: 'send_cash_register', requirements: ['eventId' => '\d+'], methods: ['PUT'])]
     public function confirmTransaction(
         int $eventId,
-        #[MapRequestPayload] PaymentTransaction $transactionData,
+        #[MapRequestPayload(resolver: PaymentTransactionRequestResolver::class)] PaymentTransaction $transactionData,
     ): Response {
         $event = $this->eventRepository->find($eventId);
         if ($event === null) {
@@ -83,7 +84,7 @@ class AppController extends AbstractController
 
         $transaction = new PurchaseTransaction()
             ->setEventName($event->getName())
-            ->setPaymentType($transactionData->getPaymentType())
+            ->setPaymentType($transactionData->paymentType)
             ->setTransactionId($transactionData->getUuid());
 
         $price = '0.00';

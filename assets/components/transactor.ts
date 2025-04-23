@@ -18,51 +18,61 @@ export default class Transactor {
             const result = await this.sendTransaction(transaction)
 
             if (result.state === CheckoutTransition.Error) {
-                await this.queue.add(transaction)
+                console.error(`[Transactor] Error: ${result.message}`)
             }
 
             return result;
         } catch (error) {
-            return {state: CheckoutTransition.Error, message: `${error}`}
+            const message = `${error}`
+            const isRetryable = message.includes('NetworkError') || message.includes('timed out')
+            console.error(`[Transactor] Error: `, error, {retryable: isRetryable})
+
+            if (isRetryable) {
+                await this.queue.push(transaction)
+                return {state: CheckoutTransition.RetryableError, message: 'Server not reachable'}
+            }
+
+            return {state: CheckoutTransition.Error, message}
         }
     }
 
-    public async sendAll(): Promise<void> {
-        this.queue.getAll().then(transactions => {
-            transactions.forEach(transaction => {
-                this.sendTransaction(transaction)
+    public async sendAll(callback: (current: number, of: number) => void): Promise<void> {
+        const items = await this.queue.getAll()
+        const max = items.length
+        let current = 1
+        for (const transaction of items) {
+            await new Promise(r => setTimeout(r, 2000))
+            this.sendTransaction(transaction).then(() => {
+                this.queue.delete(transaction.id)
+                callback(current, max)
+                current++
             })
-        })
+
+        }
     }
 
     private async sendTransaction(transaction: Transaction): Promise<SendResponse> {
-        return new Promise((resolve, reject) => {
-            fetch(this.endpointUrl, {
-                method: 'PUT',
-                body: JSON.stringify({
-                    uuid: transaction.id,
-                    paymentType: transaction.paymentType,
-                    cart: transaction.cart,
-                }),
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                signal: AbortSignal.timeout(3000)
-            })
-                .then(response => response.json())
-                .then(response => {
-                    const message = response.hasOwnProperty('message') ? response.message : '[unknown]'
-                    const stateString = response.hasOwnProperty('state') ? response.state : 'error'
+        const response = await fetch(this.endpointUrl, {
+            method: 'PUT',
+            body: JSON.stringify({
+                uuid: transaction.id,
+                paymentType: transaction.paymentType,
+                cart: transaction.cart,
+            }),
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            signal: AbortSignal.timeout(3000)
+        });
+        const json = await response.json();
 
-                    const state = stateString === 'success'
-                        ? CheckoutTransition.Success
-                        : CheckoutTransition.Error
+        const message = json.hasOwnProperty('message') ? json.message : '[unknown]'
+        const stateString = json.hasOwnProperty('state') ? json.state : 'error'
 
-                    resolve({state, message})
-                })
-                .catch(error => {
-                    reject(error)
-                })
-        })
+        const state = stateString === 'success'
+            ? CheckoutTransition.Success
+            : CheckoutTransition.Error
+
+        return {state, message}
     }
 }

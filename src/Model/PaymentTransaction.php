@@ -3,6 +3,7 @@
 namespace App\Model;
 
 use App\Enum\PaymentType;
+use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Component\Uid\Uuid;
 use Symfony\Component\Uid\UuidV4;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -10,18 +11,13 @@ use Symfony\Component\Validator\Constraints as Assert;
 readonly class PaymentTransaction
 {
     public function __construct(
-        #[Assert\Type(PaymentType::class)]
-        public string $paymentType,
+        public PaymentType $paymentType,
 
         #[Assert\All([new Assert\Type('integer'), new Assert\GreaterThanOrEqual(1)])]
         public array $cart,
 
-        #[Assert\AtLeastOneOf([
-            new Assert\Uuid(versions: 4),
-            new Assert\Blank(),
-            new Assert\IsNull(),
-        ])]
-        public ?string $uuid = null,
+        #[Assert\AtLeastOneOf([new Assert\Uuid(versions: 4), new Assert\IsNull()])]
+        private ?string $uuid = null,
     ) {}
 
     public function getUuid(): Uuid
@@ -29,10 +25,5 @@ readonly class PaymentTransaction
         return $this->uuid !== null
             ? UuidV4::fromString($this->uuid)
             : Uuid::v4();
-    }
-
-    public function getPaymentType(): PaymentType
-    {
-        return PaymentType::from($this->paymentType);
     }
 }

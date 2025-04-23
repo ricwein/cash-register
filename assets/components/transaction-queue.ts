@@ -6,6 +6,8 @@ type TableRow = { name: string, unique: boolean }
 
 export class TransactionQueue {
     db: IDBDatabase | null = null;
+    isInitialised: boolean = false;
+    items: Array<Transaction> = [];
     tables: Record<string, Array<TableRow>> = {
         transactions: [
             {name: 'uuid', unique: true},
@@ -14,50 +16,18 @@ export class TransactionQueue {
         ],
     };
 
-    constructor() {
-        const request = window.indexedDB.open("transaction_queue", 3);
-        request.onsuccess = () => (this.db = request.result);
-        request.onerror = (err) => console.error(`[IndexedDB] error: ${request.error}`, err);
-        request.onupgradeneeded = () => {
-            const db = request.result;
-            for (const name in this.tables) {
-                const row = this.tables[name];
-                const transactionsStore = db.createObjectStore(storeName, {keyPath: row[0].name});
-                row.forEach((key) => transactionsStore.createIndex(key.name, key.name, {unique: key.unique}));
-            }
-        };
+    public async length(): Promise<number> {
+        if (!this.isInitialised) {
+            this.items = await this.getAll()
+        }
+
+        return this.items.length
     }
 
-    public async count(): Promise<number> {
+    public async push(transaction: Transaction): Promise<void> {
+        const db = await this.getDb()
         return new Promise((resolve, reject) => {
-            if (this.db === null) {
-                reject('Not initialized.')
-                return
-            }
-
-            const request = this.db
-                .transaction(storeName, 'readonly')
-                .objectStore(storeName)
-                .count();
-
-            request.onerror = err => {
-                console.error('[IndexedDB] error: opening db', err);
-                reject('Error');
-            };
-            request.onsuccess = () => {
-                resolve(request.result)
-            }
-        })
-    }
-
-    public async add(transaction: Transaction): Promise<void> {
-        return new Promise((resolve, reject) => {
-            if (this.db === null) {
-                reject('Not initialized.')
-                return
-            }
-
-            const request = this.db
+            const request = db
                 .transaction(storeName, 'readwrite')
                 .objectStore(storeName)
                 .add({
@@ -71,18 +41,19 @@ export class TransactionQueue {
                 reject('Error')
             }
             request.onsuccess = () => {
+                if (this.isInitialised) {
+                    this.items.push(transaction)
+                }
                 resolve()
             }
         })
     }
 
-    public delete(uuid: string): Promise<void> {
+    public async delete(uuid: string): Promise<void> {
+        const db = await this.getDb()
         return new Promise((resolve, reject) => {
-            if (this.db === null) {
-                reject('Not initialized.')
-                return
-            }
-            const request = this.db.transaction(storeName, 'readwrite')
+            const request = db
+                .transaction(storeName, 'readwrite')
                 .objectStore(storeName)
                 .delete(uuid);
 
@@ -91,19 +62,55 @@ export class TransactionQueue {
                 reject('Error')
             }
             request.onsuccess = () => {
+                if (this.isInitialised) {
+                    this.items = this.items.filter(item => item.id !== uuid)
+                }
                 resolve()
             }
         })
     }
 
     public async getAll(): Promise<Array<Transaction>> {
+        if (!this.isInitialised) {
+            this.items = await this.loadAll()
+            this.isInitialised = true
+        }
+
+        return this.items
+    }
+
+    private async getDb(): Promise<IDBDatabase> {
+        if (this.db !== null) {
+            return this.db
+        }
+
         return new Promise((resolve, reject) => {
-            if (this.db === null) {
-                reject('Not initialized.')
-                return
+            const request = window.indexedDB.open("transaction_queue", 3)
+            request.onsuccess = () => {
+                this.db = request.result
+                resolve(this.db)
             }
 
-            const request = this.db
+            request.onerror = (err) => {
+                console.error(`[IndexedDB] error: ${request.error}`, err)
+                reject(err)
+            }
+
+            request.onupgradeneeded = () => {
+                const db = request.result;
+                for (const name in this.tables) {
+                    const row = this.tables[name];
+                    const transactionsStore = db.createObjectStore(storeName, {keyPath: row[0].name});
+                    row.forEach((key) => transactionsStore.createIndex(key.name, key.name, {unique: key.unique}));
+                }
+            }
+        })
+    }
+
+    private async loadAll(): Promise<Array<Transaction>> {
+        const db = await this.getDb()
+        return new Promise((resolve, reject) => {
+            const request = db
                 .transaction(storeName, 'readonly')
                 .objectStore(storeName)
                 .getAll();
@@ -121,6 +128,7 @@ export class TransactionQueue {
                         cart: JSON.parse(data.cart),
                     } as Transaction;
                 })
+
                 resolve(transactions)
             }
         })
