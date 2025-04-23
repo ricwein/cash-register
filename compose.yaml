@@ -6,9 +6,6 @@ services:
       context: .
       dockerfile: docker/Dockerfile
       target: cash-register_nginx
-      platforms:
-        - "linux/amd64"
-        - "linux/arm64"
       args:
         APP_ENV: ${APP_ENV:-prod}
     environment:
@@ -29,9 +26,6 @@ services:
       context: .
       dockerfile: docker/Dockerfile
       target: cash-register_php-fpm
-      platforms:
-        - "linux/amd64"
-        - "linux/arm64"
       args:
         PHP_VERSION: ${PHP_VERSION:-8.4}
         PHP_TIMEZONE: ${PHP_TIMEZONE:-UTC}
