@@ -78,12 +78,14 @@ COPY docker/php-fpm/docker-healthcheck.sh /usr/local/bin/docker-healthcheck
 RUN chmod +x /usr/local/bin/docker-healthcheck
 HEALTHCHECK --interval=10s --timeout=3s --retries=3 CMD ["docker-healthcheck"]
 
+COPY bin ./bin
+COPY config ./config
 COPY migrations ./migrations
-COPY templates ./templates
-COPY translations ./translations
 COPY public ./public
 COPY src ./src
-COPY bin ./bin
+COPY templates ./templates
+COPY tests ./tests
+COPY translations ./translations
 COPY .env ./.env
 
 RUN mkdir -p var/cache var/log public/uploads && chmod -R 777 var/cache var/log public/uploads && sync
