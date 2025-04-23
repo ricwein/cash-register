@@ -1,0 +1,20 @@
+services:
+  php-fpm:
+    build:
+#      target: cash-register_php-fpm-debug
+      args:
+        APP_ENV: "prod"
+        APP_SECRET: df6e8c36d834e87ddc56f70ced9b2c81
+    environment:
+      APP_ENV: "prod"
+  nginx:
+    volumes:
+      - ./public:/app/public:rw,cached
+    ports:
+      - "127.0.0.1:32064:80"
+
+  db:
+    volumes:
+      - ./var/mysql/:/var/lib/mysql:rw
+    ports:
+      - "127.0.0.1:32065:3306"

@@ -49,10 +49,10 @@ RUN yarn encore ${APP_ENV}
 ############################
 ###        NGINX         ###
 ############################
-
 FROM nginx AS cash-register_nginx
 
 WORKDIR /app
+COPY public ./public
 COPY --from=yarn-encore /app/public/build ./public/build
 COPY docker/nginx/nginx.conf /etc/nginx/conf.d/default.conf
 
@@ -87,6 +87,7 @@ COPY templates ./templates
 COPY tests ./tests
 COPY translations ./translations
 COPY .env ./.env
+COPY --from=yarn-encore /app/public/build ./public/build
 
 RUN mkdir -p var/cache var/log public/uploads && chmod -R 777 var/cache var/log public/uploads && sync
 
@@ -95,9 +96,11 @@ RUN sed -i -e "s/APP_SECRET=.*/APP_SECRET=${APP_SECRET}/g" ./.env
 ENTRYPOINT ["docker-entrypoint"]
 CMD [ "php-fpm" ]
 
+
 ###################################
 ###        PHP-FPM-DEBUG        ###
 ###################################
 FROM cash-register_php-fpm AS cash-register_php-fpm-debug
+
 RUN install-php-extensions xdebug
 COPY docker/php-fpm/xdebug.ini $PHP_INI_DIR/conf.d/
