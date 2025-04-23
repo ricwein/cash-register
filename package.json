@@ -29,6 +29,7 @@
     "sass-loader": "^16.0.1",
     "ts-loader": "^9.0.0",
     "typescript": "^5.8.2",
+    "uuid": "^11.1.0",
     "vue": "^3.0",
     "vue-final-modal": "^4.5.5",
     "vue-loader": "^17.4.2",

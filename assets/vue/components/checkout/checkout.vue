@@ -171,6 +171,8 @@ import cancelSound from '../../../sounds/cancel.mp3'
 import successSound from '../../../sounds/success.wav'
 import warningSound from '../../../sounds/warning.wav'
 import buttonSound from '../../../sounds/checkout.mp3'
+import Transactor from "../../../components/transactor.ts";
+import {Transaction} from "../../../model/transaction.ts";
 
 const {play: playButton} = useSound(buttonSound)
 const {play: playSuccess} = useSound(successSound)
@@ -181,29 +183,6 @@ const {play: playCancel} = useSound(cancelSound)
 const emit = defineEmits(['create-new-receipt', 'checkout-cancelled'])
 const checkoutState = defineModel<CheckoutStateMachine>({required: true})
 
-// setup state-machine callbacks
-checkoutState.value
-    .addCallback(null, () => changeField.value = '0,00')
-    .addCallback(null, change => {
-      if (!props.buttonSound) {
-        return;
-      }
-
-      if (change.transition === CheckoutTransition.Error) {
-        playWarning()
-      } else if (change.transition === CheckoutTransition.Success) {
-        playSuccess()
-      } else if (change.transition === CheckoutTransition.Cancel) {
-        playDelete()
-      } else if (change.transition === CheckoutTransition.Back) {
-        playCancel()
-      } else {
-        playButton()
-      }
-    })
-    .addCallback(CheckoutTransition.Cash, () => setTimeout(() => document.getElementById('calculatorInput')?.focus(), 200))
-    .addCallback(CheckoutState.Sending, processPayment);
-
 // setup vue component
 const props = defineProps({
   price: {type: Number, required: true},
@@ -211,6 +190,23 @@ const props = defineProps({
   confirmEndpointUrl: {type: String, required: true},
   buttonSound: {type: Boolean, required: true},
 })
+
+const transactor = new Transactor(decodeURI(props.confirmEndpointUrl ?? ''))
+
+// setup state-machine callbacks
+checkoutState.value
+    .addCallback(null, () => changeField.value = '0,00')
+    .addCallback(null, change => {
+      if (!props.buttonSound) return;
+
+      if (change.transition === CheckoutTransition.Error) playWarning()
+      else if (change.transition === CheckoutTransition.Success) playSuccess()
+      else if (change.transition === CheckoutTransition.Cancel) playDelete()
+      else if (change.transition === CheckoutTransition.Back) playCancel()
+      else playButton()
+    })
+    .addCallback(CheckoutTransition.Cash, () => setTimeout(() => document.getElementById('calculatorInput')?.focus(), 200))
+    .addCallback(CheckoutState.Sending, processPayment);
 
 const changeField = ref<string>('0,00');
 
@@ -232,41 +228,25 @@ function updateChangeMoney(event: Event): void {
 
 function processPayment(changes: StateChange): void {
   const paymentType: string = changes.storage ?? 'none'
-  let data: Record<number, number> = {};
+  let cart: Record<number, number> = {};
 
   for (const product of props.cart) {
-    if (!data.hasOwnProperty(product.id)) {
-      data[product.id] = 0;
+    if (!cart.hasOwnProperty(product.id)) {
+      cart[product.id] = 0;
     }
-    data[product.id]++;
+    cart[product.id]++;
   }
 
-  const endpointUrl = decodeURI(props.confirmEndpointUrl ?? '').replace("{{paymentType}}", paymentType)
-
-  fetch(endpointUrl, {
-    method: 'PUT',
-    body: JSON.stringify(data)
-  })
-      .then(response => response.json())
+  transactor
+      .send(new Transaction(paymentType, cart))
       .then(response => {
-        if (response.hasOwnProperty('success') && response.success) {
+        if (response.state === CheckoutTransition.Success) {
           emit('create-new-receipt')
-
-          checkoutState.value.dispatch(CheckoutTransition.Success)
-
-          toast.success('verarbeitet', {
-            position: toast.POSITION.TOP_LEFT,
-            theme: toast.THEME.DARK,
-            autoClose: 1000,
-          })
-        } else if (response.hasOwnProperty('error')) {
-          checkoutState.value.dispatch(CheckoutTransition.Error)
-
-          toast.error(response.error, {
-            position: toast.POSITION.TOP_LEFT,
-            theme: toast.THEME.DARK,
-          })
+          toast.success(response.message, {autoClose: 1000})
+        } else {
+          toast.error(response.message)
         }
+        checkoutState.value.dispatch(response.state)
       })
 }
 </script>

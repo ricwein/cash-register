@@ -8,8 +8,9 @@ use App\Entity\Event;
 use App\Entity\Product;
 use App\Entity\PurchasedArticle;
 use App\Entity\PurchaseTransaction;
-use App\Enum\PaymentType;
+use App\Enum\ConfirmationState;
 use App\Helper\ReceiptArticleGroupHelper;
+use App\Model\PaymentTransaction;
 use App\Repository\CategoryRepository;
 use App\Repository\EventRepository;
 use App\Repository\ProductRepository;
@@ -17,13 +18,12 @@ use App\Repository\SettingRepository;
 use App\Service\DTOMapperService;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
-use JsonException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Component\Routing\Attribute\Route;
-use Symfony\Component\Uid\Uuid;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 #[Route('/app')]
 class AppController extends AbstractController
@@ -37,6 +37,7 @@ class AppController extends AbstractController
         private readonly CategoryRepository $categoryRepository,
         private readonly ProductRepository $productRepository,
         private readonly SettingRepository $settingRepository,
+        private readonly TranslatorInterface $translator,
     ) {}
 
     #[Route('/{eventId}', name: 'start_cash_register', requirements: ['eventId' => '\d+'])]
@@ -61,35 +62,38 @@ class AppController extends AbstractController
         ]);
     }
 
-    #[Route('/{eventId}/send/{paymentType}', name: 'send_cash_register', requirements: ['eventId' => '\d+'])]
-    public function confirmTransaction(int $eventId, PaymentType $paymentType, Request $request): Response
-    {
+    #[Route('/{eventId}/send', name: 'send_cash_register', requirements: ['eventId' => '\d+'], methods: ['PUT'])]
+    public function confirmTransaction(
+        int $eventId,
+        #[MapRequestPayload] PaymentTransaction $transactionData,
+    ): Response {
         $event = $this->eventRepository->find($eventId);
         if ($event === null) {
-            return new JsonResponse(['success' => false, 'error' => "Event with id {$eventId} not found"], 404);
-        }
-
-        try {
-            /** @noinspection JsonEncodingApiUsageInspection */
-            $cartData = json_decode($request->getContent(), true, flags: JSON_THROW_ON_ERROR);
-        } catch (JsonException $exception) {
-            return new JsonResponse(['success' => false, 'error' => $exception->getMessage()], 500);
+            return new JsonResponse([
+                'state' => ConfirmationState::ERROR,
+                'message' => "Event with id {$eventId} not found",
+            ], 404);
         }
 
         $products = [];
         /** @var Product $product */
-        foreach ($this->productRepository->findBy(['id' => array_keys($cartData)]) as $product) {
+        foreach ($this->productRepository->findBy(['id' => array_keys($transactionData->cart)]) as $product) {
             $products[$product->getId()] = $product;
         }
 
         $transaction = new PurchaseTransaction()
             ->setEventName($event->getName())
-            ->setPaymentType($paymentType)
-            ->setTransactionId(Uuid::v4());
+            ->setPaymentType($transactionData->getPaymentType())
+            ->setTransactionId($transactionData->getUuid());
 
         $price = '0.00';
-        foreach ($cartData as $productId => $quantity) {
-            $product = $products[$productId];
+        foreach ($transactionData->cart as $productId => $quantity) {
+            if (null === $product = ($products[$productId] ?? null)) {
+                return new JsonResponse([
+                    'state' => ConfirmationState::ERROR,
+                    'message' => "Product with id {$productId} not found",
+                ], 404);
+            }
 
             $price = bcadd($price, bcmul($product->getPrice(), (string)$quantity, self::PRECISION), self::PRECISION);
             $transaction->addSoldArticle(
@@ -106,11 +110,15 @@ class AppController extends AbstractController
             $this->entityManager->persist($transaction);
             $this->entityManager->flush();
         } catch (Exception $exception) {
-            return new JsonResponse(['success' => false, 'error' => $exception->getMessage()], 500);
+            return new JsonResponse([
+                'state' => ConfirmationState::ERROR,
+                'message' => $exception->getMessage(),
+            ], 500);
         }
 
         return new JsonResponse([
-            'success' => true,
+            'state' => ConfirmationState::SUCCESS,
+            'message' => $this->translator->trans('processed'),
         ]);
     }
 }
