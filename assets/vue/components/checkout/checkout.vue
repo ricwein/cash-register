@@ -235,7 +235,8 @@ function processPayment(changes: StateChange): void {
     cart[product.id]++;
   }
 
-  props.transactor
+  const transactor: Transactor = props.transactor
+  transactor
       .send(new Transaction(paymentType, cart))
       .then(response => {
         if (response.state === CheckoutTransition.Success) {

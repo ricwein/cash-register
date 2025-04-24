@@ -17,6 +17,7 @@ use App\Repository\ProductRepository;
 use App\Repository\SettingRepository;
 use App\Resolver\PaymentTransactionRequestResolver;
 use App\Service\DTOMapperService;
+use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -63,6 +64,7 @@ class AppController extends AbstractController
         ]);
     }
 
+    /** @noinspection PhpRedundantCatchClauseInspection */
     #[Route('/{eventId}/send', name: 'send_cash_register', requirements: ['eventId' => '\d+'], methods: ['PUT'])]
     public function confirmTransaction(
         int $eventId,
@@ -110,6 +112,11 @@ class AppController extends AbstractController
         try {
             $this->entityManager->persist($transaction);
             $this->entityManager->flush();
+        } catch (UniqueConstraintViolationException) {
+            return new JsonResponse([
+                'state' => ConfirmationState::SUCCESS,
+                'message' => 'Transaction already processed.',
+            ]);
         } catch (Exception $exception) {
             return new JsonResponse([
                 'state' => ConfirmationState::ERROR,

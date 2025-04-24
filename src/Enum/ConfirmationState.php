@@ -6,5 +6,5 @@ enum ConfirmationState: string
 {
     case SUCCESS = 'success';
     case ERROR = 'error';
-    case OFFLINE = 'offline';
+    case RETRYABLE_ERROR = 'retryable';
 }

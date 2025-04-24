@@ -31,8 +31,9 @@
 </template>
 
 <script setup lang="ts">
-import {computed, type PropType, ref, shallowRef} from "vue";
+import {computed, onMounted, type PropType, ref, shallowRef} from "vue";
 import {toast} from "vue3-toastify";
+import {useSound} from "@vueuse/sound";
 import {CheckoutStateMachine, CheckoutTransition} from "../../components/checkout-state-machine.ts";
 import Category from "../../model/category";
 import Product from "../../model/product";
@@ -46,6 +47,7 @@ import ProductSelection from "../components/selection/product-selection.vue";
 import ProductSelectionTabbed from "../components/selection/product-selection-tabbed.vue";
 import Checkout from "../components/checkout/checkout.vue";
 import Transactor from "../../components/transactor.ts";
+import successSound from '../../sounds/success.wav'
 
 const props = defineProps({
   confirmEndpointUrl: {type: String, required: true},
@@ -55,26 +57,17 @@ const props = defineProps({
   startPrice: {type: Number, default: 0.0},
   gridWidthElements: {type: Number, default: 5},
   useCategoryTabs: {type: Boolean, default: true},
+  enqueuedMessages: {type: String, default: null},
 });
 
 const checkoutState = shallowRef<CheckoutStateMachine>(new CheckoutStateMachine())
-const transactor = new Transactor(decodeURI(props.confirmEndpointUrl))
+const transactor = new Transactor(decodeURI(props.confirmEndpointUrl), props.enqueuedMessages)
 
-transactor.queue.length().then((queueCount: number) => {
-  if (queueCount > 0) {
-    const loadingToast = toast.loading(`0 / ${queueCount}`, {
-      toastClassName: 'w-50',
-    })
-    transactor.sendAll((current, max) => {
-      toast.update(loadingToast, {render: `${current} / ${max} ...`})
-    }).then(() => {
-      toast.update(loadingToast, {
-        type: toast.TYPE.SUCCESS,
-        isLoading: false,
-        autoClose: 1000,
-      })
-    })
-  }
+onMounted(() => {
+  setInterval(() => {
+    sendOpenTransactions()
+  }, 15_000)
+  sendOpenTransactions()
 })
 
 const cart = ref<Product[]>([]);
@@ -89,6 +82,8 @@ const showCategoryTabs = computed(() => props.useCategoryTabs && (props.categori
 const displayHeightPortrait = props.useLandscapeMode ? '0' : '5rem'
 const historyHeightPortrait = props.useLandscapeMode ? '0' : '7rem'
 
+const {play: playSuccess} = useSound(successSound)
+
 function removeArticleByIndex(index: number): void {
   const normalizedIndex: number = (cart.value.length - 1) - index;
   cart.value.splice(normalizedIndex, 1)
@@ -96,6 +91,27 @@ function removeArticleByIndex(index: number): void {
 
 function reset() {
   cart.value = []
+}
+
+function sendOpenTransactions() {
+  transactor.queue.length().then((queueCount: number) => {
+    if (queueCount > 0) {
+      const loadingToast = toast.loading(`0 / ${queueCount}`, {
+        toastClassName: 'w-50',
+      })
+      transactor.sendAll((current, max) => {
+        toast.update(loadingToast, {render: `${current} / ${max} ...`})
+      }).then((result) => {
+        if (result.success >= result.max) {
+          if (props.buttonSound) playSuccess()
+          toast.update(loadingToast, {type: toast.TYPE.SUCCESS, isLoading: false, autoClose: 250})
+        } else {
+          toast.update(loadingToast, {type: toast.TYPE.ERROR, isLoading: false, autoClose: 250})
+        }
+        setTimeout(() => toast.remove(loadingToast), 1000)
+      })
+    }
+  })
 }
 </script>
 

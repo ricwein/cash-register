@@ -7,48 +7,61 @@ type SendResponse = { state: CheckoutTransition, message: string }
 export default class Transactor {
     queue: TransactionQueue
     endpointUrl: string
+    enqueuedMessage: string
 
-    constructor(endpointUrl: string) {
+    constructor(endpointUrl: string, enqueuedMessage: string = 'Transaction queued') {
         this.endpointUrl = endpointUrl
         this.queue = transactionQueue
+        this.enqueuedMessage = enqueuedMessage
     }
 
     public async send(transaction: Transaction): Promise<SendResponse> {
         try {
             const result = await this.sendTransaction(transaction)
 
-            if (result.state === CheckoutTransition.Error) {
-                console.error(`[Transactor] Error: ${result.message}`)
+            if (result.state === CheckoutTransition.RetryableError) {
+                await this.queue.push(transaction)
+            } else if (result.state === CheckoutTransition.Error) {
+                console.error(`TransactionError: ${result.message}`)
             }
 
             return result;
         } catch (error) {
             const message = `${error}`
             const isRetryable = message.includes('NetworkError') || message.includes('timed out')
-            console.error(`[Transactor] Error: `, error, {retryable: isRetryable})
+            console.error(error, {retryable: isRetryable})
 
             if (isRetryable) {
                 await this.queue.push(transaction)
-                return {state: CheckoutTransition.RetryableError, message: 'Server not reachable'}
+                return {state: CheckoutTransition.RetryableError, message: this.enqueuedMessage}
             }
 
             return {state: CheckoutTransition.Error, message}
         }
     }
 
-    public async sendAll(callback: (current: number, of: number) => void): Promise<void> {
+    public async sendAll(
+        callback: (current: number, of: number) => void
+    ): Promise<{ success: number, max: number }> {
         const items = await this.queue.getAll()
         const max = items.length
-        let current = 1
-        for (const transaction of items) {
-            await new Promise(r => setTimeout(r, 2000))
-            this.sendTransaction(transaction).then(() => {
-                this.queue.delete(transaction.id)
-                callback(current, max)
-                current++
-            })
+        let current = 0
+        let success: number = 0
 
-        }
+        await Promise.all(items.map(async transaction => {
+            try {
+                const result = await this.sendTransaction(transaction)
+                callback(++current, max)
+                if (result.state === CheckoutTransition.Success) {
+                    await this.queue.delete(transaction.id)
+                    success++
+                }
+            } catch (error) {
+                callback(++current, max)
+            }
+        }))
+
+        return {success, max}
     }
 
     private async sendTransaction(transaction: Transaction): Promise<SendResponse> {
@@ -68,10 +81,7 @@ export default class Transactor {
 
         const message = json.hasOwnProperty('message') ? json.message : '[unknown]'
         const stateString = json.hasOwnProperty('state') ? json.state : 'error'
-
-        const state = stateString === 'success'
-            ? CheckoutTransition.Success
-            : CheckoutTransition.Error
+        const state = stateString as CheckoutTransition
 
         return {state, message}
     }
