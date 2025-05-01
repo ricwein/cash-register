@@ -1,7 +1,7 @@
 <template>
   <div v-if="useLandscapeMode" class="row w-100">
     <div class="receipt col-lg-4 col-md-5 col-sm-5">
-      <number-display-side class="sticky-top" :price></number-display-side>
+      <number-display-side v-model="transactionState" :transactionState class="sticky-top" :price></number-display-side>
       <receipt-side :cart @removeArticle="removeArticleByIndex"></receipt-side>
       <div class="row action-button-row sticky-bottom">
         <backspace-button class="col" :buttonSound @backspaceClicked="cart.pop()" @createNewReceipt="reset"></backspace-button>
@@ -15,7 +15,7 @@
   </div>
   <div v-else>
     <div class="sticky-top">
-      <number-display :buttonSound :price :cart :displayHeightPortrait @registerConfirmed="checkoutState.dispatch(CheckoutTransition.Start)"></number-display>
+      <number-display v-model="transactionState" :buttonSound :transactionState :price :cart :displayHeightPortrait @registerConfirmed="checkoutState.dispatch(CheckoutTransition.Start)"></number-display>
       <receipt :buttonSound :cart :historyHeightPortrait @removeArticle="removeArticleByIndex" @backspaceClicked="cart.pop()" @createNewReceipt="reset"></receipt>
     </div>
     <product-selection-tabbed v-if="showCategoryTabs" :buttonSound :categories :displayHeightPortrait :historyHeightPortrait :gridWidthElements @product-clicked="product => cart.push(product)"></product-selection-tabbed>
@@ -32,7 +32,6 @@
 
 <script setup lang="ts">
 import {computed, onMounted, type PropType, ref, shallowRef} from "vue";
-import {toast} from "vue3-toastify";
 import {useSound} from "@vueuse/sound";
 import {CheckoutStateMachine, CheckoutTransition} from "../../components/checkout-state-machine.ts";
 import Category from "../../model/category";
@@ -47,6 +46,7 @@ import ProductSelection from "../components/selection/product-selection.vue";
 import ProductSelectionTabbed from "../components/selection/product-selection-tabbed.vue";
 import Checkout from "../components/checkout/checkout.vue";
 import Transactor from "../../components/transactor.ts";
+import {None, Pending, Sending, Success, type TransactionState} from "../../components/transaction-state.ts";
 import successSound from '../../sounds/success.wav'
 
 const props = defineProps({
@@ -62,15 +62,17 @@ const props = defineProps({
 
 const checkoutState = shallowRef<CheckoutStateMachine>(new CheckoutStateMachine())
 const transactor = new Transactor(decodeURI(props.confirmEndpointUrl), props.enqueuedMessages)
+const transactionState = shallowRef<TransactionState>(new None())
 
-onMounted(() => {
-  setInterval(() => {
-    sendOpenTransactions()
-  }, 15_000)
-  sendOpenTransactions()
+checkoutState.value.addCallback(CheckoutTransition.RetryableError, () => {
+  if (transactionState.value.kind === 'None') {
+    transactionState.value = new Pending(1)
+  } else if (transactionState.value.kind === 'Pending') {
+    transactionState.value = new Pending(transactionState.value.count + 1)
+  }
 })
 
-const cart = ref<Product[]>([]);
+const cart = ref<Product[]>([])
 const price = computed<number>(() => cart.value
     .map((product: Product) => product.price)
     .reduce((price: number, prev: number): number => price + prev, 0.0)
@@ -84,6 +86,13 @@ const historyHeightPortrait = props.useLandscapeMode ? '0' : '7rem'
 
 const {play: playSuccess} = useSound(successSound)
 
+onMounted(() => {
+  setInterval(() => {
+    sendOpenTransactions()
+  }, 5_000)
+  sendOpenTransactions()
+})
+
 function removeArticleByIndex(index: number): void {
   const normalizedIndex: number = (cart.value.length - 1) - index;
   cart.value.splice(normalizedIndex, 1)
@@ -95,22 +104,22 @@ function reset() {
 
 function sendOpenTransactions() {
   transactor.queue.length().then((queueCount: number) => {
-    if (queueCount > 0) {
-      const loadingToast = toast.loading(`0 / ${queueCount}`, {
-        toastClassName: 'w-50',
-      })
-      transactor.sendAll((current, max) => {
-        toast.update(loadingToast, {render: `${current} / ${max} ...`})
-      }).then((result) => {
-        if (result.success >= result.max) {
-          if (props.buttonSound) playSuccess()
-          toast.update(loadingToast, {type: toast.TYPE.SUCCESS, isLoading: false, autoClose: 250})
-        } else {
-          toast.update(loadingToast, {type: toast.TYPE.ERROR, isLoading: false, autoClose: 250})
-        }
-        setTimeout(() => toast.remove(loadingToast), 1000)
-      })
+    if (queueCount <= 0) {
+      return
     }
+
+    transactionState.value = new Sending(queueCount)
+    transactor.sendAll((current, max, success) => {
+      transactionState.value = new Sending(max - success)
+    }).then((result) => {
+      if (result.success >= result.max) {
+        if (props.buttonSound) playSuccess()
+        transactionState.value = new Success()
+        setTimeout(() => transactionState.value = new None(), 2500)
+      } else {
+        transactionState.value = new Pending(result.max - result.success)
+      }
+    })
   })
 }
 </script>

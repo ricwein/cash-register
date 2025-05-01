@@ -1,6 +1,12 @@
 <template>
-  <div class="w-100 bg-white display-container d-flex justify-content-end">
-    <span class="display">{{ NumberFormatter.format(price) }}</span>
+  <div class="w-100 bg-white display-container d-flex justify-content-between">
+    <div v-if="transactionState.kind !== 'None'" class="transaction-info">
+      <div class="badge font-monospace bg-warning shadow badge rounded-pill mt-1 ms-1">
+        <span class="fa-solid fa-spinner fa-sm fa-pulse"></span>
+        {{ transactionState.count }}
+      </div>
+    </div>
+    <span class="display ms-auto">{{ NumberFormatter.format(price) }}</span>
     <checkout-button :buttonSound :cart @registerConfirmed="$emit('registerConfirmed')"></checkout-button>
   </div>
 </template>
@@ -9,6 +15,7 @@
 import {NumberFormatter} from "../../../../components/number-formatter.ts";
 import CheckoutButton from "../buttons/checkout-button.vue";
 import type Product from "../../../../model/product.ts";
+import type {TransactionState} from "../../../../components/transaction-state.ts";
 
 defineProps({
   price: {type: Number, required: true},
@@ -16,12 +23,19 @@ defineProps({
   buttonSound: {type: Boolean, required: true},
   displayHeightPortrait: String,
 })
+
+defineEmits(['registerConfirmed'])
+const transactionState = defineModel<TransactionState>({required: true})
 </script>
 
 <style scoped lang="scss">
 .display-container {
   height: v-bind(displayHeightPortrait);
   text-align: right;
+
+  .transaction-info {
+    height: 100%;
+  }
 
   .display {
     font-size: calc(v-bind(displayHeightPortrait) - 2rem);

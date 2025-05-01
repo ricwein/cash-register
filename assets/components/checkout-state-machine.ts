@@ -53,6 +53,8 @@ export class CheckoutStateMachine {
     private transitions: Record<CheckoutState, Partial<Record<CheckoutTransition, TransitionAction>>> = {
         [CheckoutState.Off]: {
             [CheckoutTransition.Start]: () => CheckoutState.Check,
+            [CheckoutTransition.Cash]: () => CheckoutState.Calculator,
+            [CheckoutTransition.Card]: () => CheckoutState.Confirm,
             [CheckoutTransition.Cancel]: () => CheckoutState.Off,
         },
         [CheckoutState.Check]: {

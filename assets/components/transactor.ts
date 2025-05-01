@@ -41,7 +41,7 @@ export default class Transactor {
     }
 
     public async sendAll(
-        callback: (current: number, of: number) => void
+        callback: (current: number, of: number, success: number) => void
     ): Promise<{ success: number, max: number }> {
         const items = await this.queue.getAll()
         const max = items.length
@@ -51,13 +51,13 @@ export default class Transactor {
         await Promise.all(items.map(async transaction => {
             try {
                 const result = await this.sendTransaction(transaction)
-                callback(++current, max)
                 if (result.state === CheckoutTransition.Success) {
                     await this.queue.delete(transaction.id)
                     success++
                 }
+                callback(++current, max, success)
             } catch (error) {
-                callback(++current, max)
+                callback(++current, max, success)
             }
         }))
 
