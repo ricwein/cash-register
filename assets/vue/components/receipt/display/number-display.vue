@@ -7,7 +7,11 @@
       </div>
     </div>
     <span class="display ms-auto">{{ NumberFormatter.format(price) }}</span>
-    <checkout-button :buttonSound :cart @registerConfirmed="$emit('registerConfirmed')"></checkout-button>
+    <span v-if="quickCheckout" class="d-flex justify-content-center">
+      <checkout-button :buttonSound :cart @registerConfirmed="$emit('registerConfirmed', CheckoutTransition.Card)" :type="CheckoutTransition.Card"></checkout-button>
+      <checkout-button :buttonSound :cart @registerConfirmed="$emit('registerConfirmed', CheckoutTransition.Cash)" :type="CheckoutTransition.Cash"></checkout-button>
+    </span>
+    <checkout-button v-else :buttonSound :cart @registerConfirmed="$emit('registerConfirmed', CheckoutTransition.Start)"></checkout-button>
   </div>
 </template>
 
@@ -16,11 +20,13 @@ import {NumberFormatter} from "../../../../components/number-formatter.ts";
 import CheckoutButton from "../buttons/checkout-button.vue";
 import type Product from "../../../../model/product.ts";
 import type {TransactionState} from "../../../../components/transaction-state.ts";
+import {CheckoutTransition} from "../../../../components/checkout-state-machine.ts";
 
 defineProps({
   price: {type: Number, required: true},
   cart: {type: Array<Product>, required: true},
   buttonSound: {type: Boolean, required: true},
+  quickCheckout: {type: Boolean, required: true},
   displayHeightPortrait: String,
 })
 

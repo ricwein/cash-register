@@ -3,7 +3,12 @@
     <div class="receipt col-lg-4 col-md-5 col-sm-5">
       <number-display-side v-model="transactionState" :transactionState class="sticky-top" :price></number-display-side>
       <receipt-side :cart @removeArticle="removeArticleByIndex"></receipt-side>
-      <div class="row action-button-row sticky-bottom">
+      <div v-if="quickCheckout" class="row action-button-row sticky-bottom">
+        <backspace-button class="col" :buttonSound @backspaceClicked="cart.pop()" @createNewReceipt="reset"></backspace-button>
+        <checkout-button class="col" :buttonSound :cart @registerConfirmed="checkoutState.dispatch(CheckoutTransition.Card)" :type="CheckoutTransition.Card"></checkout-button>
+        <checkout-button class="col" :buttonSound :cart @registerConfirmed="checkoutState.dispatch(CheckoutTransition.Cash)" :type="CheckoutTransition.Cash"></checkout-button>
+      </div>
+      <div v-else class="row action-button-row sticky-bottom">
         <backspace-button class="col" :buttonSound @backspaceClicked="cart.pop()" @createNewReceipt="reset"></backspace-button>
         <checkout-button class="col" :buttonSound :cart @registerConfirmed="checkoutState.dispatch(CheckoutTransition.Start)"></checkout-button>
       </div>
@@ -15,7 +20,7 @@
   </div>
   <div v-else>
     <div class="sticky-top">
-      <number-display v-model="transactionState" :buttonSound :transactionState :price :cart :displayHeightPortrait @registerConfirmed="checkoutState.dispatch(CheckoutTransition.Start)"></number-display>
+      <number-display v-model="transactionState" :quickCheckout :buttonSound :transactionState :price :cart :displayHeightPortrait @registerConfirmed="(transition:CheckoutTransition) => checkoutState.dispatch(transition)"></number-display>
       <receipt :buttonSound :cart :historyHeightPortrait @removeArticle="removeArticleByIndex" @backspaceClicked="cart.pop()" @createNewReceipt="reset"></receipt>
     </div>
     <product-selection-tabbed v-if="showCategoryTabs" :buttonSound :categories :displayHeightPortrait :historyHeightPortrait :gridWidthElements @product-clicked="product => cart.push(product)"></product-selection-tabbed>
@@ -24,7 +29,7 @@
 
   <checkout
       v-model="checkoutState"
-      :buttonSound :price :cart :transactor
+      :buttonSound :lazyCalculator :price :cart :transactor
       @checkoutCancelled="checkoutState.dispatch(CheckoutTransition.Cancel)"
       @createNewReceipt="reset"
   ></checkout>
@@ -54,6 +59,8 @@ const props = defineProps({
   categories: {type: Object as PropType<Array<Category>>, required: true},
   useLandscapeMode: {type: Boolean, default: true},
   buttonSound: {type: Boolean, default: true},
+  quickCheckout: {type: Boolean, default: true},
+  lazyCalculator: {type: Boolean, default: true},
   startPrice: {type: Number, default: 0.0},
   gridWidthElements: {type: Number, default: 5},
   useCategoryTabs: {type: Boolean, default: true},
@@ -67,7 +74,7 @@ const transactionState = shallowRef<TransactionState>(new None())
 checkoutState.value.addCallback(CheckoutTransition.RetryableError, () => {
   if (transactionState.value.kind === 'None') {
     transactionState.value = new Pending(1)
-  } else if (transactionState.value.kind === 'Pending') {
+  } else if (transactionState.value instanceof Pending) {
     transactionState.value = new Pending(transactionState.value.count + 1)
   }
 })

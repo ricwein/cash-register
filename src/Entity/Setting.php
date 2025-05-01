@@ -14,6 +14,9 @@ class Setting
     #[ORM\Column]
     private ?int $id = null;
 
+    #[ORM\Column(length: 255)]
+    private ?string $icon = null;
+
     #[ORM\Column(length: 255, unique: true)]
     private ?string $name = null;
 
@@ -25,7 +28,7 @@ class Setting
 
     public static function create(string $name, bool $value, ?string $description = null): self
     {
-        return (new self())
+        return new self()
             ->setName($name)
             ->setIsOn($value)
             ->setDescription($description);
@@ -34,6 +37,17 @@ class Setting
     public function getId(): ?int
     {
         return $this->id;
+    }
+
+    public function getIcon(): ?string
+    {
+        return $this->icon;
+    }
+
+    public function setIcon(?string $icon): static
+    {
+        $this->icon = $icon;
+        return $this;
     }
 
     public function getName(): ?string

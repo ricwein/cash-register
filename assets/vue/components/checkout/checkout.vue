@@ -189,6 +189,7 @@ const props = defineProps({
   cart: {type: Array<Product>, required: true},
   transactor: {type: Object as PropType<Transactor>, required: true},
   buttonSound: {type: Boolean, required: true},
+  lazyCalculator: {type: Boolean, required: true},
 })
 
 // set up state-machine callbacks
@@ -203,8 +204,12 @@ checkoutStateMachine.value
       else if (change.transition === CheckoutTransition.Back) playCancel()
       else playButton()
     })
-    .addCallback(CheckoutTransition.Cash, () => setTimeout(() => document.getElementById('calculatorInput')?.focus(), 200))
     .addCallback(CheckoutState.Sending, processPayment);
+
+if (!props.lazyCalculator) {
+  checkoutStateMachine.value
+      .addCallback(CheckoutTransition.Cash, () => setTimeout(() => document.getElementById('calculatorInput')?.focus(), 200))
+}
 
 const changeField = ref<string>('0,00');
 

@@ -2,6 +2,7 @@
 
 namespace App\Controller\Admin;
 
+use App\EasyAdmin\Field\IconField;
 use App\Entity\Setting;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
@@ -29,6 +30,7 @@ class SettingCrudController extends AbstractCrudController
     public function configureFields(string $pageName): iterable
     {
         return [
+            IconField::new('icon', label: ''),
             TextField::new('description'),
             BooleanField::new('isOn'),
         ];
