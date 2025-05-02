@@ -118,6 +118,7 @@ export class CheckoutStateMachine {
 
         // execute actual transition
         this.state.value = action()
+
         if (storage !== undefined) {
             this.storage = storage
         }

@@ -5,12 +5,12 @@
       <receipt-side :cart @removeArticle="removeArticleByIndex"></receipt-side>
       <div v-if="quickCheckout" class="row action-button-row sticky-bottom">
         <backspace-button class="col" :buttonSound @backspaceClicked="cart.pop()" @createNewReceipt="reset"></backspace-button>
-        <checkout-button class="col" :buttonSound :cart @registerConfirmed="checkoutState.dispatch(CheckoutTransition.Card)" :type="CheckoutTransition.Card"></checkout-button>
-        <checkout-button class="col" :buttonSound :cart @registerConfirmed="checkoutState.dispatch(CheckoutTransition.Cash)" :type="CheckoutTransition.Cash"></checkout-button>
+        <checkout-button class="col" :buttonSound :cart @registerConfirmed="transition" :type="CheckoutTransition.Card"></checkout-button>
+        <checkout-button class="col" :buttonSound :cart @registerConfirmed="transition" :type="CheckoutTransition.Cash"></checkout-button>
       </div>
       <div v-else class="row action-button-row sticky-bottom">
         <backspace-button class="col" :buttonSound @backspaceClicked="cart.pop()" @createNewReceipt="reset"></backspace-button>
-        <checkout-button class="col" :buttonSound :cart @registerConfirmed="checkoutState.dispatch(CheckoutTransition.Start)"></checkout-button>
+        <checkout-button class="col" :buttonSound :cart @registerConfirmed="transition" :type="CheckoutTransition.Start"></checkout-button>
       </div>
     </div>
     <div class="products col">
@@ -20,7 +20,7 @@
   </div>
   <div v-else>
     <div class="sticky-top">
-      <number-display v-model="transactionState" :quickCheckout :buttonSound :transactionState :price :cart :displayHeightPortrait @registerConfirmed="(transition:CheckoutTransition) => checkoutState.dispatch(transition)"></number-display>
+      <number-display v-model="transactionState" :quickCheckout :buttonSound :transactionState :price :cart :displayHeightPortrait @registerConfirmed="transition"></number-display>
       <receipt :buttonSound :cart :historyHeightPortrait @removeArticle="removeArticleByIndex" @backspaceClicked="cart.pop()" @createNewReceipt="reset"></receipt>
     </div>
     <product-selection-tabbed v-if="showCategoryTabs" :buttonSound :categories :displayHeightPortrait :historyHeightPortrait :gridWidthElements @product-clicked="product => cart.push(product)"></product-selection-tabbed>
@@ -109,24 +109,29 @@ function reset() {
   cart.value = []
 }
 
+function transition(to: CheckoutTransition) {
+  checkoutState.value.dispatch(to)
+}
+
 function sendOpenTransactions() {
   transactor.queue.length().then((queueCount: number) => {
     if (queueCount <= 0) {
+      transactionState.value = new None()
       return
     }
 
     transactionState.value = new Sending(queueCount)
-    transactor.sendAll((current, max, success) => {
-      transactionState.value = new Sending(max - success)
-    }).then((result) => {
-      if (result.success >= result.max) {
-        if (props.buttonSound) playSuccess()
-        transactionState.value = new Success()
-        setTimeout(() => transactionState.value = new None(), 2500)
-      } else {
-        transactionState.value = new Pending(result.max - result.success)
-      }
-    })
+    transactor
+        .sendAll((current, max, success) => transactionState.value = new Sending(max - success))
+        .then((result) => {
+          if (result.success >= result.max) {
+            if (props.buttonSound) playSuccess()
+            transactionState.value = new Success()
+            setTimeout(() => transactionState.value = new None(), 2500)
+          } else {
+            transactionState.value = new Pending(result.max - result.success)
+          }
+        })
   })
 }
 </script>

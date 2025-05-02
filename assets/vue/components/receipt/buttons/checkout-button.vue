@@ -41,7 +41,7 @@ const emit = defineEmits(['registerConfirmed'])
 const props = defineProps({
   cart: {type: Array<Product>, required: true},
   buttonSound: {type: Boolean, required: true},
-  type: {type: Object as PropType<CheckoutTransition>, default: CheckoutTransition.Start}
+  type: {type: String as PropType<CheckoutTransition>, default: CheckoutTransition.Start}
 })
 
 function click() {
@@ -53,7 +53,7 @@ function click() {
     play()
   }
 
-  emit('registerConfirmed')
+  emit('registerConfirmed', props.type)
 }
 </script>
 
