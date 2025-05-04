@@ -8,7 +8,7 @@
       </v-tabs-window-item>
     </v-tabs-window>
 
-    <v-card class="bg-dark tab-bar w-100 mt-auto" variant="flat">
+    <v-card class="bg-dark tab-bar w-100 mt-auto" :class="{'sticky': !useLandscapeMode}" variant="flat">
       <v-tabs
           v-model="tab"
           :height="tabBarHeight"
@@ -44,6 +44,7 @@ const props = defineProps({
   displayHeightPortrait: String,
   historyHeightPortrait: String,
   gridWidthElements: Number,
+  useLandscapeMode: {type: Boolean, required: true},
   buttonSound: {type: Boolean, required: true},
 })
 
@@ -98,8 +99,11 @@ function productClicked(product: Product) {
 .tab-bar {
   border-top: 0.1rem solid var(--bs-dark);
   //border-radius: 0;
-  //position: sticky;
-  //bottom: 0;
+
+  &.sticky {
+    position: sticky;
+    bottom: 0;
+  }
 
   .tab:not(:first-of-type) {
     border-left: 0.1em solid rgba(255, 255, 255, 0.3);

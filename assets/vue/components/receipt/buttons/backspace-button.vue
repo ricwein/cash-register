@@ -2,7 +2,7 @@
   <div
       class="backspace-button d-flex align-items-center justify-content-around"
       @click="backspaceClicked"
-      :class="{'mousedown': isMouseDown}"
+      :class="{'mousedown': isMouseDown, 'min-width': !useLandscapeMode}"
       ref="button"
   >
     <span class="fa-solid fa-2xl fa-backspace"></span>
@@ -20,6 +20,7 @@ const {play} = useSound(buttonSound)
 const {play: playWarning} = useSound(warningSound)
 
 const props = defineProps({
+  useLandscapeMode: {type: Boolean, required: true},
   buttonSound: {type: Boolean, required: true},
 })
 const emit = defineEmits(['create-new-receipt', 'backspaceClicked'])
@@ -58,10 +59,13 @@ function onLongPressCallbackHook(): void {
 <style scoped lang="scss">
 .backspace-button {
   background-color: var(--bs-dark-bg-subtle);
-  width: 20vw;
-  min-width: 4rem;
   border-right: 0.05em solid var(--bs-dark);
   cursor: pointer;
+
+  &.min-width {
+    width: 20vw;
+    min-width: 4rem;
+  }
 
   &:active, &:focus, &:hover {
     background-color: var(--bs-warning);

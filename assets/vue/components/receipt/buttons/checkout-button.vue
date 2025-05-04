@@ -2,7 +2,7 @@
   <div
       v-if="type === CheckoutTransition.Card"
       class="checkout-button bg-primary d-flex align-items-center flex-column justify-content-around"
-      :class="{'disabled': cart.length <= 0}"
+      :class="{'disabled': cart.length <= 0, 'min-width': !useLandscapeMode}"
       @click="click"
   >
     <span class="fa-solid fa-credit-card fa-2xl mt-3"></span>
@@ -11,16 +11,34 @@
   <div
       v-else-if="type === CheckoutTransition.Cash"
       class="checkout-button bg-success d-flex align-items-center flex-column justify-content-around"
-      :class="{'disabled': cart.length <= 0}"
+      :class="{'disabled': cart.length <= 0, 'min-width': !useLandscapeMode}"
       @click="click"
   >
     <span class="fa-solid fa-money-bill-wave fa-2xl mt-3"></span>
     <span>Bar</span>
   </div>
   <div
+      v-else-if="type === CheckoutTransition.Payout"
+      class="checkout-button bg-success d-flex align-items-center flex-column justify-content-around"
+      :class="{'disabled': cart.length <= 0, 'min-width': !useLandscapeMode}"
+      @click="click"
+  >
+    <span class="fa-solid fa-money-bill-wave fa-2xl mt-3"></span>
+    <span>Auszahlen</span>
+  </div>
+  <div
+      v-else-if="type === CheckoutTransition.Continue"
+      class="checkout-button bg-success d-flex align-items-center flex-column justify-content-around"
+      :class="{'disabled': cart.length <= 0, 'min-width': !useLandscapeMode}"
+      @click="click"
+  >
+    <span class="fa-solid fa-check fa-2xl mt-3"></span>
+    <span>Bestätigen</span>
+  </div>
+  <div
       v-else
       class="checkout-button bg-primary d-flex align-items-center flex-column justify-content-around"
-      :class="{'disabled': cart.length <= 0}"
+      :class="{'disabled': cart.length <= 0, 'min-width': !useLandscapeMode}"
       @click="click"
   >
     <span class="fa-solid fa-cash-register fa-2xl mt-3"></span>
@@ -41,6 +59,7 @@ const emit = defineEmits(['registerConfirmed'])
 const props = defineProps({
   cart: {type: Array<Product>, required: true},
   buttonSound: {type: Boolean, required: true},
+  useLandscapeMode: {type: Boolean, required: true},
   type: {type: String as PropType<CheckoutTransition>, default: CheckoutTransition.Start}
 })
 
@@ -60,7 +79,10 @@ function click() {
 <style scoped lang="scss">
 .checkout-button {
   border-left: 0.05em solid var(--bs-dark);
-  width: 10vw;
+
+  &.min-width {
+    width: 10vw;
+  }
 
   &:not(.disabled) {
     cursor: pointer;

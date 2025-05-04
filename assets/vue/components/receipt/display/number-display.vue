@@ -8,10 +8,10 @@
     </div>
     <span class="display ms-auto">{{ NumberFormatter.format(price) }}</span>
     <span v-if="quickCheckout" class="d-flex justify-content-center">
-      <checkout-button :buttonSound :cart @registerConfirmed="$emit('registerConfirmed', CheckoutTransition.Card)" :type="CheckoutTransition.Card"></checkout-button>
-      <checkout-button :buttonSound :cart @registerConfirmed="$emit('registerConfirmed', CheckoutTransition.Cash)" :type="CheckoutTransition.Cash"></checkout-button>
+      <checkout-button :useLandscapeMode="true" :buttonSound :cart @registerConfirmed="$emit('registerConfirmed', CheckoutTransition.Card)" :type="CheckoutTransition.Card"></checkout-button>
+      <checkout-button :useLandscapeMode="true" :buttonSound :cart @registerConfirmed="$emit('registerConfirmed', CheckoutTransition.Cash)" :type="CheckoutTransition.Cash"></checkout-button>
     </span>
-    <checkout-button v-else :buttonSound :cart @registerConfirmed="$emit('registerConfirmed', CheckoutTransition.Start)"></checkout-button>
+    <checkout-button :useLandscapeMode="true" v-else :buttonSound :cart @registerConfirmed="$emit('registerConfirmed', CheckoutTransition.Start)"></checkout-button>
   </div>
 </template>
 

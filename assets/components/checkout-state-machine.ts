@@ -5,7 +5,8 @@ export const enum CheckoutTransition {
     Cancel = 'cancel',
     Cash = 'cash',
     Card = 'card',
-    Skip = 'skip',
+    Payout = 'payout',
+    Continue = 'continue',
     Back = 'back',
     Error = 'error',
     RetryableError = 'retryable',
@@ -24,7 +25,7 @@ export const enum CheckoutState {
 
 export type StateChange = { fromState: CheckoutState, transition: CheckoutTransition, toState: CheckoutState, storage: any | null }
 type TransitionAction = (() => CheckoutState)
-type StateChangeCallback = (change: StateChange) => void
+type StateChangeCallback = (change: StateChange) => void | any
 type StateChangeTrigger = CheckoutTransition | CheckoutState
 
 export class CheckoutStateMachine {
@@ -41,7 +42,8 @@ export class CheckoutStateMachine {
         [CheckoutTransition.Cancel]: [],
         [CheckoutTransition.Cash]: [],
         [CheckoutTransition.Card]: [],
-        [CheckoutTransition.Skip]: [],
+        [CheckoutTransition.Payout]: [],
+        [CheckoutTransition.Continue]: [],
         [CheckoutTransition.Back]: [],
         [CheckoutTransition.Error]: [],
         [CheckoutTransition.RetryableError]: [],
@@ -52,24 +54,30 @@ export class CheckoutStateMachine {
 
     private transitions: Record<CheckoutState, Partial<Record<CheckoutTransition, TransitionAction>>> = {
         [CheckoutState.Off]: {
+            [CheckoutTransition.Cancel]: () => CheckoutState.Off,
             [CheckoutTransition.Start]: () => CheckoutState.Check,
             [CheckoutTransition.Cash]: () => CheckoutState.Calculator,
             [CheckoutTransition.Card]: () => CheckoutState.Confirm,
-            [CheckoutTransition.Cancel]: () => CheckoutState.Off,
+            [CheckoutTransition.Payout]: () => CheckoutState.Confirm,
+            [CheckoutTransition.Continue]: () => CheckoutState.Confirm,
         },
         [CheckoutState.Check]: {
             [CheckoutTransition.Cancel]: () => CheckoutState.Off,
             [CheckoutTransition.Cash]: () => CheckoutState.Calculator,
             [CheckoutTransition.Card]: () => CheckoutState.Confirm,
-            [CheckoutTransition.Skip]: () => CheckoutState.Sending,
+            [CheckoutTransition.Payout]: () => CheckoutState.Sending,
+            [CheckoutTransition.Continue]: () => CheckoutState.Sending,
         },
         [CheckoutState.Calculator]: {
             [CheckoutTransition.Execute]: () => CheckoutState.Sending,
+            [CheckoutTransition.Payout]: () => CheckoutState.Sending,
             [CheckoutTransition.Back]: () => CheckoutState.Check,
             [CheckoutTransition.Cancel]: () => CheckoutState.Off,
         },
         [CheckoutState.Confirm]: {
             [CheckoutTransition.Execute]: () => CheckoutState.Sending,
+            [CheckoutTransition.Payout]: () => CheckoutState.Sending,
+            [CheckoutTransition.Continue]: () => CheckoutState.Sending,
             [CheckoutTransition.Back]: () => CheckoutState.Check,
             [CheckoutTransition.Cancel]: () => CheckoutState.Off,
         },
@@ -107,7 +115,7 @@ export class CheckoutStateMachine {
         return this.current().value
     }
 
-    public dispatch(transition: CheckoutTransition, storage: any | null | undefined = undefined): void {
+    public dispatch(transition: CheckoutTransition): void {
         const action: TransitionAction | undefined = this.transitions[this.state.value][transition]
 
         if (!action) {
@@ -119,14 +127,24 @@ export class CheckoutStateMachine {
         // execute actual transition
         this.state.value = action()
 
-        if (storage !== undefined) {
+        let change = this.handleStateChange(from, transition, this.storage)
+
+        for (const callback of [
+            ...this.callbacks[transition],
+            ...this.callbacks[this.state.value],
+            ...this.anywayCallbacks,
+        ]) {
+            const result = callback(change)
+            if (result !== undefined) {
+                change = this.handleStateChange(from, transition, result)
+            }
+        }
+    }
+
+    private handleStateChange(from: Ref<CheckoutState, CheckoutState>, transition: CheckoutTransition, storage: any | null | undefined): StateChange {
+        if (storage !== this.storage) {
             this.storage = storage
         }
-
-        const change: StateChange = {fromState: from.value, transition: transition, toState: this.state.value, storage: this.storage}
-
-        this.callbacks[this.state.value].forEach(callback => callback(change))
-        this.callbacks[transition].forEach(callback => callback(change))
-        this.anywayCallbacks.forEach(callback => callback(change))
+        return {fromState: from.value, transition: transition, toState: this.state.value, storage: this.storage}
     }
 }

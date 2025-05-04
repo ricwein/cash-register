@@ -9,6 +9,7 @@ use App\Entity\Product;
 use App\Entity\PurchasedArticle;
 use App\Entity\PurchaseTransaction;
 use App\Enum\ConfirmationState;
+use App\Enum\PaymentType;
 use App\Helper\ReceiptArticleGroupHelper;
 use App\Model\PaymentTransaction;
 use App\Repository\CategoryRepository;
@@ -107,7 +108,11 @@ class AppController extends AbstractController
                     ->setProductId($product->getId())
             );
         }
+
         $transaction->setPrice($price);
+        if (bccomp($price, '0.00', self::PRECISION) === 0) {
+            $transaction->setPaymentType(PaymentType::NONE);
+        }
 
         try {
             $this->entityManager->persist($transaction);

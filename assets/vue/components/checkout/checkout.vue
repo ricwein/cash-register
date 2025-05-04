@@ -25,24 +25,24 @@
           </v-btn>
 
           <div v-if="price > 0.00">
-            <v-btn @click="checkoutStateMachine.dispatch(CheckoutTransition.Card, 'card')" class="me-3 h-auto btn btn-primary py-3 px-5">
+            <v-btn @click="checkoutStateMachine.dispatch(CheckoutTransition.Card)" class="me-3 h-auto btn btn-primary py-3 px-5">
               <i class="fa-solid fa-xl fa-credit-card"></i>
               Karte
             </v-btn>
 
-            <v-btn @click="checkoutStateMachine.dispatch(CheckoutTransition.Cash, 'cash')" class="h-auto btn btn-success py-3 px-5">
+            <v-btn @click="checkoutStateMachine.dispatch(CheckoutTransition.Cash)" class="h-auto btn btn-success py-3 px-5">
               <i class="fa-solid fa-xl fa-money-bill-wave"></i>
               Bar
             </v-btn>
           </div>
           <div v-else-if="price < 0.00">
-            <v-btn @click="checkoutStateMachine.dispatch(CheckoutTransition.Skip, 'cash')" class="h-auto btn btn-success p-3">
+            <v-btn @click="checkoutStateMachine.dispatch(CheckoutTransition.Payout)" class="h-auto btn btn-success p-3">
               <i class="fa-xl mdi mdi-hand-coin"></i>
               Betrag Auszahlen
             </v-btn>
           </div>
           <div v-else>
-            <v-btn @click="checkoutStateMachine.dispatch(CheckoutTransition.Skip, 'none')" class="h-auto btn btn-success p-3">
+            <v-btn @click="checkoutStateMachine.dispatch(CheckoutTransition.Continue)" class="h-auto btn btn-success p-3">
               <i class="fa-solid fa-xl fa-check"></i>
               Bestätigen
             </v-btn>
@@ -148,9 +148,17 @@
             Zurück
           </v-btn>
 
-          <v-btn @click="checkoutStateMachine.dispatch(CheckoutTransition.Execute)" class="me-3 h-auto btn btn-success p-3">
+          <v-btn v-if="price > 0.0" @click="checkoutStateMachine.dispatch(CheckoutTransition.Execute)" class="me-3 h-auto btn btn-success p-3">
             <i class="fa-solid fa-xl fa-check-double"></i>
             Zahlung Bestätigen
+          </v-btn>
+          <v-btn v-else-if="price < 0.0" @click="checkoutStateMachine.dispatch(CheckoutTransition.Payout)" class="me-3 h-auto btn btn-success p-3">
+            <i class="fa-xl mdi mdi-hand-coin"></i>
+            Betrag Auszahlen
+          </v-btn>
+          <v-btn v-else @click="checkoutStateMachine.dispatch(CheckoutTransition.Continue)" class="me-3 h-auto btn btn-success p-3">
+            <i class="fa-xl mdi mdi-check-all"></i>
+            Bestätigen
           </v-btn>
         </div>
       </template>
@@ -194,8 +202,19 @@ const props = defineProps({
 
 // set up state-machine callbacks
 checkoutStateMachine.value
-    .addCallback(null, () => changeField.value = '0,00')
-    .addCallback(null, change => {
+    .addCallback(
+        [CheckoutTransition.Card, CheckoutTransition.Cash, CheckoutTransition.Payout, CheckoutTransition.Continue],
+        (change: StateChange): string => {
+          console.log('store payment type:', {transition: change.transition})
+          if (change.transition === CheckoutTransition.Continue) return 'none'
+          else if (change.transition === CheckoutTransition.Payout) return `${CheckoutTransition.Cash}`
+          else return `${change.transition}`
+        }
+    )
+    .addCallback(null, (): void => {
+      changeField.value = '0,00'
+    })
+    .addCallback(null, (change: StateChange): void => {
       if (!props.buttonSound) return;
 
       if (change.transition === CheckoutTransition.Error || change.transition === CheckoutTransition.RetryableError) playWarning()
