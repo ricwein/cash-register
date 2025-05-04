@@ -5,14 +5,14 @@
       <receipt-side :cart @removeArticle="removeArticleByIndex"></receipt-side>
       <div v-if="quickCheckout" class="row action-button-row sticky-bottom">
         <backspace-button class="col-4" :useLandscapeMode :buttonSound @backspaceClicked="cart.pop()" @createNewReceipt="reset"></backspace-button>
-        <checkout-button v-if="cart.length <= 0 || price > 0.0" class="col-4" :useLandscapeMode :buttonSound :cart @registerConfirmed="transition" :type="CheckoutTransition.Card"></checkout-button>
-        <checkout-button v-if="cart.length <= 0 || price > 0.0" class="col-4" :useLandscapeMode :buttonSound :cart @registerConfirmed="transition" :type="CheckoutTransition.Cash"></checkout-button>
-        <checkout-button v-else-if="price < 0.0" class="col-8" :useLandscapeMode :buttonSound :cart @registerConfirmed="transition" :type="CheckoutTransition.Payout"></checkout-button>
-        <checkout-button v-else class="col-8" :useLandscapeMode :buttonSound :cart @registerConfirmed="transition" :type="CheckoutTransition.Continue"></checkout-button>
+        <checkout-button v-if="cart.length <= 0 || price > 0.0" class="col-4" :buttonSound :cart @registerConfirmed="transition" :type="CheckoutTransition.Card"></checkout-button>
+        <checkout-button v-if="cart.length <= 0 || price > 0.0" class="col-4" :buttonSound :cart @registerConfirmed="transition" :type="CheckoutTransition.Cash"></checkout-button>
+        <checkout-button v-else-if="price < 0.0" class="col-8" :buttonSound :cart @registerConfirmed="transition" :type="CheckoutTransition.Payout"></checkout-button>
+        <checkout-button v-else class="col-8" :buttonSound :cart @registerConfirmed="transition" :type="CheckoutTransition.Continue"></checkout-button>
       </div>
       <div v-else class="row action-button-row sticky-bottom">
         <backspace-button class="col" :useLandscapeMode :buttonSound @backspaceClicked="cart.pop()" @createNewReceipt="reset"></backspace-button>
-        <checkout-button class="col" :useLandscapeMode :buttonSound :cart @registerConfirmed="transition" :type="CheckoutTransition.Start"></checkout-button>
+        <checkout-button class="col" :buttonSound :cart @registerConfirmed="transition" :type="CheckoutTransition.Start"></checkout-button>
       </div>
     </div>
     <div class="products col">

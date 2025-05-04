@@ -8,10 +8,12 @@
     </div>
     <span class="display ms-auto">{{ NumberFormatter.format(price) }}</span>
     <span v-if="quickCheckout" class="d-flex justify-content-center">
-      <checkout-button :useLandscapeMode="true" :buttonSound :cart @registerConfirmed="$emit('registerConfirmed', CheckoutTransition.Card)" :type="CheckoutTransition.Card"></checkout-button>
-      <checkout-button :useLandscapeMode="true" :buttonSound :cart @registerConfirmed="$emit('registerConfirmed', CheckoutTransition.Cash)" :type="CheckoutTransition.Cash"></checkout-button>
+        <checkout-button v-if="cart.length <= 0 || price > 0.0" class="half-width" :buttonSound :cart @registerConfirmed="transition" :type="CheckoutTransition.Card"></checkout-button>
+        <checkout-button v-if="cart.length <= 0 || price > 0.0" class="half-width" :buttonSound :cart @registerConfirmed="transition" :type="CheckoutTransition.Cash"></checkout-button>
+        <checkout-button v-else-if="price < 0.0" class="full-width" :buttonSound :cart @registerConfirmed="transition" :type="CheckoutTransition.Payout"></checkout-button>
+        <checkout-button v-else class="full-width" :buttonSound :cart @registerConfirmed="transition" :type="CheckoutTransition.Continue"></checkout-button>
     </span>
-    <checkout-button :useLandscapeMode="true" v-else :buttonSound :cart @registerConfirmed="$emit('registerConfirmed', CheckoutTransition.Start)"></checkout-button>
+    <checkout-button v-else class="full-width" :buttonSound :cart @registerConfirmed="transition" :type="CheckoutTransition.Start"></checkout-button>
   </div>
 </template>
 
@@ -30,11 +32,25 @@ defineProps({
   displayHeightPortrait: String,
 })
 
-defineEmits(['registerConfirmed'])
+const emit = defineEmits(['registerConfirmed'])
 const transactionState = defineModel<TransactionState>({required: true})
+
+function transition(to: CheckoutTransition) {
+  emit('registerConfirmed', to)
+}
 </script>
 
 <style scoped lang="scss">
+.half-width {
+  min-width: 5rem;
+  width: 8vw;
+}
+
+.full-width {
+  min-width: 10rem;
+  width: 16vw;
+}
+
 .display-container {
   height: v-bind(displayHeightPortrait);
   text-align: right;

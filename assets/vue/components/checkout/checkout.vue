@@ -205,7 +205,6 @@ checkoutStateMachine.value
     .addCallback(
         [CheckoutTransition.Card, CheckoutTransition.Cash, CheckoutTransition.Payout, CheckoutTransition.Continue],
         (change: StateChange): string => {
-          console.log('store payment type:', {transition: change.transition})
           if (change.transition === CheckoutTransition.Continue) return 'none'
           else if (change.transition === CheckoutTransition.Payout) return `${CheckoutTransition.Cash}`
           else return `${change.transition}`
