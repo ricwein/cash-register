@@ -22,6 +22,24 @@ class PurchaseTransactionRepository extends ServiceEntityRepository
     }
 
     /**
+     * @return array<string>
+     */
+    public function findDistinctEventNames(): array
+    {
+        $queryBuilder = $this->createQueryBuilder('transaction');
+        $queryBuilder
+            ->select('transaction.eventName')
+            ->groupBy('transaction.eventName');
+
+        $events = [];
+        foreach ($queryBuilder->getQuery()->getSingleColumnResult() as $event) {
+            $events[$event] = $event;
+        }
+
+        return $events;
+    }
+
+    /**
      * @return array<string, string>
      */
     public function findDistinctEvents(DateTimeImmutable $from, DateTimeImmutable $to): array

@@ -2,8 +2,10 @@
 
 namespace App\Controller\Admin;
 
+use App\EasyAdmin\Filter\DateFilter;
 use App\Entity\PurchaseTransaction;
 use App\Enum\PaymentType;
+use App\Repository\PurchaseTransactionRepository;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
@@ -15,10 +17,16 @@ use EasyCorp\Bundle\EasyAdminBundle\Field\IdField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\MoneyField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
 use EasyCorp\Bundle\EasyAdminBundle\Filter\ChoiceFilter;
-use EasyCorp\Bundle\EasyAdminBundle\Filter\DateTimeFilter;
+use EasyCorp\Bundle\EasyAdminBundle\Filter\EntityFilter;
+use EasyCorp\Bundle\EasyAdminBundle\Filter\NumericFilter;
+use Symfony\Component\Form\Extension\Core\Type\MoneyType;
 
 class PurchaseTransactionCrudController extends AbstractCrudController
 {
+    public function __construct(
+        private readonly PurchaseTransactionRepository $repository,
+    ) {}
+
     public static function getEntityFqcn(): string
     {
         return PurchaseTransaction::class;
@@ -50,6 +58,7 @@ class PurchaseTransactionCrudController extends AbstractCrudController
 
     public function configureFilters(Filters $filters): Filters
     {
+        $events = $this->repository->findDistinctEventNames();
         return $filters
             ->add(
                 ChoiceFilter::new('paymentType')->setChoices([
@@ -59,7 +68,13 @@ class PurchaseTransactionCrudController extends AbstractCrudController
                 ])
             )
             ->add(
-                DateTimeFilter::new('createdAt'),
+                ChoiceFilter::new('eventName')->setChoices($events)
+            )
+            ->add(
+                DateFilter::new('createdAt')
+            )
+            ->add(
+                NumericFilter::new('price')->setFormTypeOption('value_type', MoneyType::class)
             );
     }
 }
