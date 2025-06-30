@@ -1,6 +1,10 @@
 #!/bin/sh
 set -e
 
+if [ -n "${TZ+1}" ]; then
+  echo "date.timezone = ${TZ}" > "${PHP_INI_DIR}/conf.d/tzone.ini"
+fi
+
 # prefix 'php-fpm' if first arg is `-f` or `--some-option`
 if [ "${1#-}" != "$1" ]; then
   set -- php-fpm "$@"

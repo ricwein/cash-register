@@ -9,8 +9,9 @@ FROM php:${PHP_VERSION}-fpm-alpine AS php-base
 ADD --chmod=0755 https://github.com/mlocati/docker-php-extension-installer/releases/latest/download/install-php-extensions /usr/local/bin/
 RUN install-php-extensions bcmath ctype iconv intl opcache pdo_mysql gd @composer
 
-ARG PHP_TIMEZONE=${PHP_TIMEZONE:-UTC}
-RUN echo "date.timezone = ${PHP_TIMEZONE}" > $PHP_INI_DIR/conf.d/tzone.ini
+ARG TZ=${TZ:-UTC}
+ENV TZ=${TZ}
+RUN echo "date.timezone = ${TZ}" > $PHP_INI_DIR/conf.d/tzone.ini
 
 WORKDIR /app
 
