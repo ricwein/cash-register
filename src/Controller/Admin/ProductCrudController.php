@@ -43,9 +43,9 @@ class ProductCrudController extends AbstractCrudController
         return [
             IconField::new('icon'),
             TextField::new('name'),
-            AssociationField::new('events'),
+            AssociationField::new('events')->setTemplatePath('easy-admin/field/association_list.html.twig'),
             AssociationField::new('category'),
-            AssociationField::new('additionalCategories'),
+            AssociationField::new('additionalCategories')->setTemplatePath('easy-admin/field/association_list.html.twig'),
             ColorField::new('color'),
             IntegerField::new('priority'),
             ImageField::new('image')

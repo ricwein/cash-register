@@ -1,0 +1,15 @@
+{# @var ea \EasyCorp\Bundle\EasyAdminBundle\Context\AdminContext #}
+{# @var field \EasyCorp\Bundle\EasyAdminBundle\Dto\FieldDto #}
+{# @var entity \EasyCorp\Bundle\EasyAdminBundle\Dto\EntityDto #}
+{% if 'toMany' == field.customOptions.get('associationType') %}
+    {% set values = field.value %}
+    {% if values is iterable and values is not empty %}
+        <ul class="list-group list-group-flush text-start">
+            {% for entity in values %}
+                <li class="list-group-item text-nowrap bg-transparent small py-1 px-0">{{ entity }}</li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <i class="float-start text-muted fa-solid fa-minus"></i>
+    {% endif %}
+{% endif %}
