@@ -194,7 +194,9 @@ class PurchaseTransactionRepository extends ServiceEntityRepository
         }
 
         $queryBuilder
-            ->leftJoin('transaction.soldArticles', 'article');
+            ->leftJoin('transaction.soldArticles', 'article')
+            ->andWhere('article.id IS NOT NULL')
+        ;
 
         return $queryBuilder;
     }

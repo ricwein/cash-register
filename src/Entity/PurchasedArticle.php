@@ -5,10 +5,11 @@ namespace App\Entity;
 use App\Repository\PurchasedArticleRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Stringable;
 
 #[ORM\Entity(repositoryClass: PurchasedArticleRepository::class)]
 #[ORM\Index(columns: ['product_id'])]
-class PurchasedArticle
+class PurchasedArticle implements Stringable
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -94,5 +95,10 @@ class PurchasedArticle
         $this->receiptTransaction = $receiptTransaction;
 
         return $this;
+    }
+
+    public function __toString()
+    {
+        return $this->getProductName() ?? '';
     }
 }
