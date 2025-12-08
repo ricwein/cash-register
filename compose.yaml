@@ -34,7 +34,7 @@ services:
     environment:
       APP_ENV: ${APP_ENV:-prod}
       APP_DEBUG: ${APP_DEBUG:-false}
-      DATABASE_URL: mysql://root:toor@db:3306/app?serverVersion=mariadb-11.7.2&charset=utf8mb4
+      DATABASE_URL: mysql://root:toor@db:3306/app?serverVersion=mariadb-12.1.2&charset=utf8mb4
     env_file:
       - .env
     networks:
@@ -46,13 +46,18 @@ services:
       - db
 
   db:
-    image: mariadb:12.0.2-ubi
+    image: mariadb:12-ubi
     networks:
       - internal
     environment:
       - MYSQL_ROOT_PASSWORD=toor
       - MARIADB_DATABASE=app
     restart: unless-stopped
+    cap_add:
+      - SYS_ADMIN
+    ulimits:
+      memlock: 262144
+      nproc: 262144
 
 volumes:
   upload-dir:
