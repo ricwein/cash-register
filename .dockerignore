@@ -27,6 +27,7 @@ bin/*
 helm/
 public/bundles/
 public/build/
+public/uploads/
 var/
 node_modules/
 vendor/
