@@ -20,6 +20,7 @@ use App\Service\DTOMapperService;
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
+use Symfony\Bridge\Doctrine\Attribute\MapEntity;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
@@ -40,7 +41,8 @@ class AppController extends AbstractController
         private readonly ProductRepository $productRepository,
         private readonly SettingRepository $settingRepository,
         private readonly TranslatorInterface $translator,
-    ) {}
+    ) {
+    }
 
     #[Route('/{eventId}', name: 'start_cash_register', requirements: ['eventId' => '\d+'])]
     public function index(int $eventId): Response
@@ -67,17 +69,9 @@ class AppController extends AbstractController
     /** @noinspection PhpRedundantCatchClauseInspection */
     #[Route('/{eventId}/send', name: 'send_cash_register', requirements: ['eventId' => '\d+'], methods: ['PUT'])]
     public function confirmTransaction(
-        int $eventId,
+        #[MapEntity(id: 'eventId')] Event $event,
         #[MapRequestPayload(resolver: PaymentTransactionRequestResolver::class)] PaymentTransaction $transactionData,
     ): Response {
-        $event = $this->eventRepository->find($eventId);
-        if ($event === null) {
-            return new JsonResponse([
-                'state' => ConfirmationState::ERROR,
-                'message' => "Event with id {$eventId} not found",
-            ], 404);
-        }
-
         $products = [];
         /** @var Product $product */
         foreach ($this->productRepository->findBy(['id' => array_keys($transactionData->cart)]) as $product) {
@@ -105,6 +99,7 @@ class AppController extends AbstractController
                     ->setQuantity($quantity)
                     ->setProductName($product->getName())
                     ->setProductId($product->getId())
+                    ->setTax($product->getTax()?->percent ?? 0)
             );
         }
 

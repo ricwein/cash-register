@@ -12,7 +12,7 @@ class IconField implements FieldInterface
 
     public static function new(string $propertyName, $label = null): self
     {
-        return (new self())
+        return new self()
             ->setProperty($propertyName)
             ->setLabel($label)
             ->setTemplatePath('easy-admin/field/icon.html.twig')

@@ -19,6 +19,7 @@ use EasyCorp\Bundle\EasyAdminBundle\Field\IntegerField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\MoneyField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
 use EasyCorp\Bundle\EasyAdminBundle\Filter\ChoiceFilter;
+use EasyCorp\Bundle\EasyAdminBundle\Filter\EntityFilter;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
@@ -31,7 +32,8 @@ class ProductCrudController extends AbstractCrudController
         private readonly EventRepository $eventRepository,
         #[Autowire('%app.upload_dir_name%')] private readonly string $uploadDirName,
         #[Autowire('%app.upload_dir_path%')] private readonly string $uploadDirPath,
-    ) {}
+    ) {
+    }
 
     public static function getEntityFqcn(): string
     {
@@ -54,6 +56,7 @@ class ProductCrudController extends AbstractCrudController
                 ->setFileConstraints(new Image(maxSize: '2M', maxWidth: 2048, maxHeight: 2048, detectCorrupted: true))
                 ->setUploadedFileNamePattern('[slug]-[contenthash].[extension]')
             ,
+            AssociationField::new('tax', label: 'SalesTax'),
             MoneyField::new('price')->addCssClass('fw-bold')->setCurrency('EUR')->setStoredAsCents(false),
         ];
     }
@@ -65,11 +68,11 @@ class ProductCrudController extends AbstractCrudController
             return $filters;
         }
 
-        return $filters->add(
-            ChoiceFilter::new('events')
+        return $filters
+            ->add(ChoiceFilter::new('events')
                 ->setChoices($this->eventRepository->findAllEventNames())
-                ->canSelectMultiple()
-        );
+                ->canSelectMultiple())
+            ->add(EntityFilter::new('tax', 'SalesTax'));
     }
 
     public function configureActions(Actions $actions): Actions

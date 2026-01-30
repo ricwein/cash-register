@@ -6,6 +6,7 @@ use App\Entity\Category;
 use App\Entity\Event;
 use App\Entity\Product;
 use App\Entity\PurchaseTransaction;
+use App\Entity\SalesTax;
 use App\Entity\Setting;
 use App\Repository\EventRepository;
 use EasyCorp\Bundle\EasyAdminBundle\Attribute\AdminDashboard;
@@ -55,6 +56,7 @@ class DashboardController extends AbstractDashboardController
         yield MenuItem::linkToRoute('Export Receipts', 'fa-solid fa-receipt', 'receipt-export');
         yield MenuItem::linkToCrud('Transactions', 'fa-solid fa-receipt', PurchaseTransaction::class);
         yield MenuItem::section('Setting');
+        yield MenuItem::linkToCrud('Taxes', 'fa-solid fa-percent', SalesTax::class);
         yield MenuItem::linkToCrud('Setting', 'fa-solid fa-gears', Setting::class);
     }
 }

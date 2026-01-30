@@ -56,8 +56,8 @@ if [ "$1" = 'php-fpm' ] || [ "$1" = 'php' ] || [ "$1" = 'bin/console' ]; then
   for writableDirPath in 'var/cache' 'var/log'; do
     echo "[ENTRYPOINT] fix permissions on: ${writableDirPath}"
     chmod -R 777 "${writableDirPath}"
-    setfacl -R -m u:www-data:rwX -m u:"$(whoami)":rwX "${writableDirPath}"
-    setfacl -dR -m u:www-data:rwX -m u:"$(whoami)":rwX "${writableDirPath}"
+    setfacl -R -m u:www-data:rwX -m u:"$(whoami)":rwX "${writableDirPath}" || true
+    setfacl -dR -m u:www-data:rwX -m u:"$(whoami)":rwX "${writableDirPath}" || true
   done
 
   echo "[ENTRYPOINT] fix permissions on: public/uploads"

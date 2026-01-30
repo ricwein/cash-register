@@ -58,6 +58,10 @@ class Product
     )]
     private Collection $additionalCategories;
 
+    #[ORM\ManyToOne]
+    #[ORM\JoinColumn(nullable: false)]
+    private SalesTax $tax;
+
     public function __construct()
     {
         $this->events = new ArrayCollection();
@@ -195,6 +199,18 @@ class Product
     public function removeAdditionalCategory(Category $additionalCategory): static
     {
         $this->additionalCategories->removeElement($additionalCategory);
+
+        return $this;
+    }
+
+    public function getTax(): ?SalesTax
+    {
+        return $this->tax ?? null;
+    }
+
+    public function setTax(SalesTax $tax): static
+    {
+        $this->tax = $tax;
 
         return $this;
     }

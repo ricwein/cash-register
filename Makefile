@@ -1,4 +1,5 @@
-hello:
+.PHONY: build
+build:
 	docker compose build --pull
 
 release:

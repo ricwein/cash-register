@@ -20,17 +20,20 @@ class PurchasedArticle implements Stringable
     private ?int $productId = null;
 
     #[ORM\Column(length: 255)]
-    private ?string $productName = null;
+    private string $productName;
 
     #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 2)]
-    private ?string $price = null;
+    private string $price;
 
     #[ORM\Column]
-    private ?int $quantity = null;
+    private int $quantity;
 
     #[ORM\ManyToOne(inversedBy: 'soldArticles')]
     #[ORM\JoinColumn(nullable: false)]
     private ?PurchaseTransaction $receiptTransaction = null;
+
+    #[ORM\Column]
+    private int $tax;
 
     public function getId(): ?int
     {
@@ -49,9 +52,9 @@ class PurchasedArticle implements Stringable
         return $this;
     }
 
-    public function getProductName(): ?string
+    public function getProductName(): string
     {
-        return $this->productName;
+        return $this->productName ?? '';
     }
 
     public function setProductName(string $productName): static
@@ -61,9 +64,9 @@ class PurchasedArticle implements Stringable
         return $this;
     }
 
-    public function getPrice(): ?string
+    public function getPrice(): string
     {
-        return $this->price;
+        return $this->price ?? '0.00';
     }
 
     public function setPrice(string $price): static
@@ -73,9 +76,9 @@ class PurchasedArticle implements Stringable
         return $this;
     }
 
-    public function getQuantity(): ?int
+    public function getQuantity(): int
     {
-        return $this->quantity;
+        return $this->quantity ?? 0;
     }
 
     public function setQuantity(int $quantity): static
@@ -100,5 +103,16 @@ class PurchasedArticle implements Stringable
     public function __toString()
     {
         return $this->getProductName() ?? '';
+    }
+
+    public function getTax(): ?int
+    {
+        return $this->tax ?? null;
+    }
+
+    public function setTax(int $tax): static
+    {
+        $this->tax = $tax;
+        return $this;
     }
 }
