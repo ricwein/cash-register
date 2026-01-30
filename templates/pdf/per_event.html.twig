@@ -1,10 +1,12 @@
-{# @var \App\Model\ReceiptArticle[] articles #}
+{# @var array<string, array<int, array<string, \App\Model\ReceiptArticle>>> articles #}
+{# @var array<string, array<int, array<string, \BcMath\Number>> paymentPrices #}
+
 {% extends 'pdf/base.html.twig' %}
 
 {% block size %}{{ size.size }} {{ size.orientation }}{% endblock %}
 
 {% block body %}
-    {% for eventName, eventArticle in articles %}
+    {% for eventName, eventArticles in articles %}
         <div class="page">
             <div class="card">
                 <div class="card-header">
@@ -12,45 +14,20 @@
                 </div>
                 <div class="card-body">
                     {% if filter.toDate is not null %}
-                        Verkäufe vom <strong>{{ filter.fromDate|date('d.m.Y') }}</strong> bis zum <strong>{{ filter.toDate|date('d.m.Y') }}</strong>.
+                        Verkäufe vom <strong>{{ filter.fromDate|date('d.m.Y') }}</strong> bis zum
+                        <strong>{{ filter.toDate|date('d.m.Y') }}</strong>.
                     {% else %}
                         Verkäufe am <strong>{{ filter.fromDate|date('d.m.Y') }}</strong>.
                     {% endif %}
                 </div>
             </div>
-            <table class="table mt-3">
-                <thead>
-                <tr>
-                    <th>{{ 'Product Name'|trans }}</th>
-                    <th>{{ 'Quantity'|trans }}</th>
-                    <th>{{ 'Price Sum'|trans }}</th>
-                </tr>
-                </thead>
-                <tbody>
-                {% for article in eventArticle %}
-                    <tr>
-                        <th>{{ article.name }}</th>
-                        <td>{{ article.quantity }}</td>
-                        <td>{{ article.price | number_format(2,',','.') }} €</td>
-                    </tr>
-                {% endfor %}
-                </tbody>
-                <tfoot>
-                {% for type, price in paymentPrices[eventName] %}
-                    <tr>
-                        <td></td>
-                        <td>{{ type | trans | capitalize }}: </td>
-                        <td>{{ price | number_format(2,',','.') }} €</td>
-                    </tr>
-                {% endfor %}
-                </tfoot>
-                <tfoot>
-                <tr>
-                    <td colspan="2"></td>
-                    <th>{{ eventArticle | reduce((carry, article) => carry + article.price, 0.0) | number_format(2,',','.') }} €</th>
-                </tr>
-                </tfoot>
-            </table>
+            {% for tax, taxArticles in eventArticles %}
+                {% include 'pdf/components/article_table.html.twig' with {
+                    articles: taxArticles,
+                    tax,
+                    paymentPrices: paymentPrices[eventName][tax],
+                } only %}
+            {% endfor %}
         </div>
     {% endfor %}
 {% endblock %}

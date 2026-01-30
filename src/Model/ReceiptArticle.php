@@ -3,16 +3,21 @@
 namespace App\Model;
 
 use App\Enum\PaymentType;
+use BcMath\Number;
 
 final readonly class ReceiptArticle
 {
+    public Number $price;
+
     public function __construct(
         public string $name,
         public int $id,
         public int $quantity,
-        public string $price,
+        string|int|Number $price,
         public ?PaymentType $paymentType = null,
-    ) {}
+    ) {
+        $this->price = $price instanceof Number ? $price : new Number($price);
+    }
 
     public function add(self $other): self
     {
@@ -20,8 +25,8 @@ final readonly class ReceiptArticle
             $this->name,
             $this->id,
             $this->quantity + $other->quantity,
-            bcadd($this->price, $other->price, 2),
-            null
+            $this->price->add($other->price, 2),
+            null,
         );
     }
 }

@@ -96,7 +96,7 @@ class PurchaseTransactionRepository extends ServiceEntityRepository
     }
 
     /**
-     * @return array<string, ReceiptArticle[]>
+     * @return array<string, array<int, ReceiptArticle[]>>
      */
     public function aggregateArticlesByEvent(ReceiptFilter $filter): array
     {
@@ -107,6 +107,7 @@ class PurchaseTransactionRepository extends ServiceEntityRepository
             ->addSelect('transaction.paymentType')
             ->addSelect('article.productName')
             ->addSelect('article.productId')
+            ->addSelect('article.tax')
             ->addSelect('SUM(article.quantity) AS quantity')
             ->addSelect('SUM(article.price * article.quantity) AS price');
 
@@ -118,6 +119,7 @@ class PurchaseTransactionRepository extends ServiceEntityRepository
 
         $queryBuilder
             ->orderBy('transaction.eventName', 'ASC')
+            ->addOrderBy('article.tax', 'ASC')
             ->addOrderBy('article.productName', 'ASC')
             ->addOrderBy('article.productId', 'ASC');
 
@@ -127,7 +129,7 @@ class PurchaseTransactionRepository extends ServiceEntityRepository
                 continue;
             }
 
-            $articles[$articleData['eventName']][] = new ReceiptArticle(
+            $articles[$articleData['eventName']][$articleData['tax']][] = new ReceiptArticle(
                 name: $articleData['productName'],
                 id: $articleData['productId'],
                 quantity: $articleData['quantity'],
@@ -140,7 +142,7 @@ class PurchaseTransactionRepository extends ServiceEntityRepository
     }
 
     /**
-     * @return ReceiptArticle[]
+     * @return array<int, ReceiptArticle[]>
      */
     public function aggregateArticlesOverall(ReceiptFilter $filter): array
     {
@@ -150,6 +152,7 @@ class PurchaseTransactionRepository extends ServiceEntityRepository
             ->select('transaction.paymentType')
             ->addSelect('article.productName')
             ->addSelect('article.productId')
+            ->addSelect('article.tax')
             ->addSelect('SUM(article.quantity) AS quantity')
             ->addSelect('SUM(article.price * article.quantity) AS price');
 
@@ -158,12 +161,13 @@ class PurchaseTransactionRepository extends ServiceEntityRepository
             ->addGroupBy('transaction.paymentType');
 
         $queryBuilder
-            ->orderBy('article.productName', 'ASC')
+            ->orderBy('article.tax', 'ASC')
+            ->addOrderBy('article.productName', 'ASC')
             ->addOrderBy('article.productId', 'ASC');
 
         $articles = [];
         foreach ($queryBuilder->getQuery()->getResult() as $articleData) {
-            $articles[] = new ReceiptArticle(
+            $articles[$articleData['tax']][] = new ReceiptArticle(
                 name: $articleData['productName'],
                 id: $articleData['productId'],
                 quantity: $articleData['quantity'],
@@ -195,8 +199,7 @@ class PurchaseTransactionRepository extends ServiceEntityRepository
 
         $queryBuilder
             ->leftJoin('transaction.soldArticles', 'article')
-            ->andWhere('article.id IS NOT NULL')
-        ;
+            ->andWhere('article.id IS NOT NULL');
 
         return $queryBuilder;
     }

@@ -1,0 +1,40 @@
+<table class="table mt-3">
+    <caption class="text-secondary">{{ tax }} % {{ 'SalesTax'|trans }}</caption>
+    <thead>
+    <tr>
+        <th>{{ 'Product Name'|trans }}</th>
+        <th>{{ 'Quantity'|trans }}</th>
+        <th>{{ 'Price Sum'|trans }}</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for article in articles %}
+        {# @var article \App\Model\ReceiptArticle #}
+        <tr>
+            <th>{{ article.name }}</th>
+            <td>{{ article.quantity }}</td>
+            <td>{{ article.price | string | format_currency('EUR') }}</td>
+        </tr>
+    {% endfor %}
+    </tbody>
+    <tfoot>
+    {% for type, price in paymentPrices %}
+        {# @var price \BcMath\Number #}
+        <tr>
+            <td></td>
+            <td>{{ type | trans | capitalize }}:</td>
+            <td>{{ price | string | format_currency('EUR') }}</td>
+        </tr>
+    {% endfor %}
+    </tfoot>
+    <tfoot>
+    <tr>
+        <td colspan="2"></td>
+        <th>{{ articles
+            | reduce((carry, article) => carry + article.price, 0.0)
+            | string
+            | format_currency('EUR') }}
+        </th>
+    </tr>
+    </tfoot>
+</table>

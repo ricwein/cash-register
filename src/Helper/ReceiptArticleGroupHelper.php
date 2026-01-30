@@ -4,49 +4,57 @@ namespace App\Helper;
 
 use App\Enum\PaymentType;
 use App\Model\ReceiptArticle;
+use BcMath\Number;
 
 class ReceiptArticleGroupHelper
 {
     public const int PRECISION = 2;
 
     /**
-     * @param array<string, ReceiptArticle[]> $articles
+     * @param array<string, array<int, ReceiptArticle[]>> $articles
      * @return array{
-     *     array<string, array<string, ReceiptArticle>>,
-     *     array<string, array<string, string>>
+     *     array<string, array<string, array<string, ReceiptArticle>>>,
+     *     array<string, array<string, array<string, Number>>>
      * }
      */
     public function groupByEvents(array $articles): array
     {
-        /** @var array<string, array<string, ReceiptArticle>> $groupedArticles */
+        /** @var array<string, array<int, array<string, ReceiptArticle>>> $groupedArticles */
         $groupedArticles = [];
-        /** @var array<string, array<string, string>> $paymentPrices */
+        /** @var array<string, array<int, array<string, Number>>> $paymentPrices */
         $paymentPrices = [];
 
         foreach ($articles as $eventName => $eventArticles) {
-            if (!isset($paymentPrices[$eventName])) {
-                $paymentPrices[$eventName] = [
-                    PaymentType::CARD->name => '0.00',
-                    PaymentType::CASH->name => '0.00',
-                ];
-            }
+            foreach ($eventArticles as $tax => $taxArticles) {
+                [$articleGroup, $pricesPerPaymentType] = $this->groupArticles($taxArticles);
 
-            foreach ($eventArticles as $eventArticle) {
-                $paymentType = $eventArticle->paymentType->name;
-                if (array_key_exists($paymentType, $paymentPrices[$eventName])) {
-                    $paymentPrices[$eventName][$paymentType] = bcadd(
-                        $paymentPrices[$eventName][$paymentType],
-                        $eventArticle->price,
-                        self::PRECISION,
-                    );
-                }
-
-                if (isset($groupedArticles[$eventName][$eventArticle->name])) {
-                    $groupedArticles[$eventName][$eventArticle->name] = $groupedArticles[$eventName][$eventArticle->name]->add($eventArticle);
-                } else {
-                    $groupedArticles[$eventName][$eventArticle->name] = $eventArticle;
-                }
+                $paymentPrices[$eventName][$tax] = $pricesPerPaymentType;
+                $groupedArticles[$eventName][$tax] = $articleGroup;
             }
+        }
+
+        return [$groupedArticles, $paymentPrices];
+    }
+
+    /**
+     * @param array<int, ReceiptArticle[]> $articles
+     * @return array{
+     *     array<int, array<string, ReceiptArticle>>,
+     *     array<int, array<string, Number>>
+     * }
+     */
+    public function group(array $articles): array
+    {
+        /** @var array<int, array<string, ReceiptArticle>> $groupedArticles */
+        $groupedArticles = [];
+        /** @var array<int, array<string, Number>> $paymentPrices */
+        $paymentPrices = [];
+
+        foreach ($articles as $tax => $taxArticles) {
+            [$articleGroup, $pricesPerPaymentType] = $this->groupArticles($taxArticles);
+
+            $paymentPrices[$tax] = $pricesPerPaymentType;
+            $groupedArticles[$tax] = $articleGroup;
         }
 
         return [$groupedArticles, $paymentPrices];
@@ -56,36 +64,32 @@ class ReceiptArticleGroupHelper
      * @param ReceiptArticle[] $articles
      * @return array{
      *     array<string, ReceiptArticle>,
-     *     array<string, string>
+     *     array<string, Number>
      * }
      */
-    public function group(array $articles): array
+    private function groupArticles(array $articles): array
     {
-        /** @var array<string, ReceiptArticle> $groupedArticles */
-        $groupedArticles = [];
-        /** @var array<string, string> $paymentPrices */
-        $paymentPrices = [
-            PaymentType::CARD->name => '0.00',
-            PaymentType::CASH->name => '0.00',
+        $pricesPerPaymentType = [
+            PaymentType::CARD->name => new Number('0.00'),
+            PaymentType::CASH->name => new Number('0.00'),
         ];
+        /** @var array<string, ReceiptArticle> $articleGroup */
+        $articleGroup = [];
 
         foreach ($articles as $article) {
             $paymentType = $article->paymentType->name;
-            if (array_key_exists($paymentType, $paymentPrices)) {
-                $paymentPrices[$paymentType] = bcadd(
-                    $paymentPrices[$paymentType],
-                    $article->price,
-                    self::PRECISION,
-                );
+            if (array_key_exists($paymentType, $pricesPerPaymentType)) {
+                $pricesPerPaymentType[$paymentType] = $pricesPerPaymentType[$paymentType]
+                    ->add($article->price, self::PRECISION);
             }
 
-            if (isset($groupedArticles[$article->name])) {
-                $groupedArticles[$article->name] = $groupedArticles[$article->name]->add($article);
+            if (isset($articleGroup[$article->name])) {
+                $articleGroup[$article->name] = $articleGroup[$article->name]->add($article);
             } else {
-                $groupedArticles[$article->name] = $article;
+                $articleGroup[$article->name] = $article;
             }
         }
 
-        return [$groupedArticles, $paymentPrices];
+        return [$articleGroup, $pricesPerPaymentType];
     }
 }
