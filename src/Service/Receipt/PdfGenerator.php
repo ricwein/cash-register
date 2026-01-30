@@ -2,6 +2,7 @@
 
 namespace App\Service\Receipt;
 
+use App\Enum\ExportFileFormat;
 use App\Enum\PaperSize;
 use App\Enum\ReceiptExportType;
 use App\Helper\ReceiptArticleGroupHelper;
@@ -25,7 +26,13 @@ readonly class PdfGenerator implements FileGeneratorInterface
         private ReceiptArticleGroupHelper $groupHelper,
         private TwigEnvironment $twig,
         #[Autowire('%kernel.project_dir%/public')] private string $publicDir,
-    ) {}
+    ) {
+    }
+
+    public static function getFileType(): string
+    {
+        return ExportFileFormat::PDF->value;
+    }
 
     public function buildFileResponse(SplFileInfo $file): Response
     {

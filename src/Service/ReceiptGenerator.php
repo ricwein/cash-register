@@ -2,37 +2,38 @@
 
 namespace App\Service;
 
-use App\Enum\ExportFileFormat;
 use App\Enum\PaperSize;
 use App\Model\ReceiptFilter;
-use App\Service\Receipt\CsvGenerator;
-use App\Service\Receipt\PdfGenerator;
-use RuntimeException;
+use App\Service\Receipt\FileGeneratorInterface;
+use Psr\Container\ContainerExceptionInterface;
+use Psr\Container\ContainerInterface;
+use Psr\Container\NotFoundExceptionInterface;
 use SplFileInfo;
 use Symfony\Component\Clock\ClockInterface;
+use Symfony\Component\DependencyInjection\Attribute\AutowireLocator;
 use Symfony\Component\HttpFoundation\Response;
-use Twig\Error\LoaderError;
-use Twig\Error\RuntimeError;
-use Twig\Error\SyntaxError;
 
 final readonly class ReceiptGenerator
 {
     public function __construct(
         private ClockInterface $clock,
-        private PdfGenerator $pdfGenerator,
-        private CsvGenerator $csvGenerator,
-    ) {}
+        #[AutowireLocator(FileGeneratorInterface::class, defaultIndexMethod: 'getFileType')] private ContainerInterface $generatorLocator,
+    ) {
+    }
 
     /**
-     * @throws SyntaxError
-     * @throws RuntimeError
-     * @throws LoaderError
-     * @throws RuntimeException
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
      */
     public function generateReceiptPDF(PaperSize $size, ReceiptFilter $filter): Response
     {
         $today = $this->clock->now()->setTime(0, 0);
         $file = $this->buildFilename($size, $filter);
+
+        $format = $filter->getFileFormat()->value;
+
+        /** @var FileGeneratorInterface $generator */
+        $generator = $this->generatorLocator->get($format);
 
         if (
             $file->isFile()
@@ -41,16 +42,10 @@ final readonly class ReceiptGenerator
                 || ($filter->getToDate() !== null && $filter->getToDate() < $today)
             )
         ) {
-            return match ($filter->getFileFormat()) {
-                ExportFileFormat::CSV => $this->pdfGenerator->buildFileResponse($file),
-                ExportFileFormat::PDF => $this->csvGenerator->buildFileResponse($file),
-            };
+            return $generator->buildFileResponse($file);
         }
 
-        return match ($filter->getFileFormat()) {
-            ExportFileFormat::PDF => $this->pdfGenerator->generate($file, $size, $filter),
-            ExportFileFormat::CSV => $this->csvGenerator->generate($file, $size, $filter),
-        };
+        return $generator->generate($file, $size, $filter);
     }
 
     private function buildFilename(PaperSize $size, ReceiptFilter $filter): SplFileInfo

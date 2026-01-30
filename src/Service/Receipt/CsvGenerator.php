@@ -2,6 +2,7 @@
 
 namespace App\Service\Receipt;
 
+use App\Enum\ExportFileFormat;
 use App\Enum\PaperSize;
 use App\Enum\ReceiptExportType;
 use App\Helper\ReceiptArticleGroupHelper;
@@ -20,7 +21,14 @@ readonly class CsvGenerator implements FileGeneratorInterface
         private PurchaseTransactionRepository $purchaseTransactionRepository,
         private ReceiptArticleGroupHelper $groupHelper,
         private TranslatorInterface $translator,
-    ) {}
+    )
+    {
+    }
+
+    public static function getFileType(): string
+    {
+        return ExportFileFormat::CSV->value;
+    }
 
     public function buildFileResponse(SplFileInfo $file): Response
     {
