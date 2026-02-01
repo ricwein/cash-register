@@ -12,7 +12,8 @@ readonly class DTOMapperService
 {
     public function __construct(
         #[Autowire('%app.upload_dir_name%')] private string $uploadDirName,
-    ) {}
+    ) {
+    }
 
     /**
      * @param array<CategoryEntity> $categories

@@ -2,7 +2,6 @@
 
 namespace App\Service\Receipt;
 
-use App\Enum\ExportFileFormat;
 use App\Enum\PaperSize;
 use App\Model\ReceiptFilter;
 use SplFileInfo;

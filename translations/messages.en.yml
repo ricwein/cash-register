@@ -42,12 +42,6 @@ Percent: Percent
 
 Clone: Clone
 
-CARD: CARD
-CASH: CASH
-NONE: –
-PER_EVENT: per event/register
-ACCUMULATED: accumulated
-
 From date: Date
 To date: until Date
 Export type: Export Type
@@ -55,6 +49,7 @@ File format: Format
 generate receipt PDF: Generate Receipt-PDF
 Sold articles: Sold Articles
 Sold Articles: Articles
+Sum: Sum
 
 processed: processed
 enqueued: Payment saved

@@ -25,7 +25,7 @@ final readonly class ReceiptGenerator
      * @throws ContainerExceptionInterface
      * @throws NotFoundExceptionInterface
      */
-    public function generateReceiptPDF(PaperSize $size, ReceiptFilter $filter): Response
+    public function generate(PaperSize $size, ReceiptFilter $filter): Response
     {
         $today = $this->clock->now()->setTime(0, 0);
         $file = $this->buildFilename($size, $filter);

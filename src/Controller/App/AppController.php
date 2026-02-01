@@ -17,6 +17,7 @@ use App\Repository\ProductRepository;
 use App\Repository\SettingRepository;
 use App\Resolver\PaymentTransactionRequestResolver;
 use App\Service\DTOMapperService;
+use BcMath\Number;
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
@@ -83,7 +84,7 @@ class AppController extends AbstractController
             ->setPaymentType($transactionData->paymentType)
             ->setTransactionId($transactionData->getUuid());
 
-        $price = '0.00';
+        $price = new Number(0);
         foreach ($transactionData->cart as $productId => $quantity) {
             if (null === $product = ($products[$productId] ?? null)) {
                 return new JsonResponse([
@@ -92,10 +93,11 @@ class AppController extends AbstractController
                 ], 404);
             }
 
-            $price = bcadd($price, bcmul($product->getPrice(), (string)$quantity, self::PRECISION), self::PRECISION);
+            $productPrice = new Number($product->getPrice());
+            $price += ($productPrice * (string)$quantity);
             $transaction->addSoldArticle(
                 new PurchasedArticle()
-                    ->setPrice($product->getPrice())
+                    ->setPrice((string)$productPrice)
                     ->setQuantity($quantity)
                     ->setProductName($product->getName())
                     ->setProductId($product->getId())
@@ -103,7 +105,7 @@ class AppController extends AbstractController
             );
         }
 
-        $transaction->setPrice($price);
+        $transaction->setPrice((string)$price);
 
         try {
             $this->entityManager->persist($transaction);

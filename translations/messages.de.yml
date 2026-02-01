@@ -23,8 +23,8 @@ Event Name: Kasse
 Product Name: Artikel
 Price Per Item: Preis
 Payment Type: Zahlart
-Price Sum: Einnahme gesamt
-Quantity: Anzahl
+Price Sum: Betrag
+Quantity: Menge
 Created At: Erstellt am
 Products Per Row: Artikel p. Zeile
 Use Category Tabs: Kategorien als Tabs
@@ -43,12 +43,6 @@ Percent: Prozent
 
 Clone: Kopieren
 
-CARD: KARTE
-CASH: BAR
-NONE: –
-PER_EVENT: pro Kasse
-ACCUMULATED: Zusammengefasst
-
 From date: Datum
 To date: bis Datum (optional)
 Export type: Export-Art
@@ -56,6 +50,7 @@ File format: Format
 generate receipt PDF: Beleg-PDF exportieren
 Sold articles: Verkaufte Artikel
 Sold Articles: Artikel
+Sum: Summe
 
 processed: verarbeitet
 enqueued: Zahlung gespeichert

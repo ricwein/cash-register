@@ -11,6 +11,8 @@ use App\Repository\PurchaseTransactionRepository;
 use App\Service\ReceiptGenerator;
 use DateInterval;
 use DateInvalidOperationException;
+use Psr\Container\ContainerExceptionInterface;
+use Psr\Container\NotFoundExceptionInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Clock\ClockInterface;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
@@ -20,9 +22,6 @@ use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use Symfony\UX\Chartjs\Builder\ChartBuilderInterface;
 use Symfony\UX\Chartjs\Model\Chart;
-use Twig\Error\LoaderError;
-use Twig\Error\RuntimeError;
-use Twig\Error\SyntaxError;
 
 class ReceiptExportController extends AbstractController
 {
@@ -34,13 +33,14 @@ class ReceiptExportController extends AbstractController
         private readonly ReceiptGenerator $receiptGenerator,
         private readonly ChartBuilderInterface $chartBuilder,
         private readonly TranslatorInterface $translator,
-    ) {}
+    )
+    {
+    }
 
     /**
      * @throws DateInvalidOperationException
-     * @throws LoaderError
-     * @throws RuntimeError
-     * @throws SyntaxError
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
      */
     #[Route('/receipt-export', name: 'receipt-export')]
     public function index(Request $request): Response
@@ -63,7 +63,7 @@ class ReceiptExportController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             /** @var ReceiptFilter $filter */
             $filter = $form->getData();
-            return $this->receiptGenerator->generateReceiptPDF(
+            return $this->receiptGenerator->generate(
                 size: PaperSize::A4_LANDSCAPE,
                 filter: $filter,
             );

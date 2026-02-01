@@ -23,6 +23,7 @@ class ReceiptFilterType extends AbstractType
                 'multiple' => true,
                 'required' => false,
                 'choices' => $options['events'],
+                'translation_domain' => false,
             ])
             ->add('fileFormat', EnumType::class, [
                 'class' => ExportFileFormat::class,

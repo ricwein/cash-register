@@ -28,6 +28,12 @@
                     paymentPrices: paymentPrices[eventName][tax],
                 } only %}
             {% endfor %}
+
+            {% if paymentPrices[eventName] | length > 1 %}
+                {% include 'pdf/components/article_tax_sum_table.html.twig' with {
+                    paymentPrices: paymentPrices[eventName],
+                } only %}
+            {% endif %}
         </div>
     {% endfor %}
 {% endblock %}

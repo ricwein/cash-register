@@ -1,5 +1,35 @@
 {# @var array<int, array<string, \BcMath\Number>> paymentPrices #}
-<table class="table mt-3">
+<table class="table mt-4">
+    <thead>
+    <tr>
+        <th colspan="2" class="text-center">{{ 'Sum'|trans }}</th>
+    </tr>
+    </thead>
     <tfoot>
+    {% set sums = {} %}
+    {% for prices in paymentPrices %}
+        {% for type, price in prices %}
+            {# @var price \BcMath\Number #}
+            {% set sums = sums | merge({(type): (sums[type] ?? 0.0) + price}) %}
+        {% endfor %}
+    {% endfor %}
+
+    {% for type, price in sums | filter((price) => price > 0.0) %}
+        <tr>
+            <td class="text-end">{{ type | trans(domain: 'receipt') }}:</td>
+            <td>{{ price | string | format_currency('EUR') }}</td>
+        </tr>
+    {% endfor %}
+    </tfoot>
+    <tfoot>
+    <tr>
+        <td></td>
+        <th class="text-decoration-double">
+            {{ sums
+            | reduce((carry, sum) => carry + sum, 0.0)
+            | string
+            | format_currency('EUR') }}
+        </th>
+    </tr>
     </tfoot>
 </table>

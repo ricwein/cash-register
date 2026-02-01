@@ -13,8 +13,8 @@ class ReceiptArticleGroupHelper
     /**
      * @param array<string, array<int, ReceiptArticle[]>> $articles
      * @return array{
-     *     array<string, array<string, array<string, ReceiptArticle>>>,
-     *     array<string, array<string, array<string, Number>>>
+     *     array<string, array<int, array<string, ReceiptArticle>>>,
+     *     array<string, array<int, array<string, Number>>>
      * }
      */
     public function groupByEvents(array $articles): array
@@ -72,12 +72,13 @@ class ReceiptArticleGroupHelper
         $pricesPerPaymentType = [
             PaymentType::CARD->name => new Number('0.00'),
             PaymentType::CASH->name => new Number('0.00'),
+            PaymentType::NONE->name => new Number('0.00'),
         ];
         /** @var array<string, ReceiptArticle> $articleGroup */
         $articleGroup = [];
 
         foreach ($articles as $article) {
-            $paymentType = $article->paymentType->name;
+            $paymentType = $article->paymentType?->name ?? PaymentType::NONE->name;
             if (array_key_exists($paymentType, $pricesPerPaymentType)) {
                 $pricesPerPaymentType[$paymentType] = $pricesPerPaymentType[$paymentType]
                     ->add($article->price, self::PRECISION);

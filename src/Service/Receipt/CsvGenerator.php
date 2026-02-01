@@ -21,8 +21,7 @@ readonly class CsvGenerator implements FileGeneratorInterface
         private PurchaseTransactionRepository $purchaseTransactionRepository,
         private ReceiptArticleGroupHelper $groupHelper,
         private TranslatorInterface $translator,
-    )
-    {
+    ) {
     }
 
     public static function getFileType(): string

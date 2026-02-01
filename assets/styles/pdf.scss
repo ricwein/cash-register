@@ -20,8 +20,52 @@ body {
     color: slategray;
   }
 
+  .bg-light {
+    background-color: rgba(20, 20, 20, 0.1);
+  }
+
+  .bg-dark-subtle {
+    background-color: rgba(0, 0, 0, 0.2);
+  }
+
+  .p-2 {
+    padding: 0.5em;
+  }
+
   .mt-3 {
-    margin-top: 0.5em;
+    margin-top: 1.5em;
+  }
+
+  .mt-4 {
+    margin-top: 2em;
+  }
+
+  .mt-5 {
+    margin-top: 3em;
+  }
+
+  .mb-3 {
+    margin-top: 1.5em;
+  }
+
+  .mb-4 {
+    margin-top: 2em;
+  }
+
+  .mb-5 {
+    margin-top: 3em;
+  }
+
+  .text-end {
+    text-align: right !important;
+  }
+
+  .text-center {
+    text-align: center !important;
+  }
+
+  .fw-bold {
+    font-weight: bold;
   }
 
   .card {
@@ -33,7 +77,7 @@ body {
     }
 
     .card-header {
-      background-color: lightgrey;
+      background-color: rgba(10, 10, 20, 0.4);
 
       .card-title {
         padding: 0.5em;
@@ -45,6 +89,12 @@ body {
     }
   }
 
+  .text-decoration-double {
+    &, * {
+      border-bottom: 3px double black;
+    }
+  }
+
   table.table {
     border-collapse: collapse;
     width: 100%;
@@ -53,7 +103,7 @@ body {
       tr {
         td, th {
           padding: 0.5em;
-          background-color: darkgrey;
+          background-color: rgba(20, 20, 20, 0.1);
           border-bottom: 2px solid black;
           text-align: left;
         }
