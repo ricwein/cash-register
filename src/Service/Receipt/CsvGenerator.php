@@ -9,6 +9,7 @@ use App\Helper\ReceiptArticleGroupHelper;
 use App\Model\ReceiptArticle;
 use App\Model\ReceiptFilter;
 use App\Repository\PurchaseTransactionRepository;
+use BcMath\Number;
 use SplFileInfo;
 use SplFileObject;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
@@ -22,6 +23,11 @@ readonly class CsvGenerator implements FileGeneratorInterface
         private ReceiptArticleGroupHelper $groupHelper,
         private TranslatorInterface $translator,
     ) {
+    }
+
+    public function getPrecision(): int
+    {
+        return 2;
     }
 
     public static function getFileType(): string
@@ -66,7 +72,7 @@ readonly class CsvGenerator implements FileGeneratorInterface
                 $csv->fputcsv([]);
             }
             $csv->fputcsv([$eventName . ' ' . rtrim($filter->getFromDate()->format('d.m.Y') . ' - ' . $filter->getToDate()?->format('d.m.Y'), '- ')]);
-            $this->writeArticles($csv, $eventArticles, $paymentPrices[$eventName]);
+            $this->writeArticlesPerTax($csv, $eventArticles, $paymentPrices[$eventName]);
         }
 
         return $csv;
@@ -82,14 +88,73 @@ readonly class CsvGenerator implements FileGeneratorInterface
         $csv->fwrite(chr(0xEF) . chr(0xBB) . chr(0xBF));
         $csv->setCsvControl(';', escape: '');
         $csv->fputcsv([rtrim($filter->getFromDate()->format('d.m.Y') . ' - ' . $filter->getToDate()?->format('d.m.Y'), '- ')]);
-        $this->writeArticles($csv, $groupedArticles, $paymentPrices);
+        $this->writeArticlesPerTax($csv, $groupedArticles, $paymentPrices);
 
         return $csv;
     }
 
     /**
-     * @param ReceiptArticle[] $articles
-     * @param array<string, string> $paymentPrices
+     * @param array<int, array<string, ReceiptArticle>> $articles
+     * @param array<int, array<string, Number>> $paymentPrices
+     */
+    private function writeArticlesPerTax(SplFileObject $csv, array $articles, array $paymentPrices): void
+    {
+        $firstTax = array_key_first($articles);
+        foreach ($articles as $tax => $articleList) {
+            if ($tax !== $firstTax) {
+                $csv->fputcsv([]);
+            }
+            $csv->fputcsv([$tax . '% ' . $this->translator->trans('SalesTax').':']);
+            $this->writeArticles($csv, $articleList, $paymentPrices[$tax]);
+        }
+
+        if (count($articles) > 1) {
+            $this->writeArticlesSum($csv, $paymentPrices);
+        }
+    }
+
+    /**
+     * @param array<int, array<string, Number>> $paymentPrices
+     */
+    private function writeArticlesSum(SplFileObject $csv, array $paymentPrices): void
+    {
+        $sums = [];
+        foreach ($paymentPrices as $prices) {
+            foreach ($prices as $type => $price) {
+                if (array_key_exists($type, $sums)) {
+                    $sums[$type] += $price;
+                } else {
+                    $sums[$type] = $price;
+                }
+            }
+        }
+
+        $csv->fputcsv([]);
+        $csv->fputcsv([
+            $this->translator->trans('Sum'),
+        ]);
+
+        $totalSum = new Number(0);
+        foreach ($sums as $type => $sum) {
+            if ($sum->compare('0') === 0) {
+                continue;
+            }
+            $totalSum += $sum;
+            $csv->fputcsv([
+                ucfirst(strtolower($this->translator->trans($type, domain: 'receipt'))),
+                number_format((float)(string)$sum, $this->getPrecision(), ',', '.'),
+            ]);
+        }
+
+        $csv->fputcsv([
+            '∑',
+            number_format((float)(string)$totalSum, $this->getPrecision(), ',', '.'),
+        ]);
+    }
+
+    /**
+     * @param array<string, ReceiptArticle> $articles
+     * @param array<string, Number> $paymentPrices
      */
     private function writeArticles(SplFileObject $csv, array $articles, array $paymentPrices): void
     {
@@ -101,19 +166,19 @@ readonly class CsvGenerator implements FileGeneratorInterface
 
         $priceSum = 0.00;
         foreach ($articles as $article) {
-            $price = (float)$article->price;
+            $price = $article->price;
             $priceSum += $price;
             $csv->fputcsv([
                 $article->name,
                 $article->quantity,
-                number_format($price, 2, ',', '.'),
+                number_format((float)(string)$price, $this->getPrecision(), ',', '.'),
             ]);
         }
 
         foreach ($paymentPrices as $type => $price) {
-            $csv->fputcsv(['', ucfirst(strtolower($this->translator->trans($type))), number_format((float)$price, 2, ',', '.')]);
+            $csv->fputcsv(['', ucfirst(strtolower($this->translator->trans($type, domain: 'receipt'))), number_format((float)(string)$price, $this->getPrecision(), ',', '.')]);
         }
 
-        $csv->fputcsv(['', '∑', number_format($priceSum, 2, ',', '.')]);
+        $csv->fputcsv(['', '∑', number_format((float)(string)$priceSum, $this->getPrecision(), ',', '.')]);
     }
 }

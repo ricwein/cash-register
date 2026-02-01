@@ -16,4 +16,6 @@ interface FileGeneratorInterface
     public function generate(SplFileInfo $file, PaperSize $size, ReceiptFilter $filter): Response;
 
     public static function getFileType(): string;
+
+    public function getPrecision(): int;
 }

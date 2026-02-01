@@ -29,6 +29,11 @@ readonly class PdfGenerator implements FileGeneratorInterface
     ) {
     }
 
+    public function getPrecision(): int
+    {
+        return 2;
+    }
+
     public static function getFileType(): string
     {
         return ExportFileFormat::PDF->value;

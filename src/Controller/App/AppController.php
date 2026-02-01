@@ -9,7 +9,6 @@ use App\Entity\Product;
 use App\Entity\PurchasedArticle;
 use App\Entity\PurchaseTransaction;
 use App\Enum\ConfirmationState;
-use App\Helper\ReceiptArticleGroupHelper;
 use App\Model\PaymentTransaction;
 use App\Repository\CategoryRepository;
 use App\Repository\EventRepository;
@@ -32,8 +31,6 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 #[Route('/app')]
 class AppController extends AbstractController
 {
-    private const int PRECISION = ReceiptArticleGroupHelper::PRECISION;
-
     public function __construct(
         private readonly EntityManagerInterface $entityManager,
         private readonly DTOMapperService $dtoMapperService,
