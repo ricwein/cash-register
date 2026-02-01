@@ -7,7 +7,7 @@ ARG APP_ENV
 FROM php:${PHP_VERSION}-fpm-alpine AS php-base
 
 ADD --chmod=0755 https://github.com/mlocati/docker-php-extension-installer/releases/latest/download/install-php-extensions /usr/local/bin/
-RUN install-php-extensions bcmath ctype iconv intl opcache apcu pdo_mysql gd @composer
+RUN install-php-extensions bcmath ctype iconv intl opcache apcu pdo_mysql zip gd @composer
 
 ARG TZ=${TZ:-UTC}
 ENV TZ=${TZ}

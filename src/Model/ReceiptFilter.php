@@ -21,7 +21,7 @@ final class ReceiptFilter
         private ?DateTimeImmutable $toDate = null,
         private ?array $events = null,
         private ReceiptExportType $exportType = ReceiptExportType::ACCUMULATED,
-        private ExportFileFormat $fileFormat = ExportFileFormat::CSV,
+        private ExportFileFormat $fileFormat = ExportFileFormat::EXCEL,
     ) {}
 
     public function getFromDate(): DateTimeImmutable

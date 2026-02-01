@@ -8,8 +8,8 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 enum ExportFileFormat: string implements TranslatableInterface
 {
     case CSV = 'csv';
+    case EXCEL = 'xlsx';
     case PDF = 'pdf';
-    case EXCEL = 'xslx';
 
     public function trans(TranslatorInterface $translator, ?string $locale = null): string
     {
