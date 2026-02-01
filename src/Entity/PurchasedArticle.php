@@ -9,7 +9,7 @@ use Stringable;
 
 #[ORM\Entity(repositoryClass: PurchasedArticleRepository::class)]
 #[ORM\Index(columns: ['product_id'])]
-class PurchasedArticle implements Stringable
+class PurchasedArticle implements Stringable, CountableEntityInterface, TaxedEntityInterface
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]

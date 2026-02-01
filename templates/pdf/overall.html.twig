@@ -33,5 +33,10 @@
                 paymentPrices: paymentPrices[tax],
             } only %}
         {% endfor %}
+        {% if articles|length > 1 %}
+            {% include 'pdf/components/article_tax_sum_table.html.twig' with {
+                paymentPrices,
+            } only %}
+        {% endif %}
     </div>
 {% endblock %}

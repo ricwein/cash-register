@@ -6,7 +6,25 @@
     {% if values is iterable and values is not empty %}
         <ul class="list-group list-group-flush text-start">
             {% for entity in values %}
-                <li class="list-group-item text-nowrap bg-transparent small py-1 px-0">{{ entity }}</li>
+                <li class="list-group-item text-nowrap bg-transparent small py-1 px-0">
+                    {% if entity is instanceof('App\\Entity\\CountableEntityInterface') %}
+                        <span class="badge bg-light text-dark font-monospace">
+                            {{ entity.quantity }}
+                        </span>
+                        <i class="fa-solid fa-times fa-2xs px-1"></i>
+                    {% endif %}
+                    {{ entity }}
+                    {% if entity is instanceof('App\\Entity\\TaxedEntityInterface') %}
+                        {% set tax = entity.tax %}
+                        {% if tax is defined and tax is not empty %}
+                            {% if tax is numeric %}
+                                <small class="text-secondary float-end ps-1">({{ tax }}%)</small>
+                            {% else %}
+                                <small class="text-secondary float-end ps-1">({{ tax }})</small>
+                            {% endif %}
+                        {% endif %}
+                    {% endif %}
+                </li>
             {% endfor %}
         </ul>
     {% else %}

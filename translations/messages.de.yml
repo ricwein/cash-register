@@ -10,7 +10,7 @@ Description: Beschreibung
 Image: Artikelbild
 
 Category: Kategorie
-Additional Categories: weitere Anzeigekategorien
+Additional Categories: weitere Kategorien
 Event: Kasse
 Product: Artikel
 Taxes: Steuern
@@ -39,6 +39,7 @@ Events: Kassen
 Export Receipts: Belege exportieren
 Categories: Kategorien
 Setting: Einstellungen
+Percent: Prozent
 
 Clone: Kopieren
 

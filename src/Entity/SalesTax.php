@@ -15,9 +15,6 @@ class SalesTax implements Stringable
         #[ORM\Column]
         public ?int $id = null,
 
-        #[ORM\Column(length: 255)]
-        public string $name = '',
-
         #[ORM\Column]
         public int $percent = 0,
     ) {

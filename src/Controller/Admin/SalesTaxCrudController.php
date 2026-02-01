@@ -17,7 +17,6 @@ class SalesTaxCrudController extends AbstractCrudController
     public function configureFields(string $pageName): iterable
     {
         return [
-            TextField::new('name'),
             PercentField::new('percent')->setNumDecimals(2)->setStoredAsFractional(false),
         ];
     }

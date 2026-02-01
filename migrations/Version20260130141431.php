@@ -17,7 +17,7 @@ final class Version20260130141431 extends AbstractMigration
     public function up(Schema $schema): void
     {
         $this->addSql('ALTER TABLE product ADD tax_id INT NOT NULL');
-        $this->addSql('UPDATE product SET tax_id = 2');
+        $this->addSql('UPDATE product SET tax_id = 1');
         $this->addSql('ALTER TABLE product ADD CONSTRAINT FK_D34A04ADB2A824D8 FOREIGN KEY (tax_id) REFERENCES sales_tax (id)');
         $this->addSql('CREATE INDEX IDX_D34A04ADB2A824D8 ON product (tax_id)');
     }
