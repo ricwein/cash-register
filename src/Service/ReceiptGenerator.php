@@ -11,6 +11,7 @@ use Psr\Container\NotFoundExceptionInterface;
 use SplFileInfo;
 use Symfony\Component\Clock\ClockInterface;
 use Symfony\Component\DependencyInjection\Attribute\AutowireLocator;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\Response;
 
 final readonly class ReceiptGenerator

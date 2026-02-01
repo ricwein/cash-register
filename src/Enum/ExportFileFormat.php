@@ -9,6 +9,7 @@ enum ExportFileFormat: string implements TranslatableInterface
 {
     case CSV = 'csv';
     case PDF = 'pdf';
+    case EXCEL = 'xslx';
 
     public function trans(TranslatorInterface $translator, ?string $locale = null): string
     {
