@@ -13,6 +13,6 @@ enum ExportFileFormat: string implements TranslatableInterface
 
     public function trans(TranslatorInterface $translator, ?string $locale = null): string
     {
-        return $this->name;
+        return '.' . $this->value;
     }
 }
