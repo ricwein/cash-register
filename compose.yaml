@@ -55,9 +55,6 @@ services:
     restart: unless-stopped
     cap_add:
       - SYS_ADMIN
-    ulimits:
-      memlock: 262144
-      nproc: 262144
 
 volumes:
   upload-dir:
