@@ -20,6 +20,11 @@ class SalesTax implements Stringable
     ) {
     }
 
+    public function getId(): ?int
+    {
+        return $this->id;
+    }
+
     public function __toString(): string
     {
         return $this->percent . '%';
