@@ -36,8 +36,8 @@ RUN if [ "$APP_ENV" = "prod" ] ;  \
     then ln -sf "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini" ; \
     else ln -sf "$PHP_INI_DIR/php.ini-development" "$PHP_INI_DIR/php.ini" ; fi
 RUN if [ "$APP_ENV" = "prod" ] ;  \
-    then composer install --prefer-dist --no-progress --no-interaction --optimize-autoloader --no-dev ; \
-    else composer install --prefer-dist --no-progress --no-interaction --optimize-autoloader ; fi
+    then composer install --prefer-dist --no-progress --no-interaction --optimize-autoloader --no-scripts --no-dev ; \
+    else composer install --prefer-dist --no-progress --no-interaction --optimize-autoloader --no-scripts ; fi
 RUN if [ "$APP_ENV" = "prod" ] ; then composer dump-autoload --classmap-authoritative --no-dev ; fi
 
 
