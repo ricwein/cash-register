@@ -1,0 +1,14 @@
+services:
+  nginx:
+    networks:
+      - web
+    labels:
+      traefik.enable: true
+      traefik.docker.network: web
+      traefik.http.routers.cashregister.entrypoints: ${TRAEFIK_ENTRYPOINT}
+      traefik.http.routers.cashregister.rule: Host(`${TRAEFIK_HOST}`)
+      traefik.http.routers.cashregister.tls.certresolver: ${TRAEFIK_RESOLVER}
+
+networks:
+  web:
+    external: true
