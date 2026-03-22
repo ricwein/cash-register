@@ -29,7 +29,6 @@ docker/Dockerfile
 bin/*
 !bin/console
 helm/
-public/bundles/
 public/build/
 public/uploads/
 var/
