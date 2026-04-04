@@ -65,10 +65,8 @@ li {
   cursor: pointer;
 
   &.mousedown {
-    transition: background-color v-bind(longPressDelayWithUnit) ease-in, padding v-bind(longPressDelayWithUnit) ease-in;
+    transition: background-color v-bind(longPressDelayWithUnit) ease-in;
     background-color: var(--bs-danger) !important;
-    padding-top: 0 !important;
-    padding-bottom: 0 !important;
   }
 
   &:hover {

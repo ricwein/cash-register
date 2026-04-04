@@ -34,9 +34,10 @@
     "vue-final-modal": "^4.5.5",
     "vue-loader": "^17.4.2",
     "vue3-toastify": "^0.2.9",
-    "vuetify": "^4.0.1",
+    "vuetify": "^4.0.5",
     "webpack": "^5.105.4",
     "webpack-cli": "^6.0.1",
+    "webpack-dev-server": "^5.2.3",
     "webpack-notifier": "^1.15.0"
   },
   "license": "UNLICENSED",

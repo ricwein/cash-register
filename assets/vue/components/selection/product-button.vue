@@ -20,7 +20,8 @@
     <div v-if="showCategory" class="product-category mb-1 small badge">{{ categoryName }}</div>
 
     <span v-if="showCategory && product.icon !== null" class="product-icon mt-auto fa-2xl" :class="product.icon"></span>
-    <span v-else-if="product.icon !== null" class="product-icon mt-5 fa-2xl" v-if="product.icon" :class="product.icon"></span>
+    <span v-else-if="product.icon !== null" class="product-icon mt-5 fa-2xl" v-if="product.icon"
+          :class="product.icon"></span>
 
     <div class="product-price mt-auto font-monospace badge">{{ NumberFormatter.format(product.price) }}</div>
     <div class="product-name  fw-medium h5 mb-0">{{ product.name }}</div>
@@ -54,10 +55,13 @@ const categoryTextColor = computed(() => color.value.isLight() ? 'var(--bs-secon
 const emit = defineEmits(['product-clicked'])
 
 function buttonClick() {
-  useVibrate({pattern: 100})
+  const {vibrate} = useVibrate({pattern: [100]})
+  vibrate()
+
   if (props.buttonSound) {
     play()
   }
+
   emit('product-clicked', props.product)
 }
 </script>

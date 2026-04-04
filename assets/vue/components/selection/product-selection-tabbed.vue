@@ -18,7 +18,7 @@
             v-for="category in categories"
             class="tab flex-fill"
             :style="{
-              backgroundColor: category.color,
+              '--v-tab-bg-color': category.color,
               color: (new Color(category.color)).getContrastColor()
             }"
             :key="category.id"
@@ -103,6 +103,10 @@ function productClicked(product: Product) {
   &.sticky {
     position: sticky;
     bottom: 0;
+  }
+
+  .tab {
+    background-color: var(--v-tab-bg-color) !important;
   }
 
   .tab:not(:first-of-type) {
