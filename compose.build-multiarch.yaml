@@ -1,0 +1,12 @@
+services:
+  php-fpm:
+    build:
+      platforms:
+        - "linux/amd64"
+        - "linux/arm64"
+
+  nginx:
+    build:
+      platforms:
+        - "linux/amd64"
+        - "linux/arm64"
