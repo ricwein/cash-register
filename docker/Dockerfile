@@ -39,7 +39,7 @@ RUN if [ "$APP_ENV" = "prod" ] ;  \
     then composer install --prefer-dist --no-progress --no-interaction --optimize-autoloader --no-scripts --no-dev ; \
     else composer install --prefer-dist --no-progress --no-interaction --optimize-autoloader --no-scripts ; fi
 RUN if [ "$APP_ENV" = "prod" ] ; then composer dump-autoload --classmap-authoritative --no-dev ; fi
-RUN php bin/console -e ${APP_ENV} --no-debug --no-ansi --no-cleanup assets:install public
+RUN php bin/console --no-debug --no-ansi --no-cleanup assets:install public
 
 
 #############################
