@@ -39,7 +39,7 @@ RUN if [ "$APP_ENV" = "prod" ] ;  \
     then composer install --prefer-dist --no-progress --no-interaction --optimize-autoloader --no-scripts --no-dev ; \
     else composer install --prefer-dist --no-progress --no-interaction --optimize-autoloader --no-scripts ; fi
 RUN if [ "$APP_ENV" = "prod" ] ; then composer dump-autoload --classmap-authoritative --no-dev ; fi
-RUN if [ "$APP_ENV" = "prod" ] ; then php bin/console assets:install ; fi
+RUN php bin/console -e ${APP_ENV} --no-debug --no-ansi --no-cleanup assets:install public
 
 
 #############################
@@ -53,6 +53,7 @@ ENV APP_ENV=${APP_ENV}
 WORKDIR /app
 COPY ./assets ./assets
 COPY --from=php-base /app/vendor ./vendor
+COPY --from=php-base /app/public/bundles ./public/bundles  
 COPY package.json tsconfig.json webpack.config.js yarn.lock postcss.config.js composer.json composer.lock ./
 
 RUN yarn install --force --frozen-lockfile
@@ -67,7 +68,7 @@ FROM nginx AS cash-register_nginx
 WORKDIR /app
 COPY public ./public
 COPY --from=yarn-encore /app/public/build ./public/build
-COPY --from=php-base /app/public/bundles ./public/bundles
+COPY --from=yarn-encore /app/public/bundles ./public/bundles
 COPY docker/nginx/nginx.conf /etc/nginx/conf.d/default.conf
 
 
