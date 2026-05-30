@@ -15,15 +15,16 @@ import type Product from "../../../model/product.ts";
 import type {PropType} from "vue";
 import ReceiptRow from "./receipt-row.vue";
 
-defineProps({
+const props = defineProps({
   cart: {type: Object as PropType<Array<Product>>, required: true},
+  numpadHeight: {type: String, default: '0px'},
 })
 </script>
 
 <style scoped lang="scss">
 .history {
   background-color: var(--bs-white);
-  height: calc(100vh - 10rem);
+  height: calc(100vh - 10rem - v-bind('props.numpadHeight'));
   border-top: 0.05em solid var(--bs-dark);
   overflow-y: scroll;
 

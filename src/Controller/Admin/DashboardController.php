@@ -23,7 +23,6 @@ class DashboardController extends AbstractDashboardController
         return Dashboard::new()
             ->setTitle('CashRegister')
             ->setFaviconPath('favicon.svg')
-            ->disableDarkMode()
             ->generateRelativeUrls();
     }
 

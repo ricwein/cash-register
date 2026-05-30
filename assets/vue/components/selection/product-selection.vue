@@ -16,8 +16,9 @@ const emit = defineEmits(['product-clicked'])
 
 const props = defineProps({
   categories: Object as PropType<Array<Category>>,
-  displayHeightPortrait: String,
-  historyHeightPortrait: String,
+  displayHeightPortrait: {type: String, default: '0'},
+  historyHeightPortrait: {type: String, default: '0'},
+  numpadHeightPortrait: {type: String, default: '0px'},
   gridWidthElements: Number,
   buttonSound: {type: Boolean, required: true},
 })
@@ -51,10 +52,10 @@ function productClicked(product: Product) {
 
 <style scoped lang="scss">
 .selection-view {
-  min-height: calc(100vh - (v-bind(displayHeightPortrait) + v-bind(historyHeightPortrait)));
+  min-height: calc(100vh - v-bind('props.displayHeightPortrait') - v-bind('props.historyHeightPortrait') - v-bind('props.numpadHeightPortrait'));
   height: 100%;
   overflow-y: scroll;
-  max-height: 100vh;
+  max-height: calc(100vh - v-bind('props.displayHeightPortrait') - v-bind('props.historyHeightPortrait') - v-bind('props.numpadHeightPortrait'));
 
   .row {
     margin-left: 0;

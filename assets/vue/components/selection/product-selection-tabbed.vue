@@ -41,8 +41,9 @@ const emit = defineEmits(['product-clicked'])
 
 const props = defineProps({
   categories: {type: Array<Category>, required: true},
-  displayHeightPortrait: String,
-  historyHeightPortrait: String,
+  displayHeightPortrait: {type: String, default: '0'},
+  historyHeightPortrait: {type: String, default: '0'},
+  numpadHeightPortrait: {type: String, default: '0px'},
   gridWidthElements: Number,
   useLandscapeMode: {type: Boolean, required: true},
   buttonSound: {type: Boolean, required: true},
@@ -84,7 +85,7 @@ function productClicked(product: Product) {
 
 <style scoped lang="scss">
 .selection-view {
-  max-height: 100vh;
+  max-height: calc(100vh - v-bind('props.displayHeightPortrait') - v-bind('props.historyHeightPortrait') - v-bind('props.numpadHeightPortrait'));
 
   > * {
     overflow-y: scroll !important;

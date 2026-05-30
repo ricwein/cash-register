@@ -45,7 +45,7 @@ RUN php bin/console --no-debug --no-ansi --no-cleanup assets:install public
 #############################
 ###        ASSETS         ###
 #############################
-FROM node AS yarn-encore
+FROM node AS encore
 
 ARG APP_ENV
 ENV APP_ENV=${APP_ENV}
@@ -54,10 +54,11 @@ WORKDIR /app
 COPY ./assets ./assets
 COPY --from=php-base /app/vendor ./vendor
 COPY --from=php-base /app/public/bundles ./public/bundles  
-COPY package.json tsconfig.json webpack.config.js yarn.lock postcss.config.js composer.json composer.lock ./
+COPY package.json package-lock.json tsconfig.json webpack.config.js postcss.config.js composer.json composer.lock ./
 
-RUN yarn install --force --frozen-lockfile
-RUN yarn encore ${APP_ENV}
+RUN npm install --force --frozen-lockfile --ignore-scripts
+RUN npm audit --audit-level=high
+RUN npm run $([ "${APP_ENV}" = "test" || "${APP_ENV}" = "dev" ] && echo "dev" || echo "build")
 
 
 ############################
@@ -67,8 +68,8 @@ FROM nginx AS cash-register_nginx
 
 WORKDIR /app
 COPY public ./public
-COPY --from=yarn-encore /app/public/build ./public/build
-COPY --from=yarn-encore /app/public/bundles ./public/bundles
+COPY --from=encore /app/public/build ./public/build
+COPY --from=encore /app/public/bundles ./public/bundles
 COPY docker/nginx/nginx.conf /etc/nginx/conf.d/default.conf
 
 
@@ -93,7 +94,7 @@ COPY docker/php-fpm/docker-healthcheck.sh /usr/local/bin/docker-healthcheck
 RUN chmod +x /usr/local/bin/docker-healthcheck
 HEALTHCHECK --interval=10s --timeout=3s --retries=3 CMD ["docker-healthcheck"]
 
-COPY --from=yarn-encore /app/public/build ./public/build
+COPY --from=encore /app/public/build ./public/build
 
 RUN mkdir -p var/cache var/log public/uploads && chmod -R 777 var/cache var/log public/uploads && sync
 

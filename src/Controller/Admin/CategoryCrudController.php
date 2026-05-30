@@ -4,6 +4,7 @@ namespace App\Controller\Admin;
 
 use App\Entity\Category;
 use Doctrine\Bundle\DoctrineBundle\Registry;
+use EasyCorp\Bundle\EasyAdminBundle\Attribute\AdminRoute;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
@@ -45,6 +46,7 @@ class CategoryCrudController extends AbstractCrudController
      * @throws NotFoundExceptionInterface
      * @throws ContainerExceptionInterface
      */
+    #[AdminRoute]
     public function cloneAction(AdminContext $context): Response
     {
         $id = $context->getRequest()->query->get('entityId');

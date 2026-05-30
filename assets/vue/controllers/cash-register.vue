@@ -2,7 +2,13 @@
   <div v-if="useLandscapeMode" class="row w-100">
     <div class="receipt col-lg-4 col-md-5 col-sm-5">
       <number-display-side v-model="transactionState" :transactionState class="sticky-top" :price></number-display-side>
-      <receipt-side :cart @removeArticle="removeArticleByIndex"></receipt-side>
+      <receipt-side :cart :numpadHeight="numpadHeightCss" @removeArticle="removeArticleByIndex"></receipt-side>
+      <quantity-numpad
+          v-if="articleQuantitySelection"
+          ref="numpad"
+          v-model="pendingQuantity"
+          :buttonSound
+      ></quantity-numpad>
       <div v-if="quickCheckout" class="row action-button-row sticky-bottom">
         <backspace-button class="col-4" :useLandscapeMode :buttonSound @backspaceClicked="cart.pop()" @createNewReceipt="reset"></backspace-button>
         <checkout-button v-if="cart.length <= 0 || price > 0.0" class="col-4" :buttonSound :cart @registerConfirmed="transition" :type="CheckoutTransition.Card"></checkout-button>
@@ -16,17 +22,23 @@
       </div>
     </div>
     <div class="products col">
-      <product-selection-tabbed v-if="showCategoryTabs" :useLandscapeMode :buttonSound :categories :displayHeightPortrait :historyHeightPortrait :gridWidthElements @product-clicked="product => cart.push(product)"></product-selection-tabbed>
-      <product-selection v-else :buttonSound :categories :displayHeightPortrait :historyHeightPortrait :gridWidthElements @product-clicked="product => cart.push(product)"></product-selection>
+      <product-selection-tabbed v-if="showCategoryTabs" :useLandscapeMode :buttonSound :categories :displayHeightPortrait :historyHeightPortrait numpadHeightPortrait="0px" :gridWidthElements @product-clicked="addToCart"></product-selection-tabbed>
+      <product-selection v-else :buttonSound :categories :displayHeightPortrait :historyHeightPortrait numpadHeightPortrait="0px" :gridWidthElements @product-clicked="addToCart"></product-selection>
     </div>
   </div>
   <div v-else>
     <div class="sticky-top">
       <number-display v-model="transactionState" :quickCheckout :buttonSound :transactionState :price :cart :displayHeightPortrait @registerConfirmed="transition"></number-display>
       <receipt :useLandscapeMode :buttonSound :cart :historyHeightPortrait @removeArticle="removeArticleByIndex" @backspaceClicked="cart.pop()" @createNewReceipt="reset"></receipt>
+      <quantity-numpad
+          v-if="articleQuantitySelection"
+          ref="numpad"
+          v-model="pendingQuantity"
+          :buttonSound
+      ></quantity-numpad>
     </div>
-    <product-selection-tabbed v-if="showCategoryTabs" :useLandscapeMode :buttonSound :categories :displayHeightPortrait :historyHeightPortrait :gridWidthElements @product-clicked="product => cart.push(product)"></product-selection-tabbed>
-    <product-selection v-else :buttonSound :categories :displayHeightPortrait :historyHeightPortrait :gridWidthElements @product-clicked="product => cart.push(product)"></product-selection>
+    <product-selection-tabbed v-if="showCategoryTabs" :useLandscapeMode :buttonSound :categories :displayHeightPortrait :historyHeightPortrait :numpadHeightPortrait="numpadHeightForProducts" :gridWidthElements @product-clicked="addToCart"></product-selection-tabbed>
+    <product-selection v-else :buttonSound :categories :displayHeightPortrait :historyHeightPortrait :numpadHeightPortrait="numpadHeightForProducts" :gridWidthElements @product-clicked="addToCart"></product-selection>
   </div>
 
   <checkout
@@ -38,7 +50,8 @@
 </template>
 
 <script setup lang="ts">
-import {computed, onMounted, type PropType, ref, shallowRef} from "vue";
+import {computed, onMounted, type PropType, ref, shallowRef, useTemplateRef} from "vue";
+import {useElementSize} from "@vueuse/core";
 import {useSound} from "@vueuse/sound";
 import {CheckoutStateMachine, CheckoutTransition} from "../../components/checkout-state-machine.ts";
 import Category from "../../model/category";
@@ -52,6 +65,7 @@ import BackspaceButton from "../components/receipt/buttons/backspace-button.vue"
 import ProductSelection from "../components/selection/product-selection.vue";
 import ProductSelectionTabbed from "../components/selection/product-selection-tabbed.vue";
 import Checkout from "../components/checkout/checkout.vue";
+import QuantityNumpad from "../components/receipt/buttons/quantity-numpad.vue";
 import Transactor from "../../components/transactor.ts";
 import {None, Pending, Sending, Success, type TransactionState} from "../../components/transaction-state.ts";
 import successSound from '../../sounds/success.wav'
@@ -67,6 +81,7 @@ const props = defineProps({
   gridWidthElements: {type: Number, default: 5},
   useCategoryTabs: {type: Boolean, default: true},
   enqueuedMessages: {type: String, default: null},
+  articleQuantitySelection: {type: Boolean, default: false},
 });
 
 const checkoutState = shallowRef<CheckoutStateMachine>(new CheckoutStateMachine())
@@ -81,7 +96,17 @@ checkoutState.value.addCallback(CheckoutTransition.RetryableError, () => {
   }
 })
 
+const numpadRef = useTemplateRef<any>('numpad')
+const { height: numpadPx } = useElementSize(numpadRef, { width: 0, height: 0 }, { box: 'border-box' })
+const numpadHeightCss = computed(() => `${numpadPx.value}px`)
+// In landscape mode the numpad lives in the receipt column — product grid unaffected
+const numpadHeightForProducts = computed(() =>
+    props.useLandscapeMode ? '0px' : numpadHeightCss.value
+)
+
 const cart = ref<Product[]>([])
+const pendingQuantity = ref<number | null>(null)
+
 const price = computed<number>(() => cart.value
     .map((product: Product) => product.price)
     .reduce((price: number, prev: number): number => price + prev, 0.0)
@@ -101,6 +126,14 @@ onMounted(() => {
   }, 5_000)
   sendOpenTransactions()
 })
+
+function addToCart(product: Product): void {
+  const qty = pendingQuantity.value ?? 1
+  for (let i = 0; i < qty; i++) {
+    cart.value.push(product)
+  }
+  pendingQuantity.value = null
+}
 
 function removeArticleByIndex(index: number): void {
   const normalizedIndex: number = (cart.value.length - 1) - index;

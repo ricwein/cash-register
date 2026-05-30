@@ -24,7 +24,7 @@ final class Version20260314184102 extends AbstractMigration
                     1,
                     'Eingabe von Artikel-Anzahl anzeigen',
                     'fa-solid fa-keyboard'
-                ) ON DUPLICATE KEY UPDATE description = VALUES(description);
+                ) ON DUPLICATE KEY UPDATE description = VALUES(description), icon = VALUES(icon);
             QUERY
         );
     }

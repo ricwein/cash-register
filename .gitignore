@@ -1,6 +1,7 @@
 /backup.sql
 /config/reference.php
 /.idea/
+/yarn.lock
 docker-compose.override.yml
 docker-compose.override.yaml
 compose.override.yml
