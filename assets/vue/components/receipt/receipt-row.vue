@@ -4,13 +4,13 @@
       class="d-flex justify-content-between px-3 py-2"
       :class="{'mousedown': isMouseDown}"
   >
-    <span>1<span class="fa-solid fa-times"></span></span>
+    <span>{{ item.quantity }}<span class="fa-solid fa-times"></span></span>
     <div>
-      <span :class="product.icon"></span>
-      {{ product.name }}
+      <span :class="item.product.icon"></span>
+      {{ item.product.name }}
     </div>
     <div class="price">
-      {{ NumberFormatter.format(product.price) }}
+      {{ NumberFormatter.format(item.product.price * item.quantity) }}
     </div>
   </li>
 </template>
@@ -18,11 +18,11 @@
 <script setup lang="ts">
 import {type PropType, ref, useTemplateRef} from 'vue'
 import {onLongPress, useMousePressed} from '@vueuse/core'
-import Product from "../../../model/product.ts";
+import type CartItem from "../../../model/cart-item.ts";
 import {NumberFormatter} from "../../../components/number-formatter.ts";
 
 defineProps({
-  product: {type: Object as PropType<Product>, required: true},
+  item: {type: Object as PropType<CartItem>, required: true},
 })
 
 const emit = defineEmits(['removeArticle'])

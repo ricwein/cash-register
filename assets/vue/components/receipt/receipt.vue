@@ -3,8 +3,8 @@
     <backspace-button class="sticky-top" :useLandscapeMode :buttonSound @backspaceClicked="$emit('backspaceClicked')" @createNewReceipt="$emit('create-new-receipt')"></backspace-button>
     <ul class="w-100 bg-light-subtle">
       <receipt-row
-          v-for="(product, index) in cart.slice().reverse()"
-          :product
+          v-for="(item, index) in cart.slice().reverse()"
+          :item
           @removeArticle="$emit('removeArticle', index)"
       ></receipt-row>
     </ul>
@@ -12,14 +12,14 @@
 </template>
 
 <script setup lang="ts">
-import type Product from "../../../model/product.ts";
+import type CartItem from "../../../model/cart-item.ts";
 import type {PropType} from "vue";
 import BackspaceButton from "./buttons/backspace-button.vue";
 import ReceiptRow from "./receipt-row.vue";
 
 defineProps({
   historyHeightPortrait: String,
-  cart: {type: Object as PropType<Array<Product>>, required: true},
+  cart: {type: Object as PropType<Array<CartItem>>, required: true},
   useLandscapeMode: {type: Boolean, required: true},
   buttonSound: {type: Boolean, required: true},
 })

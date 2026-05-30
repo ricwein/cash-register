@@ -56,6 +56,7 @@ import {useSound} from "@vueuse/sound";
 import {CheckoutStateMachine, CheckoutTransition} from "../../components/checkout-state-machine.ts";
 import Category from "../../model/category";
 import Product from "../../model/product";
+import type CartItem from "../../model/cart-item.ts";
 import NumberDisplay from "../components/receipt/display/number-display.vue";
 import NumberDisplaySide from "../components/receipt/display/number-display-side.vue";
 import Receipt from "../components/receipt/receipt.vue";
@@ -104,12 +105,11 @@ const numpadHeightForProducts = computed(() =>
     props.useLandscapeMode ? '0px' : numpadHeightCss.value
 )
 
-const cart = ref<Product[]>([])
+const cart = ref<CartItem[]>([])
 const pendingQuantity = ref<number | null>(null)
 
 const price = computed<number>(() => cart.value
-    .map((product: Product) => product.price)
-    .reduce((price: number, prev: number): number => price + prev, 0.0)
+    .reduce((sum: number, item: CartItem) => sum + item.product.price * item.quantity, 0.0)
 )
 
 const showCategoryTabs = computed(() => props.useCategoryTabs && (props.categories?.length ?? 0) > 1);
@@ -129,8 +129,11 @@ onMounted(() => {
 
 function addToCart(product: Product): void {
   const qty = pendingQuantity.value ?? 1
-  for (let i = 0; i < qty; i++) {
-    cart.value.push(product)
+  const existing = cart.value.find(item => item.product.id === product.id)
+  if (existing) {
+    existing.quantity += qty
+  } else {
+    cart.value.push({ product, quantity: qty })
   }
   pendingQuantity.value = null
 }

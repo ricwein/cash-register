@@ -172,7 +172,7 @@ import {toast} from "vue3-toastify";
 import {useSound} from "@vueuse/sound";
 import Receipt from "./receipt.vue";
 import {CheckoutState, CheckoutStateMachine, CheckoutTransition, type StateChange} from "../../../components/checkout-state-machine.ts";
-import Product from "../../../model/product.ts";
+import type CartItem from "../../../model/cart-item.ts";
 import {NumberFormatter} from "../../../components/number-formatter.ts";
 import Transactor from "../../../components/transactor.ts";
 import {Transaction} from "../../../model/transaction.ts";
@@ -194,7 +194,7 @@ const checkoutStateMachine = defineModel<CheckoutStateMachine>({required: true})
 // setup vue component
 const props = defineProps({
   price: {type: Number, required: true},
-  cart: {type: Array<Product>, required: true},
+  cart: {type: Array<CartItem>, required: true},
   transactor: {type: Object as PropType<Transactor>, required: true},
   buttonSound: {type: Boolean, required: true},
   lazyCalculator: {type: Boolean, required: true},
@@ -249,13 +249,9 @@ function updateChangeMoney(event: Event): void {
 
 function processPayment(changes: StateChange): void {
   const paymentType: string = changes.storage ?? 'none'
-  let cart: Record<number, number> = {};
-
-  for (const product of props.cart) {
-    if (!cart.hasOwnProperty(product.id)) {
-      cart[product.id] = 0;
-    }
-    cart[product.id]++;
+  let cart: Record<number, number> = {}
+  for (const item of props.cart) {
+      cart[item.product.id] = item.quantity
   }
 
   const transactor: Transactor = props.transactor
