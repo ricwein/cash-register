@@ -43,22 +43,37 @@ RUN php bin/console --no-debug --no-ansi --no-cleanup assets:install public
 
 
 #############################
-###        ASSETS         ###
+###     ASSETS BASE       ###
 #############################
-FROM node AS encore
-
-ARG APP_ENV
-ENV APP_ENV=${APP_ENV}
+FROM node AS encore-base
 
 WORKDIR /app
 COPY ./assets ./assets
 COPY --from=php-base /app/vendor ./vendor
-COPY --from=php-base /app/public/bundles ./public/bundles  
+COPY --from=php-base /app/public/bundles ./public/bundles
 COPY package.json package-lock.json tsconfig.json webpack.config.js postcss.config.js composer.json composer.lock ./
 
 RUN npm install --force --frozen-lockfile --ignore-scripts
+
+
+#############################
+###        ASSETS         ###
+#############################
+FROM encore-base AS encore
+
+ARG APP_ENV
+ENV APP_ENV=${APP_ENV}
+
 RUN npm audit --audit-level=high
 RUN npm run $([ "${APP_ENV}" = "test" || "${APP_ENV}" = "dev" ] && echo "dev" || echo "build")
+
+
+###################################
+###      ENCORE DEV (watch)     ###
+###################################
+FROM encore-base AS encore-dev
+
+CMD ["npm", "run", "watch"]
 
 
 ############################

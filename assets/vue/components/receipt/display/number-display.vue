@@ -1,5 +1,6 @@
 <template>
   <div class="w-100 bg-white display-container d-flex justify-content-between">
+    <span v-if="pendingQuantity !== null" class="quantity-preview">×{{ pendingQuantity }}</span>
     <div v-if="transactionState.kind !== 'None'" class="transaction-info">
       <div class="badge font-monospace bg-warning shadow badge rounded-pill mt-1 ms-1">
         <span class="fa-solid fa-spinner fa-sm fa-pulse"></span>
@@ -23,6 +24,7 @@ import CheckoutButton from "../buttons/checkout-button.vue";
 import type Product from "../../../../model/product.ts";
 import type {TransactionState} from "../../../../components/transaction-state.ts";
 import {CheckoutTransition} from "../../../../components/checkout-state-machine.ts";
+import type {PropType} from "vue";
 
 defineProps({
   price: {type: Number, required: true},
@@ -30,6 +32,7 @@ defineProps({
   buttonSound: {type: Boolean, required: true},
   quickCheckout: {type: Boolean, required: true},
   displayHeightPortrait: String,
+  pendingQuantity: {type: Number as PropType<number | null>, default: null},
 })
 
 const emit = defineEmits(['registerConfirmed'])
@@ -64,6 +67,15 @@ function transition(to: CheckoutTransition) {
     font-family: var(--bs-font-monospace), monospace;
     margin-left: 1em;
     margin-right: 1em;
+  }
+
+  .quantity-preview {
+    font-size: calc(v-bind(displayHeightPortrait) - 2rem);
+    font-family: var(--bs-font-monospace), monospace;
+    color: var(--bs-warning-text-emphasis);
+    margin-left: 0.5em;
+    align-self: center;
+    font-weight: 600;
   }
 }
 </style>

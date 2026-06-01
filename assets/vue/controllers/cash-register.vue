@@ -1,7 +1,8 @@
 <template>
   <div v-if="useLandscapeMode" class="row w-100">
     <div class="receipt col-lg-4 col-md-5 col-sm-5">
-      <number-display-side v-model="transactionState" :transactionState class="sticky-top" :price></number-display-side>
+      <number-display-side v-model="transactionState" :transactionState class="sticky-top" :price
+                           :pendingQuantity="pendingQuantity"></number-display-side>
       <receipt-side :cart :numpadHeight="numpadHeightCss" @removeArticle="removeArticleByIndex"></receipt-side>
       <quantity-numpad
           v-if="articleQuantitySelection"
@@ -10,26 +11,39 @@
           :buttonSound
       ></quantity-numpad>
       <div v-if="quickCheckout" class="row action-button-row sticky-bottom">
-        <backspace-button class="col-4" :useLandscapeMode :buttonSound @backspaceClicked="cart.pop()" @createNewReceipt="reset"></backspace-button>
-        <checkout-button v-if="cart.length <= 0 || price > 0.0" class="col-4" :buttonSound :cart @registerConfirmed="transition" :type="CheckoutTransition.Card"></checkout-button>
-        <checkout-button v-if="cart.length <= 0 || price > 0.0" class="col-4" :buttonSound :cart @registerConfirmed="transition" :type="CheckoutTransition.Cash"></checkout-button>
-        <checkout-button v-else-if="price < 0.0" class="col-8" :buttonSound :cart @registerConfirmed="transition" :type="CheckoutTransition.Payout"></checkout-button>
-        <checkout-button v-else class="col-8" :buttonSound :cart @registerConfirmed="transition" :type="CheckoutTransition.Continue"></checkout-button>
+        <backspace-button class="col-4" :useLandscapeMode :buttonSound @backspaceClicked="cart.pop()"
+                          @createNewReceipt="reset"></backspace-button>
+        <checkout-button v-if="cart.length <= 0 || price > 0.0" class="col-4" :buttonSound :cart
+                         @registerConfirmed="transition" :type="CheckoutTransition.Card"></checkout-button>
+        <checkout-button v-if="cart.length <= 0 || price > 0.0" class="col-4" :buttonSound :cart
+                         @registerConfirmed="transition" :type="CheckoutTransition.Cash"></checkout-button>
+        <checkout-button v-else-if="price < 0.0" class="col-8" :buttonSound :cart @registerConfirmed="transition"
+                         :type="CheckoutTransition.Payout"></checkout-button>
+        <checkout-button v-else class="col-8" :buttonSound :cart @registerConfirmed="transition"
+                         :type="CheckoutTransition.Continue"></checkout-button>
       </div>
       <div v-else class="row action-button-row sticky-bottom">
-        <backspace-button class="col" :useLandscapeMode :buttonSound @backspaceClicked="cart.pop()" @createNewReceipt="reset"></backspace-button>
-        <checkout-button class="col" :buttonSound :cart @registerConfirmed="transition" :type="CheckoutTransition.Start"></checkout-button>
+        <backspace-button class="col" :useLandscapeMode :buttonSound @backspaceClicked="cart.pop()"
+                          @createNewReceipt="reset"></backspace-button>
+        <checkout-button class="col" :buttonSound :cart @registerConfirmed="transition"
+                         :type="CheckoutTransition.Start"></checkout-button>
       </div>
     </div>
     <div class="products col">
-      <product-selection-tabbed v-if="showCategoryTabs" :useLandscapeMode :buttonSound :categories :displayHeightPortrait :historyHeightPortrait numpadHeightPortrait="0px" :gridWidthElements @product-clicked="addToCart"></product-selection-tabbed>
-      <product-selection v-else :buttonSound :categories :displayHeightPortrait :historyHeightPortrait numpadHeightPortrait="0px" :gridWidthElements @product-clicked="addToCart"></product-selection>
+      <product-selection-tabbed v-if="showCategoryTabs" :useLandscapeMode :buttonSound :categories
+                                :displayHeightPortrait :historyHeightPortrait numpadHeightPortrait="0px"
+                                :gridWidthElements @product-clicked="addToCart"></product-selection-tabbed>
+      <product-selection v-else :buttonSound :categories :displayHeightPortrait :historyHeightPortrait
+                         numpadHeightPortrait="0px" :gridWidthElements @product-clicked="addToCart"></product-selection>
     </div>
   </div>
   <div v-else>
     <div class="sticky-top">
-      <number-display v-model="transactionState" :quickCheckout :buttonSound :transactionState :price :cart :displayHeightPortrait @registerConfirmed="transition"></number-display>
-      <receipt :useLandscapeMode :buttonSound :cart :historyHeightPortrait @removeArticle="removeArticleByIndex" @backspaceClicked="cart.pop()" @createNewReceipt="reset"></receipt>
+      <number-display v-model="transactionState" :quickCheckout :buttonSound :transactionState :price :cart
+                      :displayHeightPortrait :pendingQuantity="pendingQuantity"
+                      @registerConfirmed="transition"></number-display>
+      <receipt :useLandscapeMode :buttonSound :cart :historyHeightPortrait @removeArticle="removeArticleByIndex"
+               @backspaceClicked="cart.pop()" @createNewReceipt="reset"></receipt>
       <quantity-numpad
           v-if="articleQuantitySelection"
           ref="numpad"
@@ -37,8 +51,12 @@
           :buttonSound
       ></quantity-numpad>
     </div>
-    <product-selection-tabbed v-if="showCategoryTabs" :useLandscapeMode :buttonSound :categories :displayHeightPortrait :historyHeightPortrait :numpadHeightPortrait="numpadHeightForProducts" :gridWidthElements @product-clicked="addToCart"></product-selection-tabbed>
-    <product-selection v-else :buttonSound :categories :displayHeightPortrait :historyHeightPortrait :numpadHeightPortrait="numpadHeightForProducts" :gridWidthElements @product-clicked="addToCart"></product-selection>
+    <product-selection-tabbed v-if="showCategoryTabs" :useLandscapeMode :buttonSound :categories :displayHeightPortrait
+                              :historyHeightPortrait :numpadHeightPortrait="numpadHeightForProducts" :gridWidthElements
+                              @product-clicked="addToCart"></product-selection-tabbed>
+    <product-selection v-else :buttonSound :categories :displayHeightPortrait :historyHeightPortrait
+                       :numpadHeightPortrait="numpadHeightForProducts" :gridWidthElements
+                       @product-clicked="addToCart"></product-selection>
   </div>
 
   <checkout
@@ -98,7 +116,7 @@ checkoutState.value.addCallback(CheckoutTransition.RetryableError, () => {
 })
 
 const numpadRef = useTemplateRef<any>('numpad')
-const { height: numpadPx } = useElementSize(numpadRef, { width: 0, height: 0 }, { box: 'border-box' })
+const {height: numpadPx} = useElementSize(numpadRef, {width: 0, height: 0}, {box: 'border-box'})
 const numpadHeightCss = computed(() => `${numpadPx.value}px`)
 // In landscape mode the numpad lives in the receipt column — product grid unaffected
 const numpadHeightForProducts = computed(() =>
@@ -133,7 +151,7 @@ function addToCart(product: Product): void {
   if (existing) {
     existing.quantity += qty
   } else {
-    cart.value.push({ product, quantity: qty })
+    cart.value.push({product, quantity: qty})
   }
   pendingQuantity.value = null
 }

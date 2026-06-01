@@ -1,9 +1,5 @@
 <template>
   <div class="quantity-numpad">
-    <div class="quantity-display">
-      <span v-if="modelValue !== null" class="quantity-value">{{ modelValue }}</span>
-      <span v-else class="quantity-placeholder">—</span>
-    </div>
     <div class="numpad-grid">
       <div v-for="key in keys" :key="key.label" class="numpad-key" @click="handleKey(key)">
         {{ key.label }}
@@ -74,23 +70,6 @@ function handleKey(key: Key): void {
 .quantity-numpad {
   border-top: 0.1rem solid var(--bs-dark);
   padding: 0.4rem;
-}
-
-.quantity-display {
-  background-color: var(--bs-secondary-bg);
-  border: 0.05rem solid var(--bs-dark);
-  border-radius: 0.25rem;
-  text-align: center;
-  padding: 0.25rem 0.5rem;
-  margin-bottom: 0.4rem;
-  font-family: monospace;
-  font-size: 1.4rem;
-  line-height: 1.6rem;
-  min-height: 2.1rem;
-
-  .quantity-placeholder {
-    color: var(--bs-secondary-color);
-  }
 }
 
 .numpad-grid {

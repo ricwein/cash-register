@@ -1,5 +1,6 @@
 <template>
   <div class="bg-white display-container d-flex justify-content-between">
+    <span v-if="pendingQuantity !== null" class="quantity-preview">×{{ pendingQuantity }}</span>
     <div v-if="transactionState.kind !== 'None'" class="transaction-info">
       <div v-if="transactionState.kind === 'Pending'" class="badge font-monospace bg-warning shadow badge rounded-pill mt-1 ms-1">
         <span class="fa-solid fa-spinner fa-sm fa-pulse"></span>
@@ -20,9 +21,11 @@
 <script setup lang="ts">
 import {NumberFormatter} from "../../../../components/number-formatter.ts";
 import {type TransactionState} from "../../../../components/transaction-state.ts";
+import type {PropType} from "vue";
 
 defineProps({
   price: {type: Number, required: true},
+  pendingQuantity: {type: Number as PropType<number | null>, default: null},
 })
 
 const transactionState = defineModel<TransactionState>({required: true})
@@ -42,6 +45,15 @@ const transactionState = defineModel<TransactionState>({required: true})
     font-family: var(--bs-font-monospace), monospace;
     margin-left: 1em;
     margin-right: 1em;
+  }
+
+  .quantity-preview {
+    font-size: 3rem;
+    font-family: var(--bs-font-monospace), monospace;
+    color: var(--bs-warning-text-emphasis);
+    margin-left: 0.5em;
+    align-self: center;
+    font-weight: 600;
   }
 }
 </style>
