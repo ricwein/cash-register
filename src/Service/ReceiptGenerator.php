@@ -58,7 +58,7 @@ final readonly class ReceiptGenerator
                 strtolower($filter->getExportType()->value),
                 $filter->getFromDate()->format('Y-m-d'),
                 $filter->getToDate() === null ? '' : ('_' . $filter->getToDate()->format('Y-m-d')),
-                empty($filter->getEvents()) ? 'Alle' : implode('+', $filter->getEvents()),
+                $filter->getEvents() === null ? 'Alle' : implode('+', $filter->getEvents()->toArray()),
                 $size->value,
                 $filter->getFileFormat()->value,
             )

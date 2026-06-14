@@ -48,14 +48,7 @@ class ReceiptExportController extends AbstractController
         $now = $this->clock->now();
         $fromDate = $now->sub(new DateInterval(self::DEFAULT_CHART_RANGE));
 
-        $events = $this->purchaseTransactionRepository->findDistinctEvents(from: $fromDate, to: $now);
-        foreach ($events as $name => $quantity) {
-            $events[$name] = sprintf("%s (%s: %s)", $name, $this->translator->trans('PurchaseTransaction'), $quantity);
-        }
-
-        $form = $this->createForm(ReceiptFilterType::class, new ReceiptFilter($now), [
-            'events' => array_flip($events),
-        ]);
+        $form = $this->createForm(ReceiptFilterType::class, new ReceiptFilter($now));
 
         $form->add('submit', SubmitType::class);
 

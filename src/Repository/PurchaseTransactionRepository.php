@@ -191,10 +191,10 @@ class PurchaseTransactionRepository extends ServiceEntityRepository
             ->setParameter('from', $fromDate)
             ->setParameter('to', $toDate);
 
-        if (!empty($filter->getEvents())) {
+        if (null !== $events = $filter->getEvents()) {
             $queryBuilder
                 ->andWhere('transaction.eventName IN (:events)')
-                ->setParameter('events', $filter->getEvents());
+                ->setParameter('events', $events);
         }
 
         $queryBuilder

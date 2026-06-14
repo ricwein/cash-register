@@ -1,7 +1,7 @@
 <template>
   <div class="quantity-numpad">
     <div class="numpad-grid">
-      <div v-for="key in keys" :key="key.label" class="numpad-key" @click="handleKey(key)">
+      <div v-for="key in keys" :key="key.label" class="numpad-key" :class="{'numpad-key--wide': key.wide}" @click="handleKey(key)">
         {{ key.label }}
       </div>
     </div>
@@ -12,7 +12,6 @@
 import {type PropType} from 'vue'
 import {useSound} from "@vueuse/sound";
 import clickSound from '../../../../sounds/article.mp3'
-import deleteSound from '../../../../sounds/delete.mp3'
 
 const props = defineProps({
   modelValue: {type: Number as PropType<number | null>, default: null},
@@ -23,45 +22,31 @@ const emit = defineEmits<{
 }>()
 
 const {play: playClick} = useSound(clickSound)
-const {play: playDelete} = useSound(deleteSound)
 
-type Key = {label: string; action: 'digit' | 'clear' | 'backspace'; digit?: number}
+type Key = {label: string; digit: number; wide?: boolean}
 
 const keys: Key[] = [
-  {label: '7', action: 'digit', digit: 7},
-  {label: '8', action: 'digit', digit: 8},
-  {label: '9', action: 'digit', digit: 9},
-  {label: '4', action: 'digit', digit: 4},
-  {label: '5', action: 'digit', digit: 5},
-  {label: '6', action: 'digit', digit: 6},
-  {label: '1', action: 'digit', digit: 1},
-  {label: '2', action: 'digit', digit: 2},
-  {label: '3', action: 'digit', digit: 3},
-  {label: '×', action: 'clear'},
-  {label: '0', action: 'digit', digit: 0},
-  {label: '⌫', action: 'backspace'},
+  {label: '7', digit: 7},
+  {label: '8', digit: 8},
+  {label: '9', digit: 9},
+  {label: '4', digit: 4},
+  {label: '5', digit: 5},
+  {label: '6', digit: 6},
+  {label: '1', digit: 1},
+  {label: '2', digit: 2},
+  {label: '3', digit: 3},
+  {label: '0', digit: 0, wide: true},
 ]
 
 function handleKey(key: Key): void {
-  if (key.action === 'digit') {
-    if (props.buttonSound) playClick()
-    const d = key.digit!
-    if (props.modelValue === null) {
-      if (d === 0) return // no leading zero
-      emit('update:modelValue', d)
-    } else {
-      const next = props.modelValue * 10 + d
-      if (next > 99) return
-      emit('update:modelValue', next)
-    }
-  } else if (key.action === 'backspace') {
-    if (props.buttonSound) playDelete()
-    if (props.modelValue === null) return
-    const next = Math.floor(props.modelValue / 10)
-    emit('update:modelValue', next === 0 ? null : next)
+  if (props.buttonSound) playClick()
+  if (props.modelValue === null) {
+    if (key.digit === 0) return // no leading zero
+    emit('update:modelValue', key.digit)
   } else {
-    if (props.buttonSound) playDelete()
-    emit('update:modelValue', null)
+    const next = props.modelValue * 10 + key.digit
+    if (next > 99) return
+    emit('update:modelValue', next)
   }
 }
 </script>
@@ -76,6 +61,10 @@ function handleKey(key: Key): void {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 0.25rem;
+}
+
+.numpad-key--wide {
+  grid-column: 1 / -1;
 }
 
 .numpad-key {

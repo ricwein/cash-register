@@ -5,7 +5,9 @@
       <receipt-row
           v-for="(item, index) in cart.slice().reverse()"
           :item
+          :selected="index === selectedIndex"
           @removeArticle="$emit('removeArticle', index)"
+          @selectArticle="$emit('selectArticle', index)"
       ></receipt-row>
     </ul>
   </div>
@@ -22,7 +24,10 @@ defineProps({
   cart: {type: Object as PropType<Array<CartItem>>, required: true},
   useLandscapeMode: {type: Boolean, required: true},
   buttonSound: {type: Boolean, required: true},
+  selectedIndex: {type: Number as PropType<number | null>, default: null},
 })
+
+defineEmits(['backspaceClicked', 'create-new-receipt', 'removeArticle', 'selectArticle'])
 </script>
 
 <style scoped lang="scss">

@@ -2,11 +2,12 @@
 
 namespace App\Form;
 
+use App\Entity\Event;
 use App\Enum\ExportFileFormat;
 use App\Enum\ReceiptExportType;
 use App\Model\ReceiptFilter;
+use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
-use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
 use Symfony\Component\Form\Extension\Core\Type\EnumType;
 use Symfony\Component\Form\FormBuilderInterface;
@@ -19,10 +20,10 @@ class ReceiptFilterType extends AbstractType
         $builder
             ->add('fromDate', DateType::class, ['html5' => true])
             ->add('toDate', DateType::class, ['html5' => true, 'required' => false])
-            ->add('events', ChoiceType::class, [
+            ->add('events', EntityType::class, [
+                'class' => Event::class,
                 'multiple' => true,
                 'required' => false,
-                'choices' => $options['events'],
                 'translation_domain' => false,
             ])
             ->add('fileFormat', EnumType::class, [
@@ -36,8 +37,5 @@ class ReceiptFilterType extends AbstractType
     public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults(['data_class' => ReceiptFilter::class]);
-        $resolver->setRequired(['events']);
-        $resolver->addAllowedTypes('events', ['array']);
-
     }
 }

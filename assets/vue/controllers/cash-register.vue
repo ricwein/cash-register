@@ -3,7 +3,8 @@
     <div class="receipt col-lg-4 col-md-5 col-sm-5">
       <number-display-side v-model="transactionState" :transactionState class="sticky-top" :price
                            :pendingQuantity="pendingQuantity"></number-display-side>
-      <receipt-side :cart :numpadHeight="numpadHeightCss" @removeArticle="removeArticleByIndex"></receipt-side>
+      <receipt-side :cart :numpadHeight="numpadHeightCss" :selectedIndex="selectedDisplayIndex"
+                    @removeArticle="removeArticleByIndex" @selectArticle="selectedDisplayIndex = $event"></receipt-side>
       <quantity-numpad
           v-if="articleQuantitySelection"
           ref="numpad"
@@ -11,7 +12,7 @@
           :buttonSound
       ></quantity-numpad>
       <div v-if="quickCheckout" class="row action-button-row sticky-bottom">
-        <backspace-button class="col-4" :useLandscapeMode :buttonSound @backspaceClicked="cart.pop()"
+        <backspace-button class="col-4" :useLandscapeMode :buttonSound @backspaceClicked="backspaceClicked"
                           @createNewReceipt="reset"></backspace-button>
         <checkout-button v-if="cart.length <= 0 || price > 0.0" class="col-4" :buttonSound :cart
                          @registerConfirmed="transition" :type="CheckoutTransition.Card"></checkout-button>
@@ -23,7 +24,7 @@
                          :type="CheckoutTransition.Continue"></checkout-button>
       </div>
       <div v-else class="row action-button-row sticky-bottom">
-        <backspace-button class="col" :useLandscapeMode :buttonSound @backspaceClicked="cart.pop()"
+        <backspace-button class="col" :useLandscapeMode :buttonSound @backspaceClicked="backspaceClicked"
                           @createNewReceipt="reset"></backspace-button>
         <checkout-button class="col" :buttonSound :cart @registerConfirmed="transition"
                          :type="CheckoutTransition.Start"></checkout-button>
@@ -42,8 +43,9 @@
       <number-display v-model="transactionState" :quickCheckout :buttonSound :transactionState :price :cart
                       :displayHeightPortrait :pendingQuantity="pendingQuantity"
                       @registerConfirmed="transition"></number-display>
-      <receipt :useLandscapeMode :buttonSound :cart :historyHeightPortrait @removeArticle="removeArticleByIndex"
-               @backspaceClicked="cart.pop()" @createNewReceipt="reset"></receipt>
+      <receipt :useLandscapeMode :buttonSound :cart :historyHeightPortrait :selectedIndex="selectedDisplayIndex"
+               @removeArticle="removeArticleByIndex" @selectArticle="selectedDisplayIndex = $event"
+               @backspaceClicked="backspaceClicked" @createNewReceipt="reset"></receipt>
       <quantity-numpad
           v-if="articleQuantitySelection"
           ref="numpad"
@@ -125,6 +127,7 @@ const numpadHeightForProducts = computed(() =>
 
 const cart = ref<CartItem[]>([])
 const pendingQuantity = ref<number | null>(null)
+const selectedDisplayIndex = ref<number | null>(null)
 
 const price = computed<number>(() => cart.value
     .reduce((sum: number, item: CartItem) => sum + item.product.price * item.quantity, 0.0)
@@ -150,19 +153,36 @@ function addToCart(product: Product): void {
   const existing = cart.value.find(item => item.product.id === product.id)
   if (existing) {
     existing.quantity += qty
+    selectedDisplayIndex.value = (cart.value.length - 1) - cart.value.indexOf(existing)
   } else {
     cart.value.push({product, quantity: qty})
+    selectedDisplayIndex.value = 0
   }
   pendingQuantity.value = null
 }
 
-function removeArticleByIndex(index: number): void {
-  const normalizedIndex: number = (cart.value.length - 1) - index;
+function backspaceClicked(): void {
+  if (pendingQuantity.value !== null) {
+    const next = Math.floor(pendingQuantity.value / 10)
+    pendingQuantity.value = next === 0 ? null : next
+  } else if (selectedDisplayIndex.value !== null) {
+    removeArticleByIndex(selectedDisplayIndex.value)
+  }
+}
+
+function removeArticleByIndex(displayIndex: number): void {
+  const normalizedIndex = (cart.value.length - 1) - displayIndex
   cart.value.splice(normalizedIndex, 1)
+  if (cart.value.length === 0) {
+    selectedDisplayIndex.value = null
+  } else {
+    selectedDisplayIndex.value = Math.min(displayIndex, cart.value.length - 1)
+  }
 }
 
 function reset() {
   cart.value = []
+  selectedDisplayIndex.value = null
 }
 
 function transition(to: CheckoutTransition) {

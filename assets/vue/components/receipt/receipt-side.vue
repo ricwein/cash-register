@@ -4,7 +4,9 @@
       <receipt-row
           v-for="(item, index) in cart.slice().reverse()"
           :item
+          :selected="index === selectedIndex"
           @removeArticle="$emit('removeArticle', index)"
+          @selectArticle="$emit('selectArticle', index)"
       ></receipt-row>
     </ul>
   </div>
@@ -18,7 +20,10 @@ import ReceiptRow from "./receipt-row.vue";
 const props = defineProps({
   cart: {type: Object as PropType<Array<CartItem>>, required: true},
   numpadHeight: {type: String, default: '0px'},
+  selectedIndex: {type: Number as PropType<number | null>, default: null},
 })
+
+defineEmits(['removeArticle', 'selectArticle'])
 </script>
 
 <style scoped lang="scss">

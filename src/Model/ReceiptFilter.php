@@ -5,6 +5,7 @@ namespace App\Model;
 use App\Enum\ExportFileFormat;
 use App\Enum\ReceiptExportType;
 use DateTimeImmutable;
+use Doctrine\Common\Collections\Collection;
 use Symfony\Component\Validator\Constraints as Assert;
 
 final class ReceiptFilter
@@ -19,10 +20,11 @@ final class ReceiptFilter
             ),
         ])]
         private ?DateTimeImmutable $toDate = null,
-        private ?array $events = null,
+        private ?Collection $events = null,
         private ReceiptExportType $exportType = ReceiptExportType::ACCUMULATED,
         private ExportFileFormat $fileFormat = ExportFileFormat::EXCEL,
-    ) {}
+    ) {
+    }
 
     public function getFromDate(): DateTimeImmutable
     {
@@ -46,12 +48,12 @@ final class ReceiptFilter
         return $this;
     }
 
-    public function getEvents(): ?array
+    public function getEvents(): ?Collection
     {
-        return empty($this->events) ? null : $this->events;
+        return $this->events === null || $this->events->isEmpty() ? null : $this->events;
     }
 
-    public function setEvents(?array $events): self
+    public function setEvents(?Collection $events): self
     {
         $this->events = $events;
         return $this;

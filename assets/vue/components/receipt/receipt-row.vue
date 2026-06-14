@@ -2,7 +2,8 @@
   <li
       ref="articleRow"
       class="d-flex justify-content-between px-3 py-2"
-      :class="{'mousedown': isMouseDown}"
+      :class="{'mousedown': isMouseDown, 'selected': selected}"
+      @click="emit('selectArticle')"
   >
     <span>{{ item.quantity }}<span class="fa-solid fa-times"></span></span>
     <div>
@@ -23,9 +24,10 @@ import {NumberFormatter} from "../../../components/number-formatter.ts";
 
 defineProps({
   item: {type: Object as PropType<CartItem>, required: true},
+  selected: {type: Boolean, default: false},
 })
 
-const emit = defineEmits(['removeArticle'])
+const emit = defineEmits(['removeArticle', 'selectArticle'])
 
 const articleRow = useTemplateRef<HTMLLIElement>('articleRow')
 const isMouseDown = ref<boolean>(false);
@@ -106,6 +108,13 @@ li {
 
   &:nth-of-type(6) {
     color: rgba(var(--bs-dark-rgb), 0.75);
+  }
+
+  &.selected {
+    background-color: var(--bs-primary-bg-subtle) !important;
+    color: var(--bs-primary-text-emphasis) !important;
+    animation: none !important;
+    border-left: 3px solid var(--bs-primary);
   }
 }
 </style>
